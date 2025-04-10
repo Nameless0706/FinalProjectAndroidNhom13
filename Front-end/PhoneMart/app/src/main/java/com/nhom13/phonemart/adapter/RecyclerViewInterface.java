@@ -1,7 +1,0 @@
-package com.nhom13.phonemart.adapter;
-
-public interface RecyclerViewInterface {
-    default void onItemClick(int position){};
-
-    //default void onCartItemChange(CartItem cartItem){};
-}
