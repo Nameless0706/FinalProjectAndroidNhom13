@@ -106,7 +106,7 @@ public class VerifyOtpFragment extends Fragment {
             public void onResponse(@NonNull Call<ApiResponse> call, @NonNull Response<ApiResponse> response) {
                 if (response.isSuccessful()) {
                     //Hiển thị dialog thành công
-                    DialogUtils.ShowSuccessDialog(getContext(), "Thành công", "Xác thực thành công");
+                    DialogUtils.ShowSuccessDialog(getContext(), R.layout.success_dialog,"Thành công", "Xác thực thành công");
                     Toast.makeText(getContext(), "OTP verified successfully!", Toast.LENGTH_LONG).show();
 
                     FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.main_frag_container, new LoginFragment());
