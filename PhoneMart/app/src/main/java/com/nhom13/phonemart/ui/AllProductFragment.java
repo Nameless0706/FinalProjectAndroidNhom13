@@ -4,10 +4,10 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.viewpager2.widget.ViewPager2;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,9 +15,11 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.google.android.material.tabs.TabLayout;
-import com.google.android.material.tabs.TabLayoutMediator;
 import com.nhom13.phonemart.R;
+import com.nhom13.phonemart.adapter.ProductAdapter;
+import com.nhom13.phonemart.adapter.RecyclerViewInterface;
 import com.nhom13.phonemart.model.Product;
+import com.nhom13.phonemart.util.FragmentUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,11 +29,13 @@ import java.util.List;
  * Use the {@link AllProductFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class AllProductFragment extends Fragment implements View.OnClickListener, TabLayout.OnTabSelectedListener{
+public class AllProductFragment extends Fragment implements RecyclerViewInterface, View.OnClickListener, TabLayout.OnTabSelectedListener{
 
     ImageView backImg;
 
     RecyclerView rvProduct;
+
+    ProductAdapter adapter;
     TabLayout tabLayout;
 
     List<Product> productList;
@@ -49,7 +53,6 @@ public class AllProductFragment extends Fragment implements View.OnClickListener
     public static AllProductFragment newInstance(List<Product> productList) {
         AllProductFragment fragment = new AllProductFragment();
         Bundle args = new Bundle();
-        args.putParcelableArrayList("product_list", new ArrayList<>(productList));
         fragment.setArguments(args);
         return fragment;
     }
@@ -57,9 +60,7 @@ public class AllProductFragment extends Fragment implements View.OnClickListener
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            productList = getArguments().getParcelableArrayList(ARG_PRODUCTS);
-        }
+
     }
 
     @Override
@@ -73,14 +74,28 @@ public class AllProductFragment extends Fragment implements View.OnClickListener
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState){
         super.onViewCreated(view, savedInstanceState);
         Mapping(view);
-
+        getAllProducts();
         tabLayout.addOnTabSelectedListener(this);
+        setAdapter();
 
     }
 
     public void Mapping(View view){
         tabLayout = view.findViewById(R.id.filterTabLayout);
-        //rvProduct = view.findViewById(R.id.allProdRv);
+        rvProduct = view.findViewById(R.id.rvProducts);
+    }
+
+    private void getAllProducts(){
+        productList = new ArrayList<>();
+
+    }
+
+    private void setAdapter(){
+        adapter = new ProductAdapter(getContext(), productList, this);
+        rvProduct.setAdapter(adapter);
+        int spanCount = 2; // number of columns
+        GridLayoutManager gridLayoutManager = new GridLayoutManager(getContext(), spanCount);
+        rvProduct.setLayoutManager(gridLayoutManager);
     }
 
     @Override
@@ -113,5 +128,10 @@ public class AllProductFragment extends Fragment implements View.OnClickListener
     @Override
     public void onTabReselected(TabLayout.Tab tab) {
 
+    }
+
+    @Override
+    public void onItemClick(int position) {
+        FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.main_frag_container, new ProductDetailFragment());
     }
 }

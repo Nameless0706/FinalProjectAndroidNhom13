@@ -38,10 +38,10 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.Catego
     @Override
     public void onBindViewHolder(@NonNull CategoryViewHolder holder, int position) {
         Category category = categories.get(position);
-        holder.categoryNameTv.setText(category.getCateName());
+        holder.categoryNameTv.setText(category.getName());
 
         Glide.with(context)
-             .load(category.getCatImgUrl())
+             .load(category.getImage())
              .error(R.drawable.ic_launcher_background)
              .into(holder.cateImg);
 
@@ -53,7 +53,7 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.Catego
         return categories.size();
     }
 
-    class CategoryViewHolder extends RecyclerView.ViewHolder {
+    public static class CategoryViewHolder extends RecyclerView.ViewHolder {
         TextView categoryNameTv;
 
         ImageView cateImg;

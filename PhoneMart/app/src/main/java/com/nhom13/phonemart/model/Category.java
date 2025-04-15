@@ -1,30 +1,55 @@
 package com.nhom13.phonemart.model;
 
 import java.io.Serializable;
+import java.util.List;
 
 public class Category implements Serializable {
-    private String cateName;
 
-    private String cateImgUrl;
+    private Long id;
 
-    public Category(String cateName, String cateImgUrl) {
-        this.cateName = cateName;
-        this.cateImgUrl = cateImgUrl;
+    private String name;
+
+    private Image image;
+
+    private List<Product> products;
+
+
+    public Category(Long id, String name, Image image, List<Product> products) {
+        this.id = id;
+        this.name = name;
+        this.image = image;
+        this.products = products;
     }
 
-    public String getCateName() {
-        return cateName;
+    public Long getId() {
+        return id;
     }
 
-    public void setCateName(String cateName) {
-        this.cateName = cateName;
+    public void setId(Long id) {
+        this.id = id;
     }
 
-    public String getCatImgUrl() {
-        return cateImgUrl;
+    public String getName() {
+        return name;
     }
 
-    public void setCatImgUrl(String cateImgUrl) {
-        this.cateImgUrl = cateImgUrl;
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Image getImage() {
+        return image;
+    }
+
+    public void setImage(Image image) {
+        this.image = image;
+    }
+
+    public List<Product> getProducts() {
+        return products;
+    }
+
+    public void setProducts(List<Product> products) {
+        this.products = products;
     }
 }

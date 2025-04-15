@@ -6,7 +6,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -14,7 +13,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.nhom13.phonemart.R;
 import com.nhom13.phonemart.model.Product;
-import com.nhom13.phonemart.ui.ProductDetailFragment;
 
 import java.util.List;
 
@@ -35,21 +33,23 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
     @NonNull
     @Override
     public ProductViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.item_popular_product, parent, false);
+        View view = LayoutInflater.from(context).inflate(R.layout.item_product, parent, false);
         return new ProductViewHolder(view, recyclerViewInterface);
     }
 
     @Override
     public void onBindViewHolder(@NonNull ProductViewHolder holder, int position) {
         Product product = products.get(position);
-        holder.productNameTv.setText(product.getProdName());
-        holder.productPriceTv.setText(String.valueOf(product.getProdPrice()));
+        holder.productNameTv.setText(product.getName());
+        holder.productPriceTv.setText(String.valueOf(product.getPrice()));
 
 
         Glide.with(context)
-                .load(product.getProdImgUrl())
+                .load(product.getImages())
                 .error(R.drawable.ic_launcher_background)
                 .into(holder.productImg);
+
+
 
 
     }
@@ -70,19 +70,19 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
 
         public ProductViewHolder(@NonNull View itemView, RecyclerViewInterface recyclerViewInterface) {
             super(itemView);
-            productNameTv = itemView.findViewById(R.id.popularProdNameTv);
-            productPriceTv = itemView.findViewById(R.id.popularProdPriceTv);
-            productImg = itemView.findViewById(R.id.popularProdImg);
+            productNameTv = itemView.findViewById(R.id.prodNameTv);
+            productPriceTv = itemView.findViewById(R.id.prodPriceTv);
+            productImg = itemView.findViewById(R.id.prodImg);
 
 
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     if (recyclerViewInterface != null){
-                        int positon = getAdapterPosition();
+                        int position = getBindingAdapterPosition();
 
-                        if (positon != RecyclerView.NO_POSITION){
-                            recyclerViewInterface.onItemClick(positon);
+                        if (position != RecyclerView.NO_POSITION){
+                            recyclerViewInterface.onItemClick(position);
                         }
                     }
                 }

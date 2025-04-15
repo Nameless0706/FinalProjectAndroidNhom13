@@ -9,7 +9,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
@@ -18,16 +17,12 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.nhom13.phonemart.BaseFragment;
 import com.nhom13.phonemart.R;
 import com.nhom13.phonemart.adapter.CategoryAdapter;
-import com.nhom13.phonemart.adapter.ProductAdapter;
+import com.nhom13.phonemart.adapter.PopularProductAdapter;
 import com.nhom13.phonemart.adapter.RecyclerViewInterface;
-import com.nhom13.phonemart.databinding.ActivityMainBinding;
 import com.nhom13.phonemart.model.Category;
 import com.nhom13.phonemart.model.Product;
-import com.nhom13.phonemart.ui.auth.RegisterFragment;
 import com.nhom13.phonemart.util.FragmentUtils;
 
 import java.util.ArrayList;
@@ -42,12 +37,13 @@ public class HomePageFragment extends Fragment implements RecyclerViewInterface,
 
     ImageView cartImg;
 
+    TextView viewAllTv;
     EditText searchStr;
     List<Category> categoryList;
     List<Product> productList;
     CategoryAdapter categoryAdapter;
 
-    ProductAdapter productAdapter;
+    PopularProductAdapter popularProductAdapter;
     RecyclerView rvCategories, rvProducts;
 
     // TODO: Rename parameter arguments, choose names that match
@@ -103,11 +99,12 @@ public class HomePageFragment extends Fragment implements RecyclerViewInterface,
         // Initialize your views or setup listeners here
         Mapping(view);
         getAllCategories();
-        getAllProducts();
+        getPopularProducts();
         setAdapters();
 
         cartImg.setOnClickListener(this);
         searchStr.setOnEditorActionListener(this);
+        viewAllTv.setOnClickListener(this);
 
     }
 
@@ -117,29 +114,17 @@ public class HomePageFragment extends Fragment implements RecyclerViewInterface,
         searchStr = (EditText) view.findViewById(R.id.searchEt);
         rvCategories = (RecyclerView) view.findViewById(R.id.categoryRv);
         rvProducts = (RecyclerView) view.findViewById(R.id.popularProductRv);
+        viewAllTv = (TextView) view.findViewById(R.id.viewAllProdTv);
     }
 
     private void getAllCategories(){
         categoryList = new ArrayList<>();
-        categoryList.add(new Category("Test", "https://static-00.iconduck.com/assets.00/pc-screen-icon-512x449-tojqc71i.png"));
-        categoryList.add(new Category("Test", "https://static-00.iconduck.com/assets.00/pc-screen-icon-512x449-tojqc71i.png"));
-        categoryList.add(new Category("Test", "https://static-00.iconduck.com/assets.00/pc-screen-icon-512x449-tojqc71i.png"));
-        categoryList.add(new Category("Test", "https://static-00.iconduck.com/assets.00/pc-screen-icon-512x449-tojqc71i.png"));
-        categoryList.add(new Category("Test", "https://static-00.iconduck.com/assets.00/pc-screen-icon-512x449-tojqc71i.png"));
-        categoryList.add(new Category("Test", "https://static-00.iconduck.com/assets.00/pc-screen-icon-512x449-tojqc71i.png"));
-        categoryList.add(new Category("Test", "https://static-00.iconduck.com/assets.00/pc-screen-icon-512x449-tojqc71i.png"));
-        categoryList.add(new Category("Test", "https://static-00.iconduck.com/assets.00/pc-screen-icon-512x449-tojqc71i.png"));
+
     }
 
-    private void getAllProducts(){
+    private void getPopularProducts(){
         productList = new ArrayList<>();
-        productList.add(new Product("Test", 500, "https://i.pinimg.com/736x/2b/8a/b2/2b8ab22fcc4b73cc7f198fa6a7b25fad.jpg"));
-        productList.add(new Product("Test", 500, "https://i.pinimg.com/736x/2b/8a/b2/2b8ab22fcc4b73cc7f198fa6a7b25fad.jpg"));
-        productList.add(new Product("Test", 500, "https://i.pinimg.com/736x/2b/8a/b2/2b8ab22fcc4b73cc7f198fa6a7b25fad.jpg"));
-        productList.add(new Product("Test", 500, "https://i.pinimg.com/736x/2b/8a/b2/2b8ab22fcc4b73cc7f198fa6a7b25fad.jpg"));
-        productList.add(new Product("Test", 500, "https://i.pinimg.com/736x/2b/8a/b2/2b8ab22fcc4b73cc7f198fa6a7b25fad.jpg"));
-        productList.add(new Product("Test", 500, "https://i.pinimg.com/736x/2b/8a/b2/2b8ab22fcc4b73cc7f198fa6a7b25fad.jpg"));
-        productList.add(new Product("Test", 500, "https://i.pinimg.com/736x/2b/8a/b2/2b8ab22fcc4b73cc7f198fa6a7b25fad.jpg"));
+
     }
 
     private void setAdapters(){
@@ -148,8 +133,8 @@ public class HomePageFragment extends Fragment implements RecyclerViewInterface,
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
         rvCategories.setLayoutManager(linearLayoutManager);
 
-        productAdapter = new ProductAdapter(getContext(), productList, this);
-        rvProducts.setAdapter(productAdapter);
+        popularProductAdapter = new PopularProductAdapter(getContext(), productList, this);
+        rvProducts.setAdapter(popularProductAdapter);
         LinearLayoutManager linearLayoutManager2 = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
         rvProducts.setLayoutManager(linearLayoutManager2);
 
@@ -165,9 +150,15 @@ public class HomePageFragment extends Fragment implements RecyclerViewInterface,
 
     @Override
     public void onClick(View view) {
+        Fragment selected = null;
         if (view.getId() == R.id.cartImg){
-            FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.main_frag_container, new CartFragment());
+            selected = new CartFragment();
         }
+        else {
+            selected = new AllProductFragment();
+        }
+        FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.main_frag_container, selected);
+
     }
 
     @Override

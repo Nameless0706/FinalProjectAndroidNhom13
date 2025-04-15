@@ -88,6 +88,7 @@ public class ProductDetailFragment extends Fragment implements View.OnClickListe
 
     @Override
     public void onClick(View view) {
+        Fragment selected = null;
         if (view.getId() == R.id.productDetailsBackImg){
             requireActivity().getSupportFragmentManager().popBackStack();
         }

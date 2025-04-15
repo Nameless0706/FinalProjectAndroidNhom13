@@ -100,15 +100,7 @@ public class CartFragment extends Fragment implements View.OnClickListener{
 
 
     private void getAllCartItems(){
-        cartItems = new ArrayList<>();
-        cartItems.add(new CartItem("Test", "https://static-00.iconduck.com/assets.00/pc-screen-icon-512x449-tojqc71i.png", 50, 4));
-        cartItems.add(new CartItem("Test", "https://static-00.iconduck.com/assets.00/pc-screen-icon-512x449-tojqc71i.png", 50, 4));
-        cartItems.add(new CartItem("Test", "https://static-00.iconduck.com/assets.00/pc-screen-icon-512x449-tojqc71i.png", 50, 4));
-        cartItems.add(new CartItem("Test", "https://static-00.iconduck.com/assets.00/pc-screen-icon-512x449-tojqc71i.png", 50, 4));
-        cartItems.add(new CartItem("Test", "https://static-00.iconduck.com/assets.00/pc-screen-icon-512x449-tojqc71i.png", 50, 4));
-        cartItems.add(new CartItem("Test", "https://static-00.iconduck.com/assets.00/pc-screen-icon-512x449-tojqc71i.png", 50, 4));
-        cartItems.add(new CartItem("Test", "https://static-00.iconduck.com/assets.00/pc-screen-icon-512x449-tojqc71i.png", 50, 4));
-        cartItems.add(new CartItem("Test", "https://static-00.iconduck.com/assets.00/pc-screen-icon-512x449-tojqc71i.png", 50, 4));
+
     }
 
     private void setAdapters(){

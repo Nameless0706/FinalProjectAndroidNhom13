@@ -37,12 +37,12 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
     @Override
     public void onBindViewHolder(@NonNull CartAdapter.CartViewHolder holder, int position) {
         CartItem item = cartItems.get(position);
-        holder.cartItemNameTv.setText(item.getName());
-        holder.cartItemPriceTv.setText(String.valueOf(item.getPrice()));
+        holder.cartItemNameTv.setText(item.getProduct().getName());
+        holder.cartItemPriceTv.setText(String.valueOf(item.getProduct().getPrice()));
 
 
         Glide.with(context)
-                .load(item.getImageUrl())
+                .load(item.getProduct().getImages())
                 .error(R.drawable.ic_launcher_background)
                 .into(holder.cartItemImg);
 

@@ -1,57 +1,101 @@
 package com.nhom13.phonemart.model;
 
+import android.media.Image;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import androidx.annotation.NonNull;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
+import java.util.HashSet;
+import java.util.Set;
 
-public class Product implements Parcelable {
-    private String prodName;
-    private int prodPrice;
-    private String prodImgUrl;
+public class Product implements Serializable {
+    private Long id;
+    private String name;
+    private String brand;
+    private BigDecimal price;
+
+    private int inventory;
+    private String description;
+
+    private Category category;
+    private Set<Image> images = new HashSet<>();
 
 
-    public Product(String prodName, int prodPrice, String prodImgUrl) {
-        this.prodName = prodName;
-        this.prodPrice = prodPrice;
-        this.prodImgUrl = prodImgUrl;
+    public Product(Long id, String name, String brand, BigDecimal price, int inventory, String description, Category category, Set<Image> images) {
+        this.id = id;
+        this.name = name;
+        this.brand = brand;
+        this.price = price;
+        this.inventory = inventory;
+        this.description = description;
+        this.category = category;
+        this.images = images;
     }
 
-    public String getProdName() {
-        return prodName;
+    public Long getId() {
+        return id;
     }
 
-    public void setProdName(String prodName) {
-        this.prodName = prodName;
+    public void setId(Long id) {
+        this.id = id;
     }
 
-    public int getProdPrice() {
-        return prodPrice;
+    public String getName() {
+        return name;
     }
 
-    public void setProdPrice(int prodPrice) {
-        this.prodPrice = prodPrice;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public String getProdImgUrl() {
-        return prodImgUrl;
+    public String getBrand() {
+        return brand;
     }
 
-    public void setProdImgUrl(String prodImgUrl) {
-        this.prodImgUrl = prodImgUrl;
+    public void setBrand(String brand) {
+        this.brand = brand;
     }
 
-    @Override
-    public int describeContents() {
-        return 0;
+    public BigDecimal getPrice() {
+        return price;
     }
 
-    @Override
-    public void writeToParcel(@NonNull Parcel parcel, int i) {
-        parcel.writeString(prodName);
-        parcel.writeInt(prodPrice);
-        parcel.writeString(prodImgUrl);
+    public void setPrice(BigDecimal price) {
+        this.price = price;
+    }
+
+    public int getInventory() {
+        return inventory;
+    }
+
+    public void setInventory(int inventory) {
+        this.inventory = inventory;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public Category getCategory() {
+        return category;
+    }
+
+    public void setCategory(Category category) {
+        this.category = category;
+    }
+
+    public Set<Image> getImages() {
+        return images;
+    }
+
+    public void setImages(Set<Image> images) {
+        this.images = images;
     }
 }

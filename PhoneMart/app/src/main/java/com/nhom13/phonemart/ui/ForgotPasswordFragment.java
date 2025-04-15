@@ -93,7 +93,7 @@ public class ForgotPasswordFragment extends Fragment implements View.OnClickList
     @Override
     public void onClick(View view) {
         if (view.getId() == R.id.forgotPassword_returnTv){
-            FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.main_frag_container, new LoginFragment());
+            requireActivity().getSupportFragmentManager().popBackStack();
         }
         else if (view.getId() == R.id.forgotPassword_signupBtn){
             FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.main_frag_container, new RegisterFragment());

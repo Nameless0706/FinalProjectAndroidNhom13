@@ -22,7 +22,7 @@
     <androidx.cardview.widget.CardView
         android:id="@+id/cardView"
         android:layout_width="322dp"
-        android:layout_height="432dp"
+        android:layout_height="480dp"
         android:layout_marginStart="3dp"
         app:cardBackgroundColor="#F4EAEA"
         app:cardCornerRadius="30dp"
@@ -51,7 +51,43 @@
                 android:textStyle="bold" />
 
             <EditText
-                android:id="@+id/emailEt"
+                android:id="@+id/registerFirstNameEt"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginStart="10dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="10dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginBottom="20dp"
+                android:background="@drawable/custom_border"
+                android:drawableStart="@drawable/user_ico"
+                android:drawablePadding="15dp"
+                android:ems="10"
+                android:hint="Firstname"
+                android:inputType="text"
+                android:padding="12dp" />
+
+            <EditText
+                android:id="@+id/registerLastNameEt"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginStart="10dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="10dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginBottom="20dp"
+                android:background="@drawable/custom_border"
+                android:drawableStart="@drawable/user_ico"
+                android:drawablePadding="15dp"
+                android:ems="10"
+                android:hint="Lastname"
+                android:inputType="text"
+                android:padding="12dp" />
+
+            <EditText
+                android:id="@+id/registerEmailEt"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
                 android:layout_marginStart="10dp"
@@ -69,25 +105,7 @@
                 android:padding="12dp" />
 
             <EditText
-                android:id="@+id/userNameEt"
-                android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:layout_marginStart="10dp"
-                android:layout_marginLeft="10dp"
-                android:layout_marginTop="10dp"
-                android:layout_marginEnd="10dp"
-                android:layout_marginRight="10dp"
-                android:layout_marginBottom="20dp"
-                android:background="@drawable/custom_border"
-                android:drawableStart="@drawable/user_ico"
-                android:drawablePadding="15dp"
-                android:ems="10"
-                android:hint="Username"
-                android:inputType="textPassword"
-                android:padding="12dp" />
-
-            <EditText
-                android:id="@+id/passwordEt"
+                android:id="@+id/loginPasswordEt"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
                 android:layout_marginStart="10dp"
@@ -123,7 +141,7 @@
         android:id="@+id/register_returnTv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="35dp"
+        android:layout_marginTop="16dp"
         android:fontFamily="@font/montserrat_regular"
         android:gravity="center"
         android:text="Back to sign in"

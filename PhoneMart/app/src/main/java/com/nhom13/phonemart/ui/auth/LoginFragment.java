@@ -9,13 +9,22 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import com.nhom13.phonemart.BaseFragment;
 import com.nhom13.phonemart.R;
+import com.nhom13.phonemart.api.AuthAPI;
+import com.nhom13.phonemart.api.RetrofitClient;
+import com.nhom13.phonemart.model.request.LoginRequest;
+import com.nhom13.phonemart.model.response.ApiResponse;
 import com.nhom13.phonemart.ui.ForgotPasswordFragment;
 import com.nhom13.phonemart.ui.HomePageFragment;
 import com.nhom13.phonemart.util.FragmentUtils;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -28,6 +37,10 @@ public class LoginFragment extends Fragment implements View.OnClickListener{
     Button loginBtn;
     TextView signupTv;
     TextView forgotTv;
+
+    EditText emailEt, passwordEt;
+
+    AuthAPI authAPI;
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -93,6 +106,8 @@ public class LoginFragment extends Fragment implements View.OnClickListener{
     }
 
     private void Mapping(View view) {
+        emailEt = view.findViewById(R.id.loginEmailEt);
+        passwordEt = view.findViewById(R.id.loginPasswordEt);
         loginBtn = view.findViewById(R.id.loginBtn);
         signupTv = view.findViewById(R.id.signUpTv);
         forgotTv = view.findViewById(R.id.forgotPasswordTv);
@@ -101,14 +116,45 @@ public class LoginFragment extends Fragment implements View.OnClickListener{
 
     @Override
     public void onClick(View view) {
+        Fragment selected = null;
         if (view.getId() == R.id.loginBtn){
-            FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.main_frag_container, new BaseFragment());
+            login();
+            return;
         }
         else if (view.getId() == R.id.signUpTv){
-            FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.main_frag_container, new RegisterFragment());
+            selected = new RegisterFragment();
         }
         else{
-            FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.main_frag_container, new ForgotPasswordFragment());
+            selected = new ForgotPasswordFragment();
         }
+        FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.main_frag_container, selected);
+
     }
+
+    private void login(){
+
+        String email = emailEt.getText().toString();
+        String password = passwordEt.getText().toString();
+
+        authAPI = RetrofitClient.getClient().create(AuthAPI.class);
+
+        authAPI.login(new LoginRequest(email, password)).enqueue(new Callback<ApiResponse>() {
+            @Override
+            public void onResponse(@NonNull Call<ApiResponse> call, @NonNull Response<ApiResponse> response) {
+                if (response.isSuccessful()){
+                    FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.base_frag_container, new BaseFragment());
+                }
+                else {
+
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<ApiResponse> call, Throwable throwable) {
+
+            }
+        });
+    }
+
+
 }

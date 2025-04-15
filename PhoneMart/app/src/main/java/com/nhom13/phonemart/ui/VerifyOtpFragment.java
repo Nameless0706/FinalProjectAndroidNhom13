@@ -2,13 +2,34 @@ package com.nhom13.phonemart.ui;
 
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.Toast;
 
+import com.chaos.view.PinView;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.nhom13.phonemart.R;
+import com.nhom13.phonemart.api.AuthAPI;
+import com.nhom13.phonemart.api.RetrofitClient;
+import com.nhom13.phonemart.model.request.CreateUserRequest;
+import com.nhom13.phonemart.model.response.ApiResponse;
+import com.nhom13.phonemart.ui.auth.LoginFragment;
+import com.nhom13.phonemart.util.DialogUtils;
+import com.nhom13.phonemart.util.FragmentUtils;
+
+import java.io.IOException;
+import java.util.Objects;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -17,33 +38,25 @@ import com.nhom13.phonemart.R;
  */
 public class VerifyOtpFragment extends Fragment {
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+    Button confirmBtn;
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    PinView otp;
+
+    AuthAPI authAPI;
+
+    private static final String USER_EMAIL = "email";
+
+    private String user_email;
 
     public VerifyOtpFragment() {
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment VerifyOtpFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static VerifyOtpFragment newInstance(String param1, String param2) {
+
+    public static VerifyOtpFragment newInstance(String email) {
         VerifyOtpFragment fragment = new VerifyOtpFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
+        args.putString(USER_EMAIL, email);
         fragment.setArguments(args);
         return fragment;
     }
@@ -52,8 +65,7 @@ public class VerifyOtpFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+            user_email = getArguments().getString(USER_EMAIL);
         }
     }
 
@@ -62,5 +74,65 @@ public class VerifyOtpFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_verify_otp, container, false);
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        // Initialize your views or setup listeners here
+
+        Mapping(view);
+        confirmBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                verify();
+            }
+        });
+
+    }
+
+    private void Mapping(View view){
+        confirmBtn = view.findViewById(R.id.verify_confirmBtn);
+        otp = view.findViewById(R.id.otpPv);
+    }
+
+    private void verify(){
+        authAPI = RetrofitClient.getClient().create(AuthAPI.class);
+
+        String otp_txt = otp.getText().toString();
+
+        authAPI.verify(user_email, otp_txt).enqueue(new Callback<ApiResponse>() {
+            @Override
+            public void onResponse(@NonNull Call<ApiResponse> call, @NonNull Response<ApiResponse> response) {
+                if (response.isSuccessful()) {
+                    //Hiển thị dialog thành công
+                    DialogUtils.ShowSuccessDialog(getContext(), "Thành công", "Xác thực thành công");
+                    Toast.makeText(getContext(), "OTP verified successfully!", Toast.LENGTH_LONG).show();
+
+                    FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.main_frag_container, new LoginFragment());
+                }
+
+                else {
+                    try {
+                        String errorBody = response.errorBody().string();
+                        JsonObject jsonObject = JsonParser.parseString(errorBody).getAsJsonObject();
+                        String errorMessage = jsonObject.get("message").getAsString();
+                        Toast.makeText(getContext(), errorMessage, Toast.LENGTH_LONG).show();
+                        Log.e("Error", errorMessage);
+                    } catch (IOException e) {
+                        Toast.makeText(getContext(), "Error reading server response", Toast.LENGTH_LONG).show();
+
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<ApiResponse> call, @NonNull Throwable throwable) {
+                Log.d("VerifyOtpFragment", "Error: " + throwable.getMessage());
+                Toast.makeText(getContext(), "Network error, please try again", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+
     }
 }

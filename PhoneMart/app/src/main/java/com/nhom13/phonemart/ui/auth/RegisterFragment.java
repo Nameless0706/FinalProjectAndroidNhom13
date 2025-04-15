@@ -5,66 +5,52 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
 import com.nhom13.phonemart.R;
-import com.nhom13.phonemart.ui.ForgotPasswordFragment;
-import com.nhom13.phonemart.ui.HomePageFragment;
+import com.nhom13.phonemart.api.AuthAPI;
+import com.nhom13.phonemart.api.RetrofitClient;
+import com.nhom13.phonemart.model.request.CreateUserRequest;
+import com.nhom13.phonemart.model.response.ApiResponse;
 import com.nhom13.phonemart.ui.VerifyOtpFragment;
+import com.nhom13.phonemart.util.DialogUtils;
 import com.nhom13.phonemart.util.FragmentUtils;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link RegisterFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
+import java.io.IOException;
+import java.util.Objects;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
+
 public class RegisterFragment extends Fragment implements View.OnClickListener{
 
+    EditText firtNameEt, lastNameEt, emailEt, passwordEt;
     Button registerBtn;
     TextView returnTv;
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+    AuthAPI authAPI;
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
 
     public RegisterFragment() {
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment RegisterFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static RegisterFragment newInstance(String param1, String param2) {
-        RegisterFragment fragment = new RegisterFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
     }
 
     @Override
@@ -88,6 +74,11 @@ public class RegisterFragment extends Fragment implements View.OnClickListener{
     private void Mapping(View view) {
         registerBtn = view.findViewById(R.id.registerBtn);
         returnTv = view.findViewById(R.id.register_returnTv);
+        firtNameEt = view.findViewById(R.id.registerFirstNameEt);
+        lastNameEt = view.findViewById(R.id.registerLastNameEt);
+        emailEt = view.findViewById(R.id.registerEmailEt);
+        passwordEt = view.findViewById(R.id.loginPasswordEt);
+
     }
 
 
@@ -97,9 +88,52 @@ public class RegisterFragment extends Fragment implements View.OnClickListener{
             FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.main_frag_container, new LoginFragment());
         }
         else{
-            FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.main_frag_container, new VerifyOtpFragment());
+            Log.d("Test", "Making api call");
+            register();
         }
+    }
 
+    private void register(){
+        authAPI = RetrofitClient.getClient().create(AuthAPI.class);
+        String firstName = firtNameEt.getText().toString();
+        String lastName = lastNameEt.getText().toString();
+        String email = emailEt.getText().toString();
+        String password = passwordEt.getText().toString();
+
+
+        authAPI.register(new CreateUserRequest(firstName, lastName, email, password)).enqueue(new Callback<ApiResponse>() {
+            @Override
+            public void onResponse(@NonNull Call<ApiResponse> call, @NonNull Response<ApiResponse> response) {
+                if (response.isSuccessful()){
+
+
+                    // Đưa email qua fragment verify
+                    FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.main_frag_container, VerifyOtpFragment.newInstance(email));
+                }
+                else{
+                    try {
+
+                        String errorBody = response.errorBody().string();
+
+                        // Chỉ lấy field message từ json
+                        JsonObject jsonObject = JsonParser.parseString(errorBody).getAsJsonObject();
+                        String errorMessage = jsonObject.get("message").getAsString();
+
+                        //Hiển thị thông báo lỗi
+                        Toast.makeText(getContext(), errorMessage, Toast.LENGTH_LONG).show();
+                    } catch (IOException e) {
+                        Toast.makeText(getContext(), "Error reading server response", Toast.LENGTH_LONG).show();
+                    } catch (JsonSyntaxException | IllegalStateException e) {
+                        Toast.makeText(getContext(), "Unexpected json format", Toast.LENGTH_LONG).show();
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<ApiResponse> call, @NonNull Throwable throwable) {
+                Log.d("Error", Objects.requireNonNull(throwable.getMessage()));
+            }
+        });
     }
 
 
