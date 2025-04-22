@@ -1,10 +1,13 @@
 package com.nhom13.phonemart.ui.auth;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,15 +15,21 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
 import com.nhom13.phonemart.BaseFragment;
 import com.nhom13.phonemart.R;
 import com.nhom13.phonemart.api.AuthAPI;
 import com.nhom13.phonemart.api.RetrofitClient;
+import com.nhom13.phonemart.dto.UserDto;
 import com.nhom13.phonemart.model.request.LoginRequest;
 import com.nhom13.phonemart.model.response.ApiResponse;
+import com.nhom13.phonemart.model.response.JwtResponse;
 import com.nhom13.phonemart.ui.ForgotPasswordFragment;
 import com.nhom13.phonemart.ui.HomePageFragment;
+import com.nhom13.phonemart.util.DialogUtils;
 import com.nhom13.phonemart.util.FragmentUtils;
+
+import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -142,16 +151,36 @@ public class LoginFragment extends Fragment implements View.OnClickListener{
             @Override
             public void onResponse(@NonNull Call<ApiResponse> call, @NonNull Response<ApiResponse> response) {
                 if (response.isSuccessful()){
-                    FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.base_frag_container, new BaseFragment());
+
+                    Gson gson = new Gson();
+
+                    String json = gson.toJson(response.body().getData());
+                    JwtResponse jwt = gson.fromJson(json, JwtResponse.class);
+
+
+                    UserDto loginUser = jwt.getUser();
+                    String accessToken = jwt.getAccessToken();
+                    String refreshToken = jwt.getRefreshToken();
+
+
+                    SharedPreferences prefs = requireContext().getSharedPreferences("auth", Context.MODE_PRIVATE);
+                    prefs.edit()
+                            .putString("access_token", accessToken)
+                            .putString("refresh_token", refreshToken)
+                            .apply();
+
+
+                    FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.main_frag_container, BaseFragment.newInstance(loginUser));
                 }
                 else {
+                    DialogUtils.ShowDialog(getContext(), R.layout.error_dialog,"Thất bại", "Sai email hoặc mật khẩu");
 
                 }
             }
 
             @Override
             public void onFailure(@NonNull Call<ApiResponse> call, Throwable throwable) {
-
+                Log.e("ApiError", throwable.getMessage());
             }
         });
     }

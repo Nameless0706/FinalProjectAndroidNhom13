@@ -21,6 +21,7 @@ import com.nhom13.phonemart.R;
 import com.nhom13.phonemart.adapter.CategoryAdapter;
 import com.nhom13.phonemart.adapter.PopularProductAdapter;
 import com.nhom13.phonemart.adapter.RecyclerViewInterface;
+import com.nhom13.phonemart.dto.UserDto;
 import com.nhom13.phonemart.model.Category;
 import com.nhom13.phonemart.model.Product;
 import com.nhom13.phonemart.util.FragmentUtils;
@@ -37,7 +38,7 @@ public class HomePageFragment extends Fragment implements RecyclerViewInterface,
 
     ImageView cartImg;
 
-    TextView viewAllTv;
+    TextView userNameTv, viewAllTv;
     EditText searchStr;
     List<Category> categoryList;
     List<Product> productList;
@@ -48,32 +49,18 @@ public class HomePageFragment extends Fragment implements RecyclerViewInterface,
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
 
     // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    private UserDto loginUser;
 
     public HomePageFragment() {
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment HomePageFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-
-    public static HomePageFragment newInstance(String param1, String param2) {
+    public static HomePageFragment newInstance(UserDto userDto) {
         HomePageFragment fragment = new HomePageFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
+        args.putParcelable("login_user", userDto);
         fragment.setArguments(args);
         return fragment;
     }
@@ -82,8 +69,7 @@ public class HomePageFragment extends Fragment implements RecyclerViewInterface,
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+            loginUser = getArguments().getParcelable("login_user");
         }
     }
 
@@ -98,6 +84,10 @@ public class HomePageFragment extends Fragment implements RecyclerViewInterface,
         super.onViewCreated(view, savedInstanceState);
         // Initialize your views or setup listeners here
         Mapping(view);
+
+        String name = loginUser.getFirstName() + " " + loginUser.getLastName();
+        userNameTv.setText(name);
+
         getAllCategories();
         getPopularProducts();
         setAdapters();
@@ -114,6 +104,7 @@ public class HomePageFragment extends Fragment implements RecyclerViewInterface,
         searchStr = (EditText) view.findViewById(R.id.searchEt);
         rvCategories = (RecyclerView) view.findViewById(R.id.categoryRv);
         rvProducts = (RecyclerView) view.findViewById(R.id.popularProductRv);
+        userNameTv = (TextView) view.findViewById(R.id.userNameTv);
         viewAllTv = (TextView) view.findViewById(R.id.viewAllProdTv);
     }
 

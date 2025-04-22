@@ -83,6 +83,7 @@ public class AllProductFragment extends Fragment implements RecyclerViewInterfac
     public void Mapping(View view){
         tabLayout = view.findViewById(R.id.filterTabLayout);
         rvProduct = view.findViewById(R.id.rvProducts);
+        backImg = view.findViewById(R.id.allProductBackImg);
     }
 
     private void getAllProducts(){
@@ -96,11 +97,15 @@ public class AllProductFragment extends Fragment implements RecyclerViewInterfac
         int spanCount = 2; // number of columns
         GridLayoutManager gridLayoutManager = new GridLayoutManager(getContext(), spanCount);
         rvProduct.setLayoutManager(gridLayoutManager);
+
+        backImg.setOnClickListener(this);
     }
 
     @Override
     public void onClick(View view) {
-
+        if (view.getId() == R.id.allProductBackImg){
+            requireActivity().getSupportFragmentManager().popBackStack();
+        }
     }
 
     @Override

@@ -5,16 +5,32 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.nhom13.phonemart.R;
+import com.nhom13.phonemart.api.AuthAPI;
+import com.nhom13.phonemart.api.RetrofitClient;
+import com.nhom13.phonemart.model.response.ApiResponse;
 import com.nhom13.phonemart.ui.auth.LoginFragment;
 import com.nhom13.phonemart.ui.auth.RegisterFragment;
 import com.nhom13.phonemart.util.FragmentUtils;
+
+import java.io.IOException;
+import java.util.Objects;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -23,36 +39,21 @@ import com.nhom13.phonemart.util.FragmentUtils;
  */
 public class ForgotPasswordFragment extends Fragment implements View.OnClickListener{
 
-    Button signUpBtn;
+    Button signUpBtn, sendBtn;
     TextView returnTv;
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+    EditText forgotEmailEt;
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    AuthAPI authAPI;
 
     public ForgotPasswordFragment() {
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment ForgotPasswordFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static ForgotPasswordFragment newInstance(String param1, String param2) {
+
+    public static ForgotPasswordFragment newInstance() {
         ForgotPasswordFragment fragment = new ForgotPasswordFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
         fragment.setArguments(args);
         return fragment;
     }
@@ -60,10 +61,7 @@ public class ForgotPasswordFragment extends Fragment implements View.OnClickList
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
+
     }
 
     @Override
@@ -80,13 +78,15 @@ public class ForgotPasswordFragment extends Fragment implements View.OnClickList
         Mapping(view);
         returnTv.setOnClickListener(this);
         signUpBtn.setOnClickListener(this);
+        sendBtn.setOnClickListener(this);
 
     }
-
 
     private void Mapping(View view) {
         returnTv = view.findViewById(R.id.forgotPassword_returnTv);
         signUpBtn = view.findViewById(R.id.forgotPassword_signupBtn);
+        sendBtn = view.findViewById(R.id.sendOtpBtn);
+        forgotEmailEt = view.findViewById(R.id.email_forgotEt);
     }
 
 
@@ -98,8 +98,49 @@ public class ForgotPasswordFragment extends Fragment implements View.OnClickList
         else if (view.getId() == R.id.forgotPassword_signupBtn){
             FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.main_frag_container, new RegisterFragment());
         }
+        else{
+            sendConfirmOtp();
+        }
 
     }
+
+    private void sendConfirmOtp(){
+        authAPI = RetrofitClient.getClient().create(AuthAPI.class);
+        String email = forgotEmailEt.getText().toString();
+        authAPI.forgotPassword(email).enqueue(new Callback<ApiResponse>() {
+            @Override
+            public void onResponse(Call<ApiResponse> call, Response<ApiResponse> response) {
+                if (response.isSuccessful()){
+                    FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.main_frag_container, VerifyOtpFragment.newInstance("forgot_password", email));
+                }
+                else {
+                    try {
+                        //Chỉ lấy field message từ json
+                        //String errorBody = response.errorBody().string();
+                        //JsonObject jsonObject = JsonParser.parseString(errorBody).getAsJsonObject();
+                        //String errorMessage = jsonObject.get("message").getAsString();
+
+                        Gson gson = new Gson();
+                        ApiResponse apiResponse = gson.fromJson(response.errorBody().string(), ApiResponse.class);
+
+                        //Hiển thị thông báo lỗi
+                        Toast.makeText(getContext(), apiResponse.getMessage(), Toast.LENGTH_LONG).show();
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ApiResponse> call, Throwable throwable) {
+                Log.d("Error", Objects.requireNonNull(throwable.getMessage()));
+            }
+        });
+
+    }
+
+
 
 
 }

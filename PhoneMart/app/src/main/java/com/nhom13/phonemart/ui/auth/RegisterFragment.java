@@ -14,6 +14,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
@@ -106,21 +107,23 @@ public class RegisterFragment extends Fragment implements View.OnClickListener{
             public void onResponse(@NonNull Call<ApiResponse> call, @NonNull Response<ApiResponse> response) {
                 if (response.isSuccessful()){
 
-
                     // Đưa email qua fragment verify
-                    FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.main_frag_container, VerifyOtpFragment.newInstance(email));
+                    FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.main_frag_container, VerifyOtpFragment.newInstance("register", email));
                 }
                 else{
                     try {
 
-                        String errorBody = response.errorBody().string();
+                        //Chỉ lấy field message từ json
+                        //String errorBody = response.errorBody().string();
+                        //JsonObject jsonObject = JsonParser.parseString(errorBody).getAsJsonObject();
+                        //String errorMessage = jsonObject.get("message").getAsString();
 
-                        // Chỉ lấy field message từ json
-                        JsonObject jsonObject = JsonParser.parseString(errorBody).getAsJsonObject();
-                        String errorMessage = jsonObject.get("message").getAsString();
+                        Gson gson = new Gson();
+                        ApiResponse apiResponse = gson.fromJson(response.errorBody().string(), ApiResponse.class);
 
                         //Hiển thị thông báo lỗi
-                        Toast.makeText(getContext(), errorMessage, Toast.LENGTH_LONG).show();
+                        Toast.makeText(getContext(), apiResponse.getMessage(), Toast.LENGTH_LONG).show();
+
                     } catch (IOException e) {
                         Toast.makeText(getContext(), "Error reading server response", Toast.LENGTH_LONG).show();
                     } catch (JsonSyntaxException | IllegalStateException e) {

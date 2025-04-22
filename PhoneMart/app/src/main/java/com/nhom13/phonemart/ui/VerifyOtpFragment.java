@@ -45,18 +45,23 @@ public class VerifyOtpFragment extends Fragment {
     AuthAPI authAPI;
 
     private static final String USER_EMAIL = "email";
+    private static final String CONTEXT = "context";
+
 
     private String user_email;
+
+    private String context;
 
     public VerifyOtpFragment() {
         // Required empty public constructor
     }
 
 
-    public static VerifyOtpFragment newInstance(String email) {
+    public static VerifyOtpFragment newInstance(String context, String email) {
         VerifyOtpFragment fragment = new VerifyOtpFragment();
         Bundle args = new Bundle();
         args.putString(USER_EMAIL, email);
+        args.putString(CONTEXT, context);
         fragment.setArguments(args);
         return fragment;
     }
@@ -66,6 +71,7 @@ public class VerifyOtpFragment extends Fragment {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             user_email = getArguments().getString(USER_EMAIL);
+            context = getArguments().getString(CONTEXT);
         }
     }
 
@@ -101,15 +107,15 @@ public class VerifyOtpFragment extends Fragment {
 
         String otp_txt = otp.getText().toString();
 
+
         authAPI.verify(user_email, otp_txt).enqueue(new Callback<ApiResponse>() {
             @Override
             public void onResponse(@NonNull Call<ApiResponse> call, @NonNull Response<ApiResponse> response) {
                 if (response.isSuccessful()) {
                     //Hiển thị dialog thành công
-                    DialogUtils.ShowSuccessDialog(getContext(), R.layout.success_dialog,"Thành công", "Xác thực thành công");
+                    DialogUtils.ShowDialog(getContext(), R.layout.success_dialog,"Thành công", "Xác thực thành công");
                     Toast.makeText(getContext(), "OTP verified successfully!", Toast.LENGTH_LONG).show();
 
-                    FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.main_frag_container, new LoginFragment());
                 }
 
                 else {
@@ -129,9 +135,20 @@ public class VerifyOtpFragment extends Fragment {
             @Override
             public void onFailure(@NonNull Call<ApiResponse> call, @NonNull Throwable throwable) {
                 Log.d("VerifyOtpFragment", "Error: " + throwable.getMessage());
-                Toast.makeText(getContext(), "Network error, please try again", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(getContext(), "Lỗi kết nối API", Toast.LENGTH_SHORT).show();
             }
         });
+
+        if (context.equals("register")){
+            FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.main_frag_container, new LoginFragment());
+        }
+        else {
+            FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.main_frag_container, ResetPasswordFragment.newInstance("1",  "2"));
+
+        }
+
+
+
 
 
     }
