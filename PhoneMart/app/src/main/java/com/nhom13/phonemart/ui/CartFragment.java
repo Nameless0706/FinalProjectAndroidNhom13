@@ -15,6 +15,8 @@ import android.widget.ImageView;
 import com.nhom13.phonemart.R;
 import com.nhom13.phonemart.adapter.CartAdapter;
 import com.nhom13.phonemart.model.CartItem;
+import com.nhom13.phonemart.model.Category;
+import com.nhom13.phonemart.model.Product;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -100,7 +102,7 @@ public class CartFragment extends Fragment implements View.OnClickListener{
 
 
     private void getAllCartItems(){
-
+        cartItems = new ArrayList<>();
     }
 
     private void setAdapters(){

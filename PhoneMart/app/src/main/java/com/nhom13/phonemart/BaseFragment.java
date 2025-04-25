@@ -67,12 +67,12 @@ public class BaseFragment extends Fragment {
             Fragment selected = null;
             int idItem = item.getItemId();
             if (idItem == R.id.home)
-                selected = new HomePageFragment();
+                selected = HomePageFragment.newInstance(user);
             else if (idItem == R.id.map) {
-                selected = new HomePageFragment();
+                selected = HomePageFragment.newInstance(user);
             }
             else if (idItem == R.id.favorite) {
-                selected = new HomePageFragment();
+                selected = HomePageFragment.newInstance(user);
             }
             else {
                 selected = new UserFragment();
