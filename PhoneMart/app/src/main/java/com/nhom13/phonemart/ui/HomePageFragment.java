@@ -11,12 +11,16 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ViewFlipper;
 
+import com.bumptech.glide.Glide;
 import com.nhom13.phonemart.R;
 import com.nhom13.phonemart.adapter.CategoryAdapter;
 import com.nhom13.phonemart.adapter.PopularProductAdapter;
@@ -28,6 +32,7 @@ import com.nhom13.phonemart.util.FragmentUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -46,6 +51,7 @@ public class HomePageFragment extends Fragment implements RecyclerViewInterface,
 
     PopularProductAdapter popularProductAdapter;
     RecyclerView rvCategories, rvProducts;
+    private ViewFlipper viewFlipper;
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -96,8 +102,40 @@ public class HomePageFragment extends Fragment implements RecyclerViewInterface,
         searchStr.setOnEditorActionListener(this);
         viewAllTv.setOnClickListener(this);
 
-    }
+        ActionViewFlipperMain();
 
+    }
+    // Hàm Flipper
+    private void ActionViewFlipperMain() {
+//        List<String> arrayListFlipper = new ArrayList<>();
+//        arrayListFlipper.add("http://app.iotstar.vn:8081/appfoods/flipper/quangcao.png");
+//        arrayListFlipper.add("http://app.iotstar.vn:8081/appfoods/flipper/coffee.jpg");
+//        arrayListFlipper.add("http://app.iotstar.vn:8081/appfoods/flipper/companypizza.jpeg");
+//        arrayListFlipper.add("http://app.iotstar.vn:8081/appfoods/flipper/themoingon.jpeg");
+
+        List<Integer> arrayListFlipper = new ArrayList<>();
+        arrayListFlipper.add(R.drawable.arrow);
+        arrayListFlipper.add(R.drawable.profile);
+        arrayListFlipper.add(R.drawable.baseline_home_24);
+
+        for (int i = 0; i < arrayListFlipper.size(); i++) {
+            ImageView imageView = new ImageView(requireContext());
+            Glide.with(requireContext()).load(arrayListFlipper.get(i)).into(imageView);
+            imageView.setScaleType(ImageView.ScaleType.FIT_XY);
+            viewFlipper.addView(imageView);
+        }
+
+        viewFlipper.setFlipInterval(5000);
+        viewFlipper.setAutoStart(true);
+        viewFlipper.startFlipping();
+
+        // Thiết lập animation cho flipper
+        Animation slide_in = AnimationUtils.loadAnimation(requireContext(), R.anim.slide_in_right);
+        Animation slide_out = AnimationUtils.loadAnimation(requireContext(), R.anim.slide_out_right);
+
+        viewFlipper.setInAnimation(slide_in);
+        viewFlipper.setOutAnimation(slide_out);
+    }
 
     private void Mapping(View view) {
         cartImg = (ImageView) view.findViewById(R.id.cartImg);
@@ -106,6 +144,7 @@ public class HomePageFragment extends Fragment implements RecyclerViewInterface,
         rvProducts = (RecyclerView) view.findViewById(R.id.popularProductRv);
         userNameTv = (TextView) view.findViewById(R.id.userNameTv);
         viewAllTv = (TextView) view.findViewById(R.id.viewAllProdTv);
+        viewFlipper = (ViewFlipper) view.findViewById(R.id.viewFlipperMain);
     }
 
     private void getAllCategories(){
