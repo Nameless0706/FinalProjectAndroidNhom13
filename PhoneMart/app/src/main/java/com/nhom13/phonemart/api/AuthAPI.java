@@ -18,22 +18,22 @@ import retrofit2.http.Part;
 import retrofit2.http.Query;
 
 public interface AuthAPI {
-    @POST("/api/v1/auth/register")
+    @POST("auth/register")
     Call<ApiResponse> register(@Body CreateUserRequest userRequest);
 
-    @POST("/api/v1/auth/verify")
+    @POST("auth/verify")
     Call<ApiResponse> verify(@Query("email") String email, @Query("otp") String otp);
 
-    @POST("/api/v1/auth/login")
+    @POST("auth/login")
     Call<ApiResponse> login(@Body LoginRequest loginRequest);
 
-    @POST("/api/v1/auth/forgot")
+    @POST("auth/forgot")
     Call<ApiResponse> forgotPassword(@Query("email") String email);
 
-    @POST("/api/v1/auth/reset-password")
+    @POST("auth/reset-password")
     Call<ApiResponse> resetPassword(@Query("email") String email, @Query("newPassword") String newPassword, @Query("otp") String otp);
 
-    @POST("/api/v1/auth/resend-otp")
+    @POST("auth/resend-otp")
     Call<ApiResponse> resendOtp(@Query("email") String email);
 
 

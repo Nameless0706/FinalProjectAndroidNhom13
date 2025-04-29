@@ -67,7 +67,7 @@ public class UserFragment extends Fragment implements View.OnClickListener{
         String name = loginUser.getFirstName() + " " + loginUser.getLastName();
         userNameTv.setText(name);
 
-        ImageUtils.loadImageIntoImageView(getContext(), (long) 2, profileImg);
+        ImageUtils.loadImageIntoImageView(getContext(), (long) loginUser.getImage().getId(), profileImg);
         backImg.setOnClickListener(this);
 
     }

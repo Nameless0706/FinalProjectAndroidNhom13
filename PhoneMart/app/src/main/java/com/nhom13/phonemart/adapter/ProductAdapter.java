@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.nhom13.phonemart.R;
+import com.nhom13.phonemart.dto.ProductDto;
 import com.nhom13.phonemart.model.Product;
 
 import java.util.List;
@@ -20,11 +21,11 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
 
     private final RecyclerViewInterface recyclerViewInterface;
     private Context context;
-    private List<Product> products;
+    private List<ProductDto> products;
 
 
 
-    public ProductAdapter(Context context, List<Product> products, RecyclerViewInterface recyclerViewInterface) {
+    public ProductAdapter(Context context, List<ProductDto> products, RecyclerViewInterface recyclerViewInterface) {
         this.context = context;
         this.products = products;
         this.recyclerViewInterface = recyclerViewInterface;
@@ -39,7 +40,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
 
     @Override
     public void onBindViewHolder(@NonNull ProductViewHolder holder, int position) {
-        Product product = products.get(position);
+        ProductDto product = products.get(position);
         holder.productNameTv.setText(product.getName());
         holder.productPriceTv.setText(String.valueOf(product.getPrice()));
 
@@ -82,7 +83,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
                         int position = getBindingAdapterPosition();
 
                         if (position != RecyclerView.NO_POSITION){
-                            recyclerViewInterface.onItemClick(position);
+                            recyclerViewInterface.onItemClick(position, "product");
                         }
                     }
                 }

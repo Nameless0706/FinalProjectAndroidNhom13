@@ -1,6 +1,7 @@
 package com.nhom13.phonemart.adapter;
 
 import android.content.Context;
+import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,7 +13,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.nhom13.phonemart.R;
+import com.nhom13.phonemart.dto.ProductDto;
 import com.nhom13.phonemart.model.Product;
+import com.nhom13.phonemart.util.ImageUtils;
 
 import java.util.List;
 
@@ -20,11 +23,11 @@ public class PopularProductAdapter extends RecyclerView.Adapter<PopularProductAd
 
     private final RecyclerViewInterface recyclerViewInterface;
     private Context context;
-    private List<Product> products;
+    private List<ProductDto> products;
 
 
 
-    public PopularProductAdapter(Context context, List<Product> products, RecyclerViewInterface recyclerViewInterface) {
+    public PopularProductAdapter(Context context, List<ProductDto> products, RecyclerViewInterface recyclerViewInterface) {
         this.context = context;
         this.products = products;
         this.recyclerViewInterface = recyclerViewInterface;
@@ -39,15 +42,18 @@ public class PopularProductAdapter extends RecyclerView.Adapter<PopularProductAd
 
     @Override
     public void onBindViewHolder(@NonNull ProductViewHolder holder, int position) {
-        Product product = products.get(position);
+        ProductDto product = products.get(position);
         holder.productNameTv.setText(product.getName());
         holder.productPriceTv.setText(String.valueOf(product.getPrice()));
 
 
-        Glide.with(context)
-                .load(product.getImages())
-                .error(R.drawable.ic_launcher_background)
-                .into(holder.productImg);
+        if (product.getImages() != null) {
+            ImageUtils.loadImageIntoImageView(context, product.getImages().get(0).getId(), holder.productImg);
+
+        } else {
+            // Optionally load a placeholder or fallback image
+            holder.productImg.setImageResource(R.drawable.ic_launcher_background);
+        }
 
 
 
@@ -82,7 +88,7 @@ public class PopularProductAdapter extends RecyclerView.Adapter<PopularProductAd
                         int position = getBindingAdapterPosition();
 
                         if (position != RecyclerView.NO_POSITION){
-                            recyclerViewInterface.onItemClick(position);
+                            recyclerViewInterface.onItemClick(position, "product");
                         }
                     }
                 }

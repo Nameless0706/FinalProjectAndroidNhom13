@@ -18,6 +18,7 @@ import com.google.android.material.tabs.TabLayout;
 import com.nhom13.phonemart.R;
 import com.nhom13.phonemart.adapter.ProductAdapter;
 import com.nhom13.phonemart.adapter.RecyclerViewInterface;
+import com.nhom13.phonemart.dto.ProductDto;
 import com.nhom13.phonemart.model.Product;
 import com.nhom13.phonemart.util.FragmentUtils;
 
@@ -38,7 +39,7 @@ public class AllProductFragment extends Fragment implements RecyclerViewInterfac
     private ProductAdapter adapter;
     private TabLayout tabLayout;
 
-    private List<Product> productList;
+    private List<ProductDto> productList;
 
     private static final String ARG_PRODUCTS = "PRODUCTS";
     private String currentApiUrl = "api/moi-nhat";
@@ -136,7 +137,7 @@ public class AllProductFragment extends Fragment implements RecyclerViewInterfac
     }
 
     @Override
-    public void onItemClick(int position) {
+    public void onItemClick(int position, String source) {
         FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.main_frag_container, new ProductDetailFragment());
     }
 }

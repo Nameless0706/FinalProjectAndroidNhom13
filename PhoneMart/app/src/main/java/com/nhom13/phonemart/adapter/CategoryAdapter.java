@@ -12,39 +12,45 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.nhom13.phonemart.R;
+import com.nhom13.phonemart.dto.CategoryDto;
 import com.nhom13.phonemart.model.Category;
+import com.nhom13.phonemart.util.ImageUtils;
 
 import java.util.List;
 
 public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.CategoryViewHolder> {
 
+    private final RecyclerViewInterface recyclerViewInterface;
     private Context context;
-    private List<Category> categories;
+    private List<CategoryDto> categories;
 
 
 
-    public CategoryAdapter(Context context, List<Category> categories) {
+    public CategoryAdapter(Context context, List<CategoryDto> categories, RecyclerViewInterface recyclerViewInterface) {
         this.context = context;
         this.categories = categories;
+        this.recyclerViewInterface = recyclerViewInterface;
+
     }
 
     @NonNull
     @Override
     public CategoryViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(context).inflate(R.layout.item_category, parent, false);
-        return new CategoryViewHolder(view);
+        return new CategoryViewHolder(view, recyclerViewInterface);
     }
 
     @Override
     public void onBindViewHolder(@NonNull CategoryViewHolder holder, int position) {
-        Category category = categories.get(position);
+        CategoryDto category = categories.get(position);
         holder.categoryNameTv.setText(category.getName());
 
-        Glide.with(context)
-             .load(category.getImage())
-             .error(R.drawable.ic_launcher_background)
-             .into(holder.cateImg);
-
+        if (category.getImage() != null) {
+            ImageUtils.loadImageIntoImageView(context, category.getImage().getId(), holder.cateImg);
+        } else {
+            // Optionally load a placeholder or fallback image
+            holder.cateImg.setImageResource(R.drawable.ic_launcher_background);
+        }
 
     }
 
@@ -58,11 +64,26 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.Catego
 
         ImageView cateImg;
 
-        public CategoryViewHolder(@NonNull View itemView) {
+        public CategoryViewHolder(@NonNull View itemView, RecyclerViewInterface recyclerViewInterface) {
             super(itemView);
             categoryNameTv = itemView.findViewById(R.id.categoryNameTv);
 
             cateImg = itemView.findViewById(R.id.categoryImg);
+
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if (recyclerViewInterface != null){
+                        int position = getBindingAdapterPosition();
+
+                        if (position != RecyclerView.NO_POSITION){
+                            recyclerViewInterface.onItemClick(position, "category");
+                        }
+                    }
+                }
+            });
         }
+
+
     }
 }

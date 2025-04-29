@@ -7,6 +7,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,18 +22,36 @@ import android.widget.Toast;
 import android.widget.ViewFlipper;
 
 import com.bumptech.glide.Glide;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.nhom13.phonemart.R;
 import com.nhom13.phonemart.adapter.CategoryAdapter;
 import com.nhom13.phonemart.adapter.PopularProductAdapter;
 import com.nhom13.phonemart.adapter.RecyclerViewInterface;
+import com.nhom13.phonemart.api.AuthAPI;
+import com.nhom13.phonemart.api.CategoryAPI;
+import com.nhom13.phonemart.api.ProductAPI;
+import com.nhom13.phonemart.api.RetrofitClient;
+import com.nhom13.phonemart.dto.CategoryDto;
+import com.nhom13.phonemart.dto.ImageDto;
+import com.nhom13.phonemart.dto.ProductDto;
 import com.nhom13.phonemart.dto.UserDto;
 import com.nhom13.phonemart.model.Category;
 import com.nhom13.phonemart.model.Product;
+import com.nhom13.phonemart.model.response.ApiResponse;
+import com.nhom13.phonemart.model.response.JwtResponse;
+import com.nhom13.phonemart.util.DialogUtils;
 import com.nhom13.phonemart.util.FragmentUtils;
 
+import java.lang.reflect.Type;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -45,19 +64,18 @@ public class HomePageFragment extends Fragment implements RecyclerViewInterface,
 
     private TextView userNameTv, viewAllTv;
     private EditText searchStr;
-    private List<Category> categoryList;
-    private List<Product> productList;
+    private List<CategoryDto> categoryList;
+    private List<ProductDto> productList;
     private CategoryAdapter categoryAdapter;
 
     private PopularProductAdapter popularProductAdapter;
     private RecyclerView rvCategories, rvProducts;
     private ViewFlipper viewFlipper;
-
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-
-    // TODO: Rename and change types of parameters
     private UserDto loginUser;
+
+    private CategoryAPI categoryAPI;
+
+    private ProductAPI productAPI;
 
     public HomePageFragment() {
         // Required empty public constructor
@@ -96,7 +114,6 @@ public class HomePageFragment extends Fragment implements RecyclerViewInterface,
 
         getAllCategories();
         getPopularProducts();
-        setAdapters();
 
         cartImg.setOnClickListener(this);
         searchStr.setOnEditorActionListener(this);
@@ -149,33 +166,93 @@ public class HomePageFragment extends Fragment implements RecyclerViewInterface,
 
     private void getAllCategories(){
         categoryList = new ArrayList<>();
+        categoryAPI = RetrofitClient.getClient().create(CategoryAPI.class);
+        categoryAPI.getAllCategories().enqueue(new Callback<ApiResponse>() {
+            @Override
+            public void onResponse(@NonNull Call<ApiResponse> call, @NonNull Response<ApiResponse> response) {
+                if (response.isSuccessful()){
+
+                    Gson gson = new Gson();
+                    String json = gson.toJson(response.body().getData());
+                    Type listType = new TypeToken<List<CategoryDto>>(){}.getType();
+                    categoryList = gson.fromJson(json, listType);
+
+
+                    for (CategoryDto category : categoryList) {
+                        if (category.getImage() != null){
+                            Log.d("Imagehere","Image: "+ category.getImage().getId());
+                        }
+                        Log.d("Category", "ID: " + category.getId() + ", Name: " + category.getName());
+                    }
+
+                    categoryAdapter = new CategoryAdapter(getContext(), categoryList, HomePageFragment.this);
+                    rvCategories.setAdapter(categoryAdapter);
+                    LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
+                    rvCategories.setLayoutManager(linearLayoutManager);
+                }
+                else{
+                    DialogUtils.ShowDialog(getContext(), R.layout.error_dialog,"Thất bại", "Không thể load danh mục");
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<ApiResponse> call, @NonNull Throwable throwable) {
+                Log.e("ApiError", throwable.getMessage());
+            }
+        });
 
     }
 
     private void getPopularProducts(){
         productList = new ArrayList<>();
+        productAPI = RetrofitClient.getClient().create(ProductAPI.class);
+        productAPI.getAllProducts().enqueue(new Callback<ApiResponse>() {
+            @Override
+            public void onResponse(@NonNull Call<ApiResponse> call, @NonNull Response<ApiResponse> response) {
+                if (response.isSuccessful()){
 
-    }
+                    Gson gson = new Gson();
+                    String json = gson.toJson(response.body().getData());
+                    Type listType = new TypeToken<List<ProductDto>>(){}.getType();
+                    productList = gson.fromJson(json, listType);
 
-    private void setAdapters(){
-        categoryAdapter = new CategoryAdapter(getContext(), categoryList);
-        rvCategories.setAdapter(categoryAdapter);
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
-        rvCategories.setLayoutManager(linearLayoutManager);
+                    popularProductAdapter = new PopularProductAdapter(getContext(), productList, HomePageFragment.this);
+                    rvProducts.setAdapter(popularProductAdapter);
+                    LinearLayoutManager linearLayoutManager2 = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
+                    rvProducts.setLayoutManager(linearLayoutManager2);
+                }
+                else{
+                    DialogUtils.ShowDialog(getContext(), R.layout.error_dialog,"Thất bại", "Không thể load sản phẩm");
+                }
+            }
 
-        popularProductAdapter = new PopularProductAdapter(getContext(), productList, this);
-        rvProducts.setAdapter(popularProductAdapter);
-        LinearLayoutManager linearLayoutManager2 = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
-        rvProducts.setLayoutManager(linearLayoutManager2);
+            @Override
+            public void onFailure(@NonNull Call<ApiResponse> call, @NonNull Throwable throwable) {
+                Log.e("ApiError", throwable.getMessage());
+
+            }
+        });
+
 
 
     }
 
 
     @Override
-    public void onItemClick(int position) {
+    public void onItemClick(int position, String source) {
         // Note: Tao fragment bang constructor de gan cac thong tin, bay gio chi tam thoi load
-        FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.main_frag_container, new ProductDetailFragment());
+        switch (source) {
+            case "category":
+                CategoryDto selectedCategory = categoryList.get(position);
+                Toast.makeText(getContext(), "Clicked category: " + selectedCategory.getName(), Toast.LENGTH_SHORT).show();
+                break;
+
+            case "product":
+                ProductDto selectedProduct = productList.get(position);
+                Toast.makeText(getContext(), "Clicked product: " + selectedProduct.getName(), Toast.LENGTH_SHORT).show();
+                FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.main_frag_container, new ProductDetailFragment());
+                break;
+        }
     }
 
     @Override
