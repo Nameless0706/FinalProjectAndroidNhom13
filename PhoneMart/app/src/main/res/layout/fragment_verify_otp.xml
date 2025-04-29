@@ -58,7 +58,7 @@
         app:layout_constraintVertical_bias="0.053" />
 
     <TextView
-        android:id="@+id/resendOtp"
+        android:id="@+id/resendOtpTv"
         android:layout_width="350dp"
         android:layout_height="wrap_content"
         android:fontFamily="@font/montserrat_regular"

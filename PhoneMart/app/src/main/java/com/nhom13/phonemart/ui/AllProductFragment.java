@@ -31,14 +31,14 @@ import java.util.List;
  */
 public class AllProductFragment extends Fragment implements RecyclerViewInterface, View.OnClickListener, TabLayout.OnTabSelectedListener{
 
-    ImageView backImg;
+    private ImageView backImg;
 
-    RecyclerView rvProduct;
+    private RecyclerView rvProduct;
 
-    ProductAdapter adapter;
-    TabLayout tabLayout;
+    private ProductAdapter adapter;
+    private TabLayout tabLayout;
 
-    List<Product> productList;
+    private List<Product> productList;
 
     private static final String ARG_PRODUCTS = "PRODUCTS";
     private String currentApiUrl = "api/moi-nhat";

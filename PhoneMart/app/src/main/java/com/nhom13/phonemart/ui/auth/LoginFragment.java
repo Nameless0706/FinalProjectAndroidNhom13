@@ -43,13 +43,13 @@ import retrofit2.Response;
 public class LoginFragment extends Fragment implements View.OnClickListener{
 
 
-    Button loginBtn;
-    TextView signupTv;
-    TextView forgotTv;
+    private Button loginBtn;
+    private TextView signupTv;
+    private TextView forgotTv;
 
-    EditText emailEt, passwordEt;
+    private EditText emailEt, passwordEt;
 
-    AuthAPI authAPI;
+    private AuthAPI authAPI;
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER

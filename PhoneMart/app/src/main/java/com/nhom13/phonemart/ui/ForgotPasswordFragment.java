@@ -39,12 +39,12 @@ import retrofit2.Response;
  */
 public class ForgotPasswordFragment extends Fragment implements View.OnClickListener{
 
-    Button signUpBtn, sendBtn;
-    TextView returnTv;
+    private Button signUpBtn, sendBtn;
+    private TextView returnTv;
 
-    EditText forgotEmailEt;
+    private EditText forgotEmailEt;
 
-    AuthAPI authAPI;
+    private AuthAPI authAPI;
 
     public ForgotPasswordFragment() {
         // Required empty public constructor

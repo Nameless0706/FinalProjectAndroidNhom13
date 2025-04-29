@@ -60,13 +60,14 @@
                 </LinearLayout>
 
                 <de.hdodenhof.circleimageview.CircleImageView
+                    android:id="@+id/userProfileImg"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:src="@drawable/profile" />
 
                 <TextView
-                    android:id="@+id/textView28"
+                    android:id="@+id/profileUsernameTv"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="bottom|center_horizontal"

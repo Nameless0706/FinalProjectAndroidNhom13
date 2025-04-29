@@ -5,7 +5,7 @@ import java.util.List;
 public class User {
     private int id;
     private String email;
-//    private String firstName;
+    private String firstName;
     private String lastName;
     private String otp;
     private String password;
@@ -17,7 +17,7 @@ public class User {
     public User(int id, String email, String firstName, String lastName, String otp, String password, Boolean isVerified, List<Order> orders) {
         this.id = id;
         this.email = email;
-//        this.firstName = firstName;
+        this.firstName = firstName;
         this.lastName = lastName;
         this.otp = otp;
         this.password = password;
@@ -42,13 +42,13 @@ public class User {
         this.email = email;
     }
 
-//    public String getFirstName() {
-//        return firstName;
-//    }
-//
-//    public void setFirstName(String firstName) {
-//        this.firstName = firstName;
-//    }
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
 
     public String getLastName() {
         return lastName;

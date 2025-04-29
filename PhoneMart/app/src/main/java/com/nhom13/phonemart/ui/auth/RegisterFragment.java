@@ -37,11 +37,11 @@ import retrofit2.Response;
 
 public class RegisterFragment extends Fragment implements View.OnClickListener{
 
-    EditText firtNameEt, lastNameEt, emailEt, passwordEt;
-    Button registerBtn;
-    TextView returnTv;
+    private EditText firtNameEt, lastNameEt, emailEt, passwordEt;
+    private Button registerBtn;
+    private TextView returnTv;
 
-    AuthAPI authAPI;
+    private AuthAPI authAPI;
 
 
     public RegisterFragment() {

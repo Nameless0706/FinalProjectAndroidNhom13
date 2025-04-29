@@ -20,9 +20,9 @@ import com.nhom13.phonemart.R;
  */
 public class ProductDetailFragment extends Fragment implements View.OnClickListener{
 
-    ImageView backImg;
+    private ImageView backImg;
 
-    Button addTocartBtn, buyNowBtn;
+    private Button addTocartBtn, buyNowBtn;
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER

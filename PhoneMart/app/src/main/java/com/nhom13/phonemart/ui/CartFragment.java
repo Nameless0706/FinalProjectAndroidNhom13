@@ -28,12 +28,12 @@ import java.util.List;
  */
 public class CartFragment extends Fragment implements View.OnClickListener{
 
-    ImageView backBtn;
-    List<CartItem> cartItems;
+    private ImageView backBtn;
+    private List<CartItem> cartItems;
 
-    CartAdapter adapter;
+    private CartAdapter adapter;
 
-    RecyclerView rvCartItems;
+    private RecyclerView rvCartItems;
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER

@@ -33,6 +33,9 @@ public interface AuthAPI {
     @POST("/api/v1/auth/reset-password")
     Call<ApiResponse> resetPassword(@Query("email") String email, @Query("newPassword") String newPassword, @Query("otp") String otp);
 
+    @POST("/api/v1/auth/resend-otp")
+    Call<ApiResponse> resendOtp(@Query("email") String email);
+
 
 
 

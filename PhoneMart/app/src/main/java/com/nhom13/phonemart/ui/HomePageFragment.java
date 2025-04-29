@@ -41,16 +41,16 @@ import java.util.Objects;
  */
 public class HomePageFragment extends Fragment implements RecyclerViewInterface, View.OnClickListener, TextView.OnEditorActionListener {
 
-    ImageView cartImg;
+    private ImageView cartImg;
 
-    TextView userNameTv, viewAllTv;
-    EditText searchStr;
-    List<Category> categoryList;
-    List<Product> productList;
-    CategoryAdapter categoryAdapter;
+    private TextView userNameTv, viewAllTv;
+    private EditText searchStr;
+    private List<Category> categoryList;
+    private List<Product> productList;
+    private CategoryAdapter categoryAdapter;
 
-    PopularProductAdapter popularProductAdapter;
-    RecyclerView rvCategories, rvProducts;
+    private PopularProductAdapter popularProductAdapter;
+    private RecyclerView rvCategories, rvProducts;
     private ViewFlipper viewFlipper;
 
     // TODO: Rename parameter arguments, choose names that match
@@ -102,11 +102,11 @@ public class HomePageFragment extends Fragment implements RecyclerViewInterface,
         searchStr.setOnEditorActionListener(this);
         viewAllTv.setOnClickListener(this);
 
-        ActionViewFlipperMain();
+        actionViewFlipperMain();
 
     }
     // Hàm Flipper
-    private void ActionViewFlipperMain() {
+    private void actionViewFlipperMain() {
 //        List<String> arrayListFlipper = new ArrayList<>();
 //        arrayListFlipper.add("http://app.iotstar.vn:8081/appfoods/flipper/quangcao.png");
 //        arrayListFlipper.add("http://app.iotstar.vn:8081/appfoods/flipper/coffee.jpg");

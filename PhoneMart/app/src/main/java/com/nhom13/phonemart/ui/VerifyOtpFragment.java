@@ -10,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.chaos.view.PinView;
@@ -36,13 +37,15 @@ import retrofit2.Response;
  * Use the {@link VerifyOtpFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class VerifyOtpFragment extends Fragment {
+public class VerifyOtpFragment extends Fragment implements View.OnClickListener{
 
-    Button confirmBtn;
+    private Button confirmBtn;
 
-    PinView otp;
+    private PinView otp;
 
-    AuthAPI authAPI;
+    private AuthAPI authAPI;
+
+    private TextView resendTv;
 
     private static final String USER_EMAIL = "email";
     private static final String CONTEXT = "context";
@@ -88,22 +91,20 @@ public class VerifyOtpFragment extends Fragment {
         // Initialize your views or setup listeners here
 
         Mapping(view);
-        confirmBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                verify();
-            }
-        });
+        confirmBtn.setOnClickListener(this);
+        resendTv.setOnClickListener(this);
 
     }
 
     private void Mapping(View view){
         confirmBtn = view.findViewById(R.id.verify_confirmBtn);
         otp = view.findViewById(R.id.otpPv);
+        resendTv = view.findViewById(R.id.resendOtpTv);
+        authAPI = RetrofitClient.getClient().create(AuthAPI.class);
+
     }
 
     private void verify(){
-        authAPI = RetrofitClient.getClient().create(AuthAPI.class);
 
         String otp_txt = otp.getText().toString();
 
@@ -115,6 +116,13 @@ public class VerifyOtpFragment extends Fragment {
                     //Hiển thị dialog thành công
                     DialogUtils.ShowDialog(getContext(), R.layout.success_dialog,"Thành công", "Xác thực thành công");
                     Toast.makeText(getContext(), "OTP verified successfully!", Toast.LENGTH_LONG).show();
+
+                    if (context.equals("register")){
+                        FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.main_frag_container, new LoginFragment());
+                    }
+                    else {
+                        FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.main_frag_container, ResetPasswordFragment.newInstance("1",  "2"));
+                    }
 
                 }
 
@@ -139,17 +147,36 @@ public class VerifyOtpFragment extends Fragment {
             }
         });
 
-        if (context.equals("register")){
-            FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.main_frag_container, new LoginFragment());
+
+
+    }
+
+    private void resendOtp(){
+        authAPI.resendOtp(user_email).enqueue(new Callback<ApiResponse>() {
+            @Override
+            public void onResponse(Call<ApiResponse> call, Response<ApiResponse> response) {
+                if (response.isSuccessful()){
+                    DialogUtils.ShowDialog(getContext(), R.layout.success_dialog, "Thành công", "Đã gửi otp thành công");
+                }
+                else{
+                    DialogUtils.ShowDialog(getContext(), R.layout.success_dialog, "Thất bại", "Gửi otp thất bại");
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ApiResponse> call, Throwable throwable) {
+                Log.d("VerifyOtpFragment", "Error: " + throwable.getMessage());
+            }
+        });
+    }
+
+    @Override
+    public void onClick(View view) {
+        if (view.getId() == R.id.verify_confirmBtn){
+            verify();
         }
-        else {
-            FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.main_frag_container, ResetPasswordFragment.newInstance("1",  "2"));
-
+        else if (view.getId() == R.id.resendOtpTv){
+            resendOtp();
         }
-
-
-
-
-
     }
 }
