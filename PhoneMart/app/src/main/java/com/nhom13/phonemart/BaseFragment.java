@@ -75,7 +75,7 @@ public class BaseFragment extends Fragment {
                 selected = HomePageFragment.newInstance(user);
             }
             else {
-                selected = new UserFragment().newInstance(user);
+                selected = UserFragment.newInstance(user);
             }
             FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.base_frag_container, selected);
             return true;
