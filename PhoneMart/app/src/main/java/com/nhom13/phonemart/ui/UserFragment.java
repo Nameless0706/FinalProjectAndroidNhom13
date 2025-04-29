@@ -12,7 +12,9 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.nhom13.phonemart.R;
+import com.nhom13.phonemart.dto.ImageDto;
 import com.nhom13.phonemart.dto.UserDto;
 import com.nhom13.phonemart.util.ImageUtils;
 
@@ -64,12 +66,22 @@ public class UserFragment extends Fragment implements View.OnClickListener{
 
         Mapping(view);
 
+        backImg.setOnClickListener(this);
+
         String name = loginUser.getFirstName() + " " + loginUser.getLastName();
         userNameTv.setText(name);
 
-        ImageUtils.loadImageIntoImageView(getContext(), (long) 2, profileImg);
-        backImg.setOnClickListener(this);
-
+        ImageDto loginUserImageDto = loginUser.getImage();
+        if (loginUserImageDto != null){
+            ImageUtils.loadImageIntoImageView(getContext(), (long) loginUser.getImage().getId(), profileImg);
+            backImg.setOnClickListener(this);
+        }
+        // trường hợp user chưa upload ảnh thì xuất ảnh mặc định
+        else {
+            Glide.with(requireContext())
+                    .load(R.drawable.profile)
+                    .into(profileImg);
+        }
     }
 
     private void Mapping(View view) {

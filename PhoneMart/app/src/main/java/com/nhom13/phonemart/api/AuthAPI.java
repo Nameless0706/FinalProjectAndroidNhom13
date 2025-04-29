@@ -2,6 +2,7 @@ package com.nhom13.phonemart.api;
 
 import com.nhom13.phonemart.model.Category;
 import com.nhom13.phonemart.model.request.CreateUserRequest;
+import com.nhom13.phonemart.model.request.GoogleLoginRequest;
 import com.nhom13.phonemart.model.request.LoginRequest;
 import com.nhom13.phonemart.model.response.ApiResponse;
 import com.nhom13.phonemart.model.response.JwtResponse;
@@ -36,10 +37,6 @@ public interface AuthAPI {
     @POST("/api/v1/auth/resend-otp")
     Call<ApiResponse> resendOtp(@Query("email") String email);
 
-
-
-
-
-
-
+    @POST("/api/v1/auth/login/google")
+    Call<ApiResponse> loginWithGoogle(@Body GoogleLoginRequest request);
 }
