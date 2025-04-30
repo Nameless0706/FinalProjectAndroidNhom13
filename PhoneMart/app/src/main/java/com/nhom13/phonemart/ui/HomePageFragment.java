@@ -28,26 +28,19 @@ import com.nhom13.phonemart.R;
 import com.nhom13.phonemart.adapter.CategoryAdapter;
 import com.nhom13.phonemart.adapter.PopularProductAdapter;
 import com.nhom13.phonemart.adapter.RecyclerViewInterface;
-import com.nhom13.phonemart.api.AuthAPI;
 import com.nhom13.phonemart.api.CategoryAPI;
 import com.nhom13.phonemart.api.ProductAPI;
 import com.nhom13.phonemart.api.RetrofitClient;
 import com.nhom13.phonemart.dto.CategoryDto;
-import com.nhom13.phonemart.dto.ImageDto;
 import com.nhom13.phonemart.dto.ProductDto;
 import com.nhom13.phonemart.dto.UserDto;
-import com.nhom13.phonemart.model.Category;
-import com.nhom13.phonemart.model.Product;
 import com.nhom13.phonemart.model.response.ApiResponse;
-import com.nhom13.phonemart.model.response.JwtResponse;
 import com.nhom13.phonemart.util.DialogUtils;
 import com.nhom13.phonemart.util.FragmentUtils;
 
 import java.lang.reflect.Type;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -155,13 +148,13 @@ public class HomePageFragment extends Fragment implements RecyclerViewInterface,
     }
 
     private void Mapping(View view) {
-        cartImg = (ImageView) view.findViewById(R.id.cartImg);
+        cartImg = (ImageView) view.findViewById(R.id.img_backMapsFragment);
         searchStr = (EditText) view.findViewById(R.id.searchEt);
         rvCategories = (RecyclerView) view.findViewById(R.id.categoryRv);
         rvProducts = (RecyclerView) view.findViewById(R.id.popularProductRv);
         userNameTv = (TextView) view.findViewById(R.id.userNameTv);
         viewAllTv = (TextView) view.findViewById(R.id.viewAllProdTv);
-        viewFlipper = (ViewFlipper) view.findViewById(R.id.viewFlipperMain);
+        viewFlipper = (ViewFlipper) view.findViewById(R.id.viewFlipper_branchesImage);
     }
 
     private void getAllCategories(){
@@ -258,7 +251,7 @@ public class HomePageFragment extends Fragment implements RecyclerViewInterface,
     @Override
     public void onClick(View view) {
         Fragment selected = null;
-        if (view.getId() == R.id.cartImg){
+        if (view.getId() == R.id.img_backMapsFragment){
             selected = new CartFragment();
         }
         else {

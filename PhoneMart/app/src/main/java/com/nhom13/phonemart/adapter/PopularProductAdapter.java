@@ -47,13 +47,13 @@ public class PopularProductAdapter extends RecyclerView.Adapter<PopularProductAd
         holder.productPriceTv.setText(String.valueOf(product.getPrice()));
 
 
-        if (product.getImages() != null) {
-            ImageUtils.loadImageIntoImageView(context, product.getImages().get(0).getId(), holder.productImg);
-
-        } else {
-            // Optionally load a placeholder or fallback image
-            holder.productImg.setImageResource(R.drawable.ic_launcher_background);
-        }
+//        if (product.getImages() != null) {
+//            ImageUtils.loadImageIntoImageView(context, product.getImages().get(0).getId(), holder.productImg);
+//
+//        } else {
+//            // Optionally load a placeholder or fallback image
+//            holder.productImg.setImageResource(R.drawable.ic_launcher_background);
+//        }
 
 
 

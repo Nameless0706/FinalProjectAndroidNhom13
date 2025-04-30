@@ -8,7 +8,6 @@ import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -23,9 +22,9 @@ import com.nhom13.phonemart.util.ImageUtils;
  * Use the {@link UserFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class UserFragment extends Fragment implements View.OnClickListener{
+public class UserFragment extends Fragment {
 
-    private ImageView backImg, profileImg;
+    private ImageView profileImg;
 
     private TextView userNameTv;
 
@@ -34,7 +33,6 @@ public class UserFragment extends Fragment implements View.OnClickListener{
     public UserFragment() {
         // Required empty public constructor
     }
-
 
 
     public static UserFragment newInstance(UserDto userDto) {
@@ -66,15 +64,12 @@ public class UserFragment extends Fragment implements View.OnClickListener{
 
         Mapping(view);
 
-        backImg.setOnClickListener(this);
-
         String name = loginUser.getFirstName() + " " + loginUser.getLastName();
         userNameTv.setText(name);
 
         ImageDto loginUserImageDto = loginUser.getImage();
-        if (loginUserImageDto != null){
+        if (loginUserImageDto != null) {
             ImageUtils.loadImageIntoImageView(getContext(), (long) loginUser.getImage().getId(), profileImg);
-            backImg.setOnClickListener(this);
         }
         // trường hợp user chưa upload ảnh thì xuất ảnh mặc định
         else {
@@ -85,20 +80,7 @@ public class UserFragment extends Fragment implements View.OnClickListener{
     }
 
     private void Mapping(View view) {
-        backImg = (ImageView) view.findViewById(R.id.userProfileBackImg);
         profileImg = (ImageView) view.findViewById(R.id.userProfileImg);
         userNameTv = (TextView) view.findViewById(R.id.profileUsernameTv);
-
-    }
-
-    @Override
-    public void onClick(View view) {
-        if (view.getId() == R.id.userProfileBackImg){
-            requireActivity().getSupportFragmentManager().popBackStack();
-        }
-
-        else{
-
-        }
     }
 }

@@ -31,52 +31,30 @@
 
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
+                    android:layout_height="wrap_content"
                     android:layout_marginLeft="10dp"
                     android:layout_marginRight="10dp"
                     android:background="@drawable/custom_background_gradient"
-                    android:orientation="horizontal"
+                    android:orientation="vertical"
                     android:paddingTop="20dp">
 
-                    <ImageView
-                        android:id="@+id/userProfileBackImg"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="10dp"
-                        android:padding="2dp"
-                        android:src="@drawable/arrow" />
+                    <de.hdodenhof.circleimageview.CircleImageView
+                        android:id="@+id/userProfileImg"
+                        android:layout_width="140dp"
+                        android:layout_height="140dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/profile" />
 
                     <TextView
-                        android:id="@+id/textView15"
+                        android:id="@+id/profileUsernameTv"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginEnd="40dp"
-                        android:layout_weight="1"
-                        android:gravity="center"
-                        android:text="Profile"
-                        android:textColor="#90371B"
-                        android:textSize="25sp"
-                        android:textStyle="bold" />
-
-
+                        android:layout_gravity="bottom|center_horizontal"
+                        android:layout_marginBottom="15dp"
+                        android:text="Username"
+                        android:textColor="@color/white"
+                        android:textSize="25sp" />
                 </LinearLayout>
-
-                <de.hdodenhof.circleimageview.CircleImageView
-                    android:id="@+id/userProfileImg"
-                    android:layout_width="140dp"
-                    android:layout_height="140dp"
-                    android:layout_gravity="center"
-                    android:src="@drawable/profile" />
-
-                <TextView
-                    android:id="@+id/profileUsernameTv"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="bottom|center_horizontal"
-                    android:layout_marginBottom="15dp"
-                    android:text="Username"
-                    android:textColor="@color/white"
-                    android:textSize="25sp" />
 
             </androidx.cardview.widget.CardView>
 
