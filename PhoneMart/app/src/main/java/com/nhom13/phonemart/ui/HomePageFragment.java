@@ -154,7 +154,7 @@ public class HomePageFragment extends Fragment implements RecyclerViewInterface,
         rvProducts = (RecyclerView) view.findViewById(R.id.popularProductRv);
         userNameTv = (TextView) view.findViewById(R.id.userNameTv);
         viewAllTv = (TextView) view.findViewById(R.id.viewAllProdTv);
-        viewFlipper = (ViewFlipper) view.findViewById(R.id.viewFlipper_branchesImage);
+        viewFlipper = (ViewFlipper) view.findViewById(R.id.viewFlipper_productImage);
     }
 
     private void getAllCategories(){
@@ -222,12 +222,8 @@ public class HomePageFragment extends Fragment implements RecyclerViewInterface,
             @Override
             public void onFailure(@NonNull Call<ApiResponse> call, @NonNull Throwable throwable) {
                 Log.e("ApiError", throwable.getMessage());
-
             }
         });
-
-
-
     }
 
 
@@ -242,8 +238,7 @@ public class HomePageFragment extends Fragment implements RecyclerViewInterface,
 
             case "product":
                 ProductDto selectedProduct = productList.get(position);
-                Toast.makeText(getContext(), "Clicked product: " + selectedProduct.getName(), Toast.LENGTH_SHORT).show();
-                FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.main_frag_container, new ProductDetailFragment());
+                FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.main_frag_container, ProductDetailFragment.newInstance(selectedProduct));
                 break;
         }
     }

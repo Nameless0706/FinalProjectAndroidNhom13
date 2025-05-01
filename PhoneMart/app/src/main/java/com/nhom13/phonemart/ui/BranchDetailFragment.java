@@ -130,7 +130,7 @@ public class BranchDetailFragment extends Fragment {
     private void mappingUi(View view) {
         img_backMapsFragment = view.findViewById(R.id.img_backMapsFragment);
         button_status = view.findViewById(R.id.button_status);
-        viewFlipper_branchesImage = view.findViewById(R.id.viewFlipper_branchesImage);
+        viewFlipper_branchesImage = view.findViewById(R.id.viewFlipper_productImage);
         textView_branchName = view.findViewById(R.id.textView_branchName);
         textView_address = view.findViewById(R.id.textView_address);
         textView_introduce = view.findViewById(R.id.textView_introduce);
