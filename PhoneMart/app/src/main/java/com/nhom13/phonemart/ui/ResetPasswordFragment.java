@@ -32,9 +32,6 @@ import retrofit2.Response;
  */
 public class ResetPasswordFragment extends Fragment implements View.OnClickListener{
     private static final String USER_EMAIL = "email";
-
-    private static final String OTP = "";
-
     private String user_email, otp;
 
     private EditText newPasswordEt, confirmPasswordEt;
@@ -49,11 +46,10 @@ public class ResetPasswordFragment extends Fragment implements View.OnClickListe
         // Required empty public constructor
     }
 
-    public static ResetPasswordFragment newInstance(String email, String otp) {
+    public static ResetPasswordFragment newInstance(String email) {
         ResetPasswordFragment fragment = new ResetPasswordFragment();
         Bundle args = new Bundle();
         args.putString(USER_EMAIL, email);
-        args.putString(OTP, otp);
         fragment.setArguments(args);
         return fragment;
     }
@@ -63,7 +59,6 @@ public class ResetPasswordFragment extends Fragment implements View.OnClickListe
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             user_email = getArguments().getString(USER_EMAIL);
-            otp = getArguments().getString(OTP);
         }
     }
 
@@ -99,7 +94,7 @@ public class ResetPasswordFragment extends Fragment implements View.OnClickListe
         }
 
         authAPI = RetrofitClient.getClient().create(AuthAPI.class);
-        authAPI.resetPassword(user_email, newPassword, otp).enqueue(new Callback<ApiResponse>() {
+        authAPI.resetPassword(user_email, newPassword).enqueue(new Callback<ApiResponse>() {
             @Override
             public void onResponse(@NonNull Call<ApiResponse> call, @NonNull Response<ApiResponse> response) {
                 if (response.isSuccessful()){

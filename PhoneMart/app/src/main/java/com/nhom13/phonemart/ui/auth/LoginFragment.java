@@ -207,7 +207,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
                     String json = gson.toJson(response.body().getData());
                     JwtResponse jwt = gson.fromJson(json, JwtResponse.class);
 
-                    rdirectAfterLoginSuccess(jwt);
+                    redirectAfterLoginSuccess(jwt);
                 } else {
                     DialogUtils.ShowDialog(getContext(), R.layout.error_dialog, "Thất bại", "Đăng nhập thất bại");
                 }
@@ -238,7 +238,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
                     JwtResponse jwt = gson.fromJson(json, JwtResponse.class);
 
 
-                    rdirectAfterLoginSuccess(jwt);
+                    redirectAfterLoginSuccess(jwt);
                 } else {
                     DialogUtils.ShowDialog(getContext(), R.layout.error_dialog, "Thất bại", "Sai email hoặc mật khẩu");
                 }
@@ -251,7 +251,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
         });
     }
 
-    private void rdirectAfterLoginSuccess(JwtResponse jwt) {
+    private void redirectAfterLoginSuccess(JwtResponse jwt) {
         UserDto loginUser = jwt.getUser();
         String accessToken = jwt.getAccessToken();
         String refreshToken = jwt.getRefreshToken();

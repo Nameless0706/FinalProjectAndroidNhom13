@@ -32,7 +32,7 @@ public interface AuthAPI {
     Call<ApiResponse> forgotPassword(@Query("email") String email);
 
     @POST("auth/reset-password")
-    Call<ApiResponse> resetPassword(@Query("email") String email, @Query("newPassword") String newPassword, @Query("otp") String otp);
+    Call<ApiResponse> resetPassword(@Query("email") String email, @Query("newPassword") String newPassword);
 
     @POST("auth/resend-otp")
     Call<ApiResponse> resendOtp(@Query("email") String email);

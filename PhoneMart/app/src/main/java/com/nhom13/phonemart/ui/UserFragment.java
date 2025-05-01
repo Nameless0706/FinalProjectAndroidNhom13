@@ -8,7 +8,6 @@ import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -16,6 +15,7 @@ import com.bumptech.glide.Glide;
 import com.nhom13.phonemart.R;
 import com.nhom13.phonemart.dto.ImageDto;
 import com.nhom13.phonemart.dto.UserDto;
+import com.nhom13.phonemart.util.FragmentUtils;
 import com.nhom13.phonemart.util.ImageUtils;
 
 /**
@@ -25,11 +25,12 @@ import com.nhom13.phonemart.util.ImageUtils;
  */
 public class UserFragment extends Fragment implements View.OnClickListener{
 
-    private ImageView backImg, profileImg;
+    private ImageView backImg, profileImg, editUserDetailImg, editUserPasswordImg;
 
     private TextView userNameTv;
 
     private UserDto loginUser;
+
 
     public UserFragment() {
         // Required empty public constructor
@@ -67,6 +68,8 @@ public class UserFragment extends Fragment implements View.OnClickListener{
         Mapping(view);
 
         backImg.setOnClickListener(this);
+        editUserDetailImg.setOnClickListener(this);
+        editUserPasswordImg.setOnClickListener(this);
 
         String name = loginUser.getFirstName() + " " + loginUser.getLastName();
         userNameTv.setText(name);
@@ -87,6 +90,8 @@ public class UserFragment extends Fragment implements View.OnClickListener{
     private void Mapping(View view) {
         backImg = (ImageView) view.findViewById(R.id.userProfileBackImg);
         profileImg = (ImageView) view.findViewById(R.id.userProfileImg);
+        editUserDetailImg = (ImageView) view.findViewById(R.id.editUserDetailImg);
+        editUserPasswordImg = (ImageView) view.findViewById(R.id.editUserPasswordImg);
         userNameTv = (TextView) view.findViewById(R.id.profileUsernameTv);
 
     }
@@ -95,6 +100,10 @@ public class UserFragment extends Fragment implements View.OnClickListener{
     public void onClick(View view) {
         if (view.getId() == R.id.userProfileBackImg){
             requireActivity().getSupportFragmentManager().popBackStack();
+        }
+
+        else if (view.getId() == R.id.editUserDetailImg){
+            FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.main_frag_container, new UserDetailFragment());
         }
 
         else{

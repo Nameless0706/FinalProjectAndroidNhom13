@@ -121,8 +121,7 @@ public class VerifyOtpFragment extends Fragment implements View.OnClickListener{
                         FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.main_frag_container, new LoginFragment());
                     }
                     else {
-                        resendOtp("confirm_Btn");
-                        FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.main_frag_container, ResetPasswordFragment.newInstance(user_email, otp_txt));
+                        FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.main_frag_container, ResetPasswordFragment.newInstance(user_email));
                     }
 
                 }
@@ -152,14 +151,12 @@ public class VerifyOtpFragment extends Fragment implements View.OnClickListener{
 
     }
 
-    private void resendOtp(String from){
+    private void resendOtp(){
         authAPI.resendOtp(user_email).enqueue(new Callback<ApiResponse>() {
             @Override
             public void onResponse(Call<ApiResponse> call, Response<ApiResponse> response) {
                 if (response.isSuccessful()){
-                    if (from.equals("resend_Tv")){
-                        DialogUtils.ShowDialog(getContext(), R.layout.success_dialog, "Thành công", "Đã gửi otp thành công");
-                    }
+                    DialogUtils.ShowDialog(getContext(), R.layout.success_dialog, "Thành công", "Đã gửi otp thành công");
                 }
                 else{
                     DialogUtils.ShowDialog(getContext(), R.layout.success_dialog, "Thất bại", "Gửi otp thất bại");
@@ -179,7 +176,7 @@ public class VerifyOtpFragment extends Fragment implements View.OnClickListener{
             verify();
         }
         else if (view.getId() == R.id.resendOtpTv){
-            resendOtp("resend_Tv");
+            resendOtp();
         }
     }
 }
