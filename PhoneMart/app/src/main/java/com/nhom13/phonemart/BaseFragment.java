@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.nhom13.phonemart.dto.UserDto;
 import com.nhom13.phonemart.ui.HomePageFragment;
+import com.nhom13.phonemart.ui.MapsFragment;
 import com.nhom13.phonemart.ui.UserFragment;
 import com.nhom13.phonemart.util.FragmentUtils;
 
@@ -69,7 +70,7 @@ public class BaseFragment extends Fragment {
             if (idItem == R.id.home)
                 selected = HomePageFragment.newInstance(user);
             else if (idItem == R.id.map) {
-                selected = HomePageFragment.newInstance(user);
+                selected = new MapsFragment();
             }
             else if (idItem == R.id.favorite) {
                 selected = HomePageFragment.newInstance(user);

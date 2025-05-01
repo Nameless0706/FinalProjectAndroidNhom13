@@ -16,11 +16,9 @@ import com.nhom13.phonemart.model.CartItem;
 
 import java.util.List;
 
-public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder>{
+public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder> {
     private Context context;
     private List<CartItem> cartItems;
-
-
 
     public CartAdapter(Context context, List<CartItem> cartItems) {
         this.context = context;
@@ -40,12 +38,10 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
         holder.cartItemNameTv.setText(item.getProduct().getName());
         holder.cartItemPriceTv.setText(String.valueOf(item.getProduct().getPrice()));
 
-
         Glide.with(context)
                 .load(item.getProduct().getImages())
                 .error(R.drawable.ic_launcher_background)
                 .into(holder.cartItemImg);
-
 
     }
 
@@ -54,14 +50,10 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
         return cartItems.size();
     }
 
-    public static class CartViewHolder extends RecyclerView.ViewHolder{
+    public static class CartViewHolder extends RecyclerView.ViewHolder {
         TextView cartItemNameTv, cartItemPriceTv, cartItemQuantity;
 
         ImageView cartItemImg;
-
-
-
-
 
         public CartViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -71,7 +63,6 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
             cartItemQuantity = itemView.findViewById(R.id.itemQuantityTv);
 
         }
-
 
     }
 }

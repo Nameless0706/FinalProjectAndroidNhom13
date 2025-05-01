@@ -140,7 +140,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
         emailEt = view.findViewById(R.id.loginEmailEt);
         passwordEt = view.findViewById(R.id.loginPasswordEt);
         loginBtn = view.findViewById(R.id.loginBtn);
-        button_loginGoogle = view.findViewById(R.id.button_loginGoogle);
+        button_loginGoogle = view.findViewById(R.id.button_addToCart);
         signupTv = view.findViewById(R.id.signUpTv);
         forgotTv = view.findViewById(R.id.forgotPasswordTv);
     }
@@ -152,7 +152,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
         if (view.getId() == R.id.loginBtn) {
             login();
             return;
-        } else if (view.getId() == R.id.button_loginGoogle) {
+        } else if (view.getId() == R.id.button_addToCart) {
             loginWithGoogle();
             return;
         } else if (view.getId() == R.id.signUpTv) {
