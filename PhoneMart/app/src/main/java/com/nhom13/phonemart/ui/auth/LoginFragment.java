@@ -180,8 +180,6 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 
                 // Lấy ID Token gửi lên server để xác thực
                 String idToken = account.getIdToken();
-                String email = account.getEmail();
-                String name = account.getDisplayName();
 
                 // TODO: Gửi idToken lên server để xác thực người dùng
                 sendTokenToBackend(idToken);
@@ -256,6 +254,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
         String accessToken = jwt.getAccessToken();
         String refreshToken = jwt.getRefreshToken();
 
+        Log.d("accessToken", "rdirectAfterLoginSuccess: " + accessToken);
 
         SharedPreferences prefs = requireContext().getSharedPreferences("auth", Context.MODE_PRIVATE);
         prefs.edit()

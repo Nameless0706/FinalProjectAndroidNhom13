@@ -48,26 +48,28 @@
         android:text="0$"
         android:textColor="#D54343"
         android:textSize="16sp"
-        app:layout_constraintBottom_toBottomOf="@+id/view5"
-        app:layout_constraintStart_toStartOf="@+id/cartItemNameTv" />
+        app:layout_constraintStart_toStartOf="@+id/cartItemNameTv"
+        app:layout_constraintTop_toBottomOf="@+id/cartItemNameTv" />
 
     <TextView
         android:id="@+id/totalCartItemPriceTv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="4dp"
         android:text="0$"
-        android:textColor="#D54343"
+        android:textColor="#4CAF50"
         android:textSize="16sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/cartItemNameTv" />
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@+id/view5"
+        app:layout_constraintStart_toStartOf="@+id/itemPriceTv"
+        app:layout_constraintTop_toBottomOf="@+id/itemPriceTv" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constraintLayout"
         android:layout_width="100dp"
         android:layout_height="50dp"
-        android:layout_marginEnd="16dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintBottom_toBottomOf="@+id/totalCartItemPriceTv"
+        app:layout_constraintEnd_toEndOf="@+id/imageView_deleteCartItem"
+        app:layout_constraintTop_toBottomOf="@+id/itemPriceTv">
 
         <TextView
             android:id="@+id/addBtn"
@@ -105,5 +107,18 @@
             app:layout_constraintEnd_toStartOf="@+id/addBtn"
             app:layout_constraintTop_toTopOf="@+id/addBtn"
             app:layout_constraintVertical_bias="0.0" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <ImageView
+        android:id="@+id/imageView_deleteCartItem"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        app:layout_constraintBottom_toBottomOf="@+id/cartItemNameTv"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/cartItemNameTv"
+        app:layout_constraintVertical_bias="0.0"
+        app:srcCompat="@drawable/baseline_close_24" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

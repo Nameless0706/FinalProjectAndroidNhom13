@@ -39,4 +39,7 @@ public interface AuthAPI {
 
     @POST("/api/v1/auth/login/google")
     Call<ApiResponse> loginWithGoogle(@Body GoogleLoginRequest request);
+
+    @POST("auth/refresh-token")
+    Call<ApiResponse> createNewAccessToken(@Query("reft") String refreshToken);
 }

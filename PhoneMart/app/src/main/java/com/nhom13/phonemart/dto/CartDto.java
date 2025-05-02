@@ -48,4 +48,16 @@ public class CartDto implements Parcelable {
 			parcel.writeLong(id);
 		}
 	}
+
+	public Long getId() {
+		return id;
+	}
+
+	public BigDecimal getTotalAmount() {
+		return totalAmount;
+	}
+
+	public Set<CartItemDto> getCartItems() {
+		return cartItems;
+	}
 }
