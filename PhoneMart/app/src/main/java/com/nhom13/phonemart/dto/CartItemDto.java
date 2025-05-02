@@ -5,10 +5,11 @@ import android.os.Parcelable;
 
 import androidx.annotation.NonNull;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 
 
-public class CartItemDto implements Parcelable {
+public class CartItemDto implements Serializable {
 	private Long id;
 	private int quantity;
 	private BigDecimal unitPrice;
@@ -23,26 +24,6 @@ public class CartItemDto implements Parcelable {
 		this.product = product;
 	}
 
-	protected CartItemDto(Parcel in) {
-		if (in.readByte() == 0) {
-			id = null;
-		} else {
-			id = in.readLong();
-		}
-		quantity = in.readInt();
-	}
-
-	public static final Creator<CartItemDto> CREATOR = new Creator<CartItemDto>() {
-		@Override
-		public CartItemDto createFromParcel(Parcel in) {
-			return new CartItemDto(in);
-		}
-
-		@Override
-		public CartItemDto[] newArray(int size) {
-			return new CartItemDto[size];
-		}
-	};
 
 	public Long getId() {
 		return id;
@@ -84,19 +65,5 @@ public class CartItemDto implements Parcelable {
 		this.product = product;
 	}
 
-	@Override
-	public int describeContents() {
-		return 0;
-	}
 
-	@Override
-	public void writeToParcel(@NonNull Parcel parcel, int i) {
-		if (id == null) {
-			parcel.writeByte((byte) 0);
-		} else {
-			parcel.writeByte((byte) 1);
-			parcel.writeLong(id);
-		}
-		parcel.writeInt(quantity);
-	}
 }

@@ -5,6 +5,7 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,6 +24,8 @@ import com.nhom13.phonemart.util.FragmentUtils;
  */
 public class BaseFragment extends Fragment {
 
+    private static final String LOGIN_USER = "login_user";
+
     BottomNavigationView navigationView;
 
     private UserDto user;
@@ -35,7 +38,7 @@ public class BaseFragment extends Fragment {
     public static BaseFragment newInstance(UserDto user) {
         BaseFragment fragment = new BaseFragment();
         Bundle args = new Bundle();
-        args.putParcelable("login_user", user);
+        args.putSerializable(LOGIN_USER, user);
         fragment.setArguments(args);
         return fragment;
     }
@@ -44,7 +47,7 @@ public class BaseFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            user = getArguments().getParcelable("login_user");
+            user = (UserDto) getArguments().getSerializable(LOGIN_USER);
         }
     }
 

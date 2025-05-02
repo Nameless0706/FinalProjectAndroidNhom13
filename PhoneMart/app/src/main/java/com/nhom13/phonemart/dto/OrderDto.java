@@ -7,13 +7,14 @@ import androidx.annotation.NonNull;
 
 import com.nhom13.phonemart.enums.OrderStatus;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Set;
 
 
 
-public class OrderDto implements Parcelable {
+public class OrderDto implements Serializable {
 	private Long id;
 	private LocalDate orderDate;
 	private OrderStatus orderStatus;
@@ -28,25 +29,6 @@ public class OrderDto implements Parcelable {
 		this.orderItems = orderItems;
 	}
 
-	protected OrderDto(Parcel in) {
-		if (in.readByte() == 0) {
-			id = null;
-		} else {
-			id = in.readLong();
-		}
-	}
-
-	public static final Creator<OrderDto> CREATOR = new Creator<OrderDto>() {
-		@Override
-		public OrderDto createFromParcel(Parcel in) {
-			return new OrderDto(in);
-		}
-
-		@Override
-		public OrderDto[] newArray(int size) {
-			return new OrderDto[size];
-		}
-	};
 
 	public Long getId() {
 		return id;
@@ -88,18 +70,5 @@ public class OrderDto implements Parcelable {
 		this.orderItems = orderItems;
 	}
 
-	@Override
-	public int describeContents() {
-		return 0;
-	}
 
-	@Override
-	public void writeToParcel(@NonNull Parcel parcel, int i) {
-		if (id == null) {
-			parcel.writeByte((byte) 0);
-		} else {
-			parcel.writeByte((byte) 1);
-			parcel.writeLong(id);
-		}
-	}
 }

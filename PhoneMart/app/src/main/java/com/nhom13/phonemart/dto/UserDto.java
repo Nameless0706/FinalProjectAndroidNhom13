@@ -5,9 +5,10 @@ import android.os.Parcelable;
 
 import androidx.annotation.NonNull;
 
+import java.io.Serializable;
 import java.util.Set;
 
-public class UserDto implements Parcelable {
+public class UserDto implements Serializable {
     private Long id;
     private String firstName;
     private String lastName;
@@ -26,31 +27,6 @@ public class UserDto implements Parcelable {
         this.orders = orders;
     }
 
-
-    protected UserDto(Parcel in) {
-        if (in.readByte() == 0) {
-            id = null;
-        } else {
-            id = in.readLong();
-        }
-        firstName = in.readString();
-        lastName = in.readString();
-        email = in.readString();
-        image = in.readParcelable(ImageDto.class.getClassLoader());
-        cart = in.readParcelable(CartDto.class.getClassLoader());
-    }
-
-    public static final Creator<UserDto> CREATOR = new Creator<UserDto>() {
-        @Override
-        public UserDto createFromParcel(Parcel in) {
-            return new UserDto(in);
-        }
-
-        @Override
-        public UserDto[] newArray(int size) {
-            return new UserDto[size];
-        }
-    };
 
     public Long getId() {
         return id;
@@ -109,23 +85,4 @@ public class UserDto implements Parcelable {
     }
 
 
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(@NonNull Parcel parcel, int i) {
-        if (id == null) {
-            parcel.writeByte((byte) 0);
-        } else {
-            parcel.writeByte((byte) 1);
-            parcel.writeLong(id);
-        }
-        parcel.writeString(firstName);
-        parcel.writeString(lastName);
-        parcel.writeString(email);
-        parcel.writeParcelable(image, i);
-        parcel.writeParcelable(cart, i);
-    }
 }

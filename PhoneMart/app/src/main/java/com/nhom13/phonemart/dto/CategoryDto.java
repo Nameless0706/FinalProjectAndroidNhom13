@@ -1,6 +1,8 @@
 package com.nhom13.phonemart.dto;
 
-public class CategoryDto{
+import java.io.Serializable;
+
+public class CategoryDto implements Serializable {
 	private Long id;
 	private String name;
 	private ImageDto image;

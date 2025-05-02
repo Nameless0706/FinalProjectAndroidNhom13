@@ -36,6 +36,7 @@ import java.util.Locale;
  */
 public class BranchDetailFragment extends Fragment {
 
+    private static final String BRANCH_DTO = "branch_dto";
     private BranchDto branchDto;
 
     private ImageView img_backMapsFragment;
@@ -50,7 +51,7 @@ public class BranchDetailFragment extends Fragment {
     public static BranchDetailFragment newInstance(BranchDto branchDto) {
         BranchDetailFragment fragment = new BranchDetailFragment();
         Bundle args = new Bundle();
-        args.putSerializable("branchDto", branchDto);
+        args.putSerializable(BRANCH_DTO, branchDto);
         fragment.setArguments(args);
         return fragment;
     }
@@ -61,7 +62,7 @@ public class BranchDetailFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         if (getArguments() != null) {
-            branchDto = (BranchDto) getArguments().getSerializable("branchDto");
+            branchDto = (BranchDto) getArguments().getSerializable(BRANCH_DTO);
         }
     }
 

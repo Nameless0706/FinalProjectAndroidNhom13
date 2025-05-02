@@ -1,5 +1,6 @@
 package com.nhom13.phonemart.ui;
 
+import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -140,4 +141,6 @@ public class AllProductFragment extends Fragment implements RecyclerViewInterfac
     public void onItemClick(int position, String source) {
         FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.main_frag_container, new ProductDetailFragment());
     }
+
+
 }

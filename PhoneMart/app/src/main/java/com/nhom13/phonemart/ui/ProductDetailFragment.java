@@ -29,6 +29,7 @@ import java.util.Random;
  */
 public class ProductDetailFragment extends Fragment implements View.OnClickListener{
 
+    private static final String PRODUCT_DTO = "product_dto";
     private ProductDto productDto;
     private ImageView imageView_back, imageView_favourite;
     private ViewFlipper viewFlipper_productImage;
@@ -40,7 +41,7 @@ public class ProductDetailFragment extends Fragment implements View.OnClickListe
     public static ProductDetailFragment newInstance(ProductDto productDto) {
         ProductDetailFragment fragment = new ProductDetailFragment();
         Bundle args = new Bundle();
-        args.putParcelable("productDto", productDto);
+        args.putSerializable(PRODUCT_DTO, productDto);
         fragment.setArguments(args);
         return fragment;
     }
@@ -49,7 +50,7 @@ public class ProductDetailFragment extends Fragment implements View.OnClickListe
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            productDto = getArguments().getParcelable("productDto");
+            productDto = (ProductDto) getArguments().getSerializable(PRODUCT_DTO);
         }
     }
 

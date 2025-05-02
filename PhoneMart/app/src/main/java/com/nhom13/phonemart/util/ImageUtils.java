@@ -8,9 +8,12 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 
 import com.bumptech.glide.Glide;
+import com.nhom13.phonemart.R;
 import com.nhom13.phonemart.api.AuthAPI;
 import com.nhom13.phonemart.api.ImageAPI;
 import com.nhom13.phonemart.api.RetrofitClient;
+import com.nhom13.phonemart.dto.ImageDto;
+import com.nhom13.phonemart.dto.UserDto;
 
 import java.io.IOException;
 
@@ -35,7 +38,10 @@ public class ImageUtils {
                         throw new RuntimeException(e);
                     }
                 } else {
-                    Toast.makeText(context, "Failed to load image", Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(context, "Failed to load image", Toast.LENGTH_SHORT).show();
+                    Glide.with(context)
+                            .load(R.drawable.profile)
+                            .into(imageView);
                 }
             }
 
@@ -44,6 +50,20 @@ public class ImageUtils {
                 Toast.makeText(context, "Network error", Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    public static void loadUserImage(Context context,UserDto loginUser, ImageView profileImg){
+        ImageDto loginUserImageDto = loginUser.getImage();
+
+        if (loginUserImageDto != null){
+            ImageUtils.loadImageIntoImageView(context, (long) loginUser.getImage().getId(), profileImg);
+        }
+        // trường hợp user chưa upload ảnh thì xuất ảnh mặc định
+        else {
+            Glide.with(context)
+                    .load(R.drawable.profile)
+                    .into(profileImg);
+        }
     }
     private static void logByteArray(byte[] bytes) {
         if (bytes != null) {
@@ -56,5 +76,7 @@ public class ImageUtils {
             android.util.Log.d("ImageBytes", "Byte array is null");
         }
     }
+
+
 
 }

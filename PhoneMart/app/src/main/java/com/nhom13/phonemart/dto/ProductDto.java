@@ -5,12 +5,13 @@ import android.os.Parcelable;
 
 import androidx.annotation.NonNull;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.List;
 
 
 
-public class ProductDto implements Parcelable {
+public class ProductDto implements Serializable {
 	private Long id;
 	private String name;
 	private String brand;
@@ -30,31 +31,6 @@ public class ProductDto implements Parcelable {
 		this.category = category;
 		this.images = images;
 	}
-
-	protected ProductDto(Parcel in) {
-		if (in.readByte() == 0) {
-			id = null;
-		} else {
-			id = in.readLong();
-		}
-		name = in.readString();
-		brand = in.readString();
-		inventory = in.readInt();
-		description = in.readString();
-		images = in.createTypedArrayList(ImageDto.CREATOR);
-	}
-
-	public static final Creator<ProductDto> CREATOR = new Creator<ProductDto>() {
-		@Override
-		public ProductDto createFromParcel(Parcel in) {
-			return new ProductDto(in);
-		}
-
-		@Override
-		public ProductDto[] newArray(int size) {
-			return new ProductDto[size];
-		}
-	};
 
 	public Long getId() {
 		return id;
@@ -120,23 +96,4 @@ public class ProductDto implements Parcelable {
 		this.images = images;
 	}
 
-	@Override
-	public int describeContents() {
-		return 0;
-	}
-
-	@Override
-	public void writeToParcel(@NonNull Parcel parcel, int i) {
-		if (id == null) {
-			parcel.writeByte((byte) 0);
-		} else {
-			parcel.writeByte((byte) 1);
-			parcel.writeLong(id);
-		}
-		parcel.writeString(name);
-		parcel.writeString(brand);
-		parcel.writeInt(inventory);
-		parcel.writeString(description);
-		parcel.writeTypedList(images);
-	}
 }

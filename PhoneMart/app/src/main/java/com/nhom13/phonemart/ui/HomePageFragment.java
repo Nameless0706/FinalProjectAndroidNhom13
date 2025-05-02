@@ -53,6 +53,7 @@ import retrofit2.Response;
  */
 public class HomePageFragment extends Fragment implements RecyclerViewInterface, View.OnClickListener, TextView.OnEditorActionListener {
 
+    private static final String LOGIN_USER = "login_user";
     private ImageView cartImg;
 
     private TextView userNameTv, viewAllTv;
@@ -77,7 +78,7 @@ public class HomePageFragment extends Fragment implements RecyclerViewInterface,
     public static HomePageFragment newInstance(UserDto userDto) {
         HomePageFragment fragment = new HomePageFragment();
         Bundle args = new Bundle();
-        args.putParcelable("login_user", userDto);
+        args.putSerializable(LOGIN_USER, userDto);
         fragment.setArguments(args);
         return fragment;
     }
@@ -86,7 +87,7 @@ public class HomePageFragment extends Fragment implements RecyclerViewInterface,
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            loginUser = getArguments().getParcelable("login_user");
+            loginUser = (UserDto) getArguments().getSerializable(LOGIN_USER);
         }
     }
 

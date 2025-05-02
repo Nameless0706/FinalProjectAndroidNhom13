@@ -1,10 +1,15 @@
 package com.nhom13.phonemart.ui;
 
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentResultListener;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,7 +30,9 @@ import com.nhom13.phonemart.util.ImageUtils;
  */
 public class UserFragment extends Fragment implements View.OnClickListener{
 
-    private ImageView backImg, profileImg, editUserDetailImg, editUserPasswordImg;
+    private static final String LOGIN_USER = "login_user";
+
+    private ImageView profileImg, editUserDetailImg, editUserPasswordImg;
 
     private TextView userNameTv;
 
@@ -41,7 +48,7 @@ public class UserFragment extends Fragment implements View.OnClickListener{
     public static UserFragment newInstance(UserDto userDto) {
         UserFragment fragment = new UserFragment();
         Bundle args = new Bundle();
-        args.putParcelable("login_user", userDto);
+        args.putSerializable(LOGIN_USER, userDto);
         fragment.setArguments(args);
         return fragment;
     }
@@ -50,7 +57,7 @@ public class UserFragment extends Fragment implements View.OnClickListener{
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            loginUser = getArguments().getParcelable("login_user");
+            loginUser = (UserDto) getArguments().getSerializable(LOGIN_USER);
         }
     }
 
@@ -67,28 +74,18 @@ public class UserFragment extends Fragment implements View.OnClickListener{
 
         Mapping(view);
 
-        backImg.setOnClickListener(this);
         editUserDetailImg.setOnClickListener(this);
         editUserPasswordImg.setOnClickListener(this);
 
         String name = loginUser.getFirstName() + " " + loginUser.getLastName();
         userNameTv.setText(name);
 
-        ImageDto loginUserImageDto = loginUser.getImage();
-        if (loginUserImageDto != null){
-            ImageUtils.loadImageIntoImageView(getContext(), (long) loginUser.getImage().getId(), profileImg);
-            backImg.setOnClickListener(this);
-        }
-        // trường hợp user chưa upload ảnh thì xuất ảnh mặc định
-        else {
-            Glide.with(requireContext())
-                    .load(R.drawable.profile)
-                    .into(profileImg);
-        }
+
+        ImageUtils.loadImageIntoImageView(getContext(), (long) loginUser.getImage().getId(), profileImg);
+
     }
 
     private void Mapping(View view) {
-        backImg = (ImageView) view.findViewById(R.id.userProfileBackImg);
         profileImg = (ImageView) view.findViewById(R.id.userProfileImg);
         editUserDetailImg = (ImageView) view.findViewById(R.id.editUserDetailImg);
         editUserPasswordImg = (ImageView) view.findViewById(R.id.editUserPasswordImg);
@@ -98,12 +95,9 @@ public class UserFragment extends Fragment implements View.OnClickListener{
 
     @Override
     public void onClick(View view) {
-        if (view.getId() == R.id.userProfileBackImg){
-            requireActivity().getSupportFragmentManager().popBackStack();
-        }
 
-        else if (view.getId() == R.id.editUserDetailImg){
-            FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.main_frag_container, new UserDetailFragment());
+        if (view.getId() == R.id.editUserDetailImg){
+            FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.main_frag_container, UserDetailFragment.newInstance(loginUser));
         }
 
         else{
