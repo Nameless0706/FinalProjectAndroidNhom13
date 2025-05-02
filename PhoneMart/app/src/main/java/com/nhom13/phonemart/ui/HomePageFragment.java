@@ -116,6 +116,7 @@ public class HomePageFragment extends Fragment implements RecyclerViewInterface,
         actionViewFlipperMain();
 
     }
+
     // Hàm Flipper
     private void actionViewFlipperMain() {
 //        List<String> arrayListFlipper = new ArrayList<>();
@@ -149,7 +150,7 @@ public class HomePageFragment extends Fragment implements RecyclerViewInterface,
     }
 
     private void Mapping(View view) {
-        cartImg = (ImageView) view.findViewById(R.id.img_backMapsFragment);
+        cartImg = (ImageView) view.findViewById(R.id.imageView_cart);
         searchStr = (EditText) view.findViewById(R.id.searchEt);
         rvCategories = (RecyclerView) view.findViewById(R.id.categoryRv);
         rvProducts = (RecyclerView) view.findViewById(R.id.popularProductRv);
@@ -158,23 +159,24 @@ public class HomePageFragment extends Fragment implements RecyclerViewInterface,
         viewFlipper = (ViewFlipper) view.findViewById(R.id.viewFlipper_productImage);
     }
 
-    private void getAllCategories(){
+    private void getAllCategories() {
         categoryList = new ArrayList<>();
         categoryAPI = RetrofitClient.getClient().create(CategoryAPI.class);
         categoryAPI.getAllCategories().enqueue(new Callback<ApiResponse>() {
             @Override
             public void onResponse(@NonNull Call<ApiResponse> call, @NonNull Response<ApiResponse> response) {
-                if (response.isSuccessful()){
+                if (response.isSuccessful()) {
 
                     Gson gson = new Gson();
                     String json = gson.toJson(response.body().getData());
-                    Type listType = new TypeToken<List<CategoryDto>>(){}.getType();
+                    Type listType = new TypeToken<List<CategoryDto>>() {
+                    }.getType();
                     categoryList = gson.fromJson(json, listType);
 
 
                     for (CategoryDto category : categoryList) {
-                        if (category.getImage() != null){
-                            Log.d("Imagehere","Image: "+ category.getImage().getId());
+                        if (category.getImage() != null) {
+                            Log.d("Imagehere", "Image: " + category.getImage().getId());
                         }
                         Log.d("Category", "ID: " + category.getId() + ", Name: " + category.getName());
                     }
@@ -183,9 +185,8 @@ public class HomePageFragment extends Fragment implements RecyclerViewInterface,
                     rvCategories.setAdapter(categoryAdapter);
                     LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
                     rvCategories.setLayoutManager(linearLayoutManager);
-                }
-                else{
-                    DialogUtils.ShowDialog(getContext(), R.layout.error_dialog,"Thất bại", "Không thể load danh mục");
+                } else {
+                    DialogUtils.ShowDialog(getContext(), R.layout.error_dialog, "Thất bại", "Không thể load danh mục");
                 }
             }
 
@@ -197,26 +198,26 @@ public class HomePageFragment extends Fragment implements RecyclerViewInterface,
 
     }
 
-    private void getPopularProducts(){
+    private void getPopularProducts() {
         productList = new ArrayList<>();
         productAPI = RetrofitClient.getClient().create(ProductAPI.class);
         productAPI.getAllProducts().enqueue(new Callback<ApiResponse>() {
             @Override
             public void onResponse(@NonNull Call<ApiResponse> call, @NonNull Response<ApiResponse> response) {
-                if (response.isSuccessful()){
+                if (response.isSuccessful()) {
 
                     Gson gson = new Gson();
                     String json = gson.toJson(response.body().getData());
-                    Type listType = new TypeToken<List<ProductDto>>(){}.getType();
+                    Type listType = new TypeToken<List<ProductDto>>() {
+                    }.getType();
                     productList = gson.fromJson(json, listType);
 
                     popularProductAdapter = new PopularProductAdapter(getContext(), productList, HomePageFragment.this);
                     rvProducts.setAdapter(popularProductAdapter);
                     LinearLayoutManager linearLayoutManager2 = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
                     rvProducts.setLayoutManager(linearLayoutManager2);
-                }
-                else{
-                    DialogUtils.ShowDialog(getContext(), R.layout.error_dialog,"Thất bại", "Không thể load sản phẩm");
+                } else {
+                    DialogUtils.ShowDialog(getContext(), R.layout.error_dialog, "Thất bại", "Không thể load sản phẩm");
                 }
             }
 
@@ -247,10 +248,14 @@ public class HomePageFragment extends Fragment implements RecyclerViewInterface,
     @Override
     public void onClick(View view) {
         Fragment selected = null;
-        if (view.getId() == R.id.img_backMapsFragment){
-            selected = new CartFragment();
-        }
-        else {
+        if (view.getId() == R.id.imageView_cart) {
+            // khi user vừa đăng thì cart chưa khởi tạo nên mặc định trả về fragment rỗng
+            if (loginUser.getCart() != null) {
+                selected = CartFragment.newInstance(loginUser.getCart().getId());
+            } else {
+                selected = new CartFragment();
+            }
+        } else {
             selected = new AllProductFragment();
         }
         FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.main_frag_container, selected);

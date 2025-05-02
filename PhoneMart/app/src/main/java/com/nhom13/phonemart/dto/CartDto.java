@@ -18,4 +18,16 @@ public class CartDto implements Serializable {
 
 
 
+
+	public Long getId() {
+		return id;
+	}
+
+	public BigDecimal getTotalAmount() {
+		return totalAmount;
+	}
+
+	public Set<CartItemDto> getCartItems() {
+		return cartItems;
+	}
 }
