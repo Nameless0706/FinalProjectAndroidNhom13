@@ -82,8 +82,16 @@ public class UserFragment extends Fragment implements View.OnClickListener{
         userNameTv.setText(name);
 
 
-        ImageUtils.loadImageIntoImageView(getContext(), (long) loginUser.getImage().getId(), profileImg);
-
+        ImageDto loginUserImageDto = loginUser.getImage();
+        if (loginUserImageDto != null) {
+            ImageUtils.loadImageIntoImageView(getContext(), (long) loginUser.getImage().getId(), profileImg);
+        }
+        // trường hợp user chưa upload ảnh thì xuất ảnh mặc định
+        else {
+            Glide.with(requireContext())
+                    .load(R.drawable.profile)
+                    .into(profileImg);
+        }
     }
 
     private void Mapping(View view) {

@@ -240,7 +240,7 @@ public class HomePageFragment extends Fragment implements RecyclerViewInterface,
 
             case "product":
                 ProductDto selectedProduct = productList.get(position);
-                FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.main_frag_container, ProductDetailFragment.newInstance(selectedProduct));
+                FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.main_frag_container, ProductDetailFragment.newInstance(selectedProduct, loginUser.getId()));
                 break;
         }
     }
@@ -249,12 +249,7 @@ public class HomePageFragment extends Fragment implements RecyclerViewInterface,
     public void onClick(View view) {
         Fragment selected = null;
         if (view.getId() == R.id.imageView_cart) {
-            // khi user vừa đăng thì cart chưa khởi tạo nên mặc định trả về fragment rỗng
-            if (loginUser.getCart() != null) {
-                selected = CartFragment.newInstance(loginUser.getCart().getId());
-            } else {
-                selected = new CartFragment();
-            }
+            selected = CartFragment.newInstance(loginUser.getId());
         } else {
             selected = new AllProductFragment();
         }

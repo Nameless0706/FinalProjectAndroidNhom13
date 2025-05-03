@@ -1,10 +1,5 @@
 package com.nhom13.phonemart.dto;
 
-import android.os.Parcel;
-import android.os.Parcelable;
-
-import androidx.annotation.NonNull;
-
 import java.io.Serializable;
 import java.util.Set;
 
@@ -16,8 +11,9 @@ public class UserDto implements Serializable {
     private ImageDto image;
     private CartDto cart;
     private Set<OrderDto> orders;
+    private Set<ProductDto> favoriteProducts;
 
-    public UserDto(Long id, String firstName, String lastName, String email, ImageDto image, CartDto cart, Set<OrderDto> orders) {
+    public UserDto(Long id, String firstName, String lastName, String email, ImageDto image, CartDto cart, Set<OrderDto> orders, Set<ProductDto> favoriteProducts) {
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -25,6 +21,7 @@ public class UserDto implements Serializable {
         this.image = image;
         this.cart = cart;
         this.orders = orders;
+        this.favoriteProducts = favoriteProducts;
     }
 
 
@@ -84,5 +81,7 @@ public class UserDto implements Serializable {
         this.orders = orders;
     }
 
-
+    public Set<ProductDto> getFavoriteProducts() {
+        return favoriteProducts;
+    }
 }

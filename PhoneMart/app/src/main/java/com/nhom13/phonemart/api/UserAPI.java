@@ -15,12 +15,16 @@ public interface UserAPI {
 
     @GET("users/user/id/{userId}")
     Call<ApiResponse> getUser (@Path("userId") Long userId,
-                               @Header("Authorization") String token
-    );
+                               @Header("Authorization") String token);
     @PUT("users/user/{userId}/update")
     Call<ApiResponse> updateUserInfo(
             @Path("userId") Long userId,
             @Body UserUpdateRequest userUpdateRequest,
+            @Header("Authorization") String token);
+    @PUT("users/user/favorite/{userId}/{productId}")
+    Call<ApiResponse> saveFavoriteProduct(
+            @Path("userId") Long userId,
+            @Path("productId") Long productId,
             @Header("Authorization") String token
     );
 }

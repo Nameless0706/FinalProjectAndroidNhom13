@@ -1,8 +1,6 @@
 package com.nhom13.phonemart.ui.auth;
 
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -35,6 +33,7 @@ import com.nhom13.phonemart.model.response.JwtResponse;
 import com.nhom13.phonemart.ui.ForgotPasswordFragment;
 import com.nhom13.phonemart.util.DialogUtils;
 import com.nhom13.phonemart.util.FragmentUtils;
+import com.nhom13.phonemart.util.TokenUtils;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -145,7 +144,6 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
         forgotTv = view.findViewById(R.id.forgotPasswordTv);
     }
 
-
     @Override
     public void onClick(View view) {
         Fragment selected = null;
@@ -251,17 +249,9 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 
     private void redirectAfterLoginSuccess(JwtResponse jwt) {
         UserDto loginUser = jwt.getUser();
-        String accessToken = jwt.getAccessToken();
-        String refreshToken = jwt.getRefreshToken();
 
-        Log.d("accessToken", "rdirectAfterLoginSuccess: " + accessToken);
-
-        SharedPreferences prefs = requireContext().getSharedPreferences("auth", Context.MODE_PRIVATE);
-        prefs.edit()
-                .putString("access_token", accessToken)
-                .putString("refresh_token", refreshToken)
-                .apply();
-
+        // lưu lại token mới
+        TokenUtils.saveTokens(requireContext(), jwt.getAccessToken(), jwt.getRefreshToken());
 
         FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.main_frag_container, BaseFragment.newInstance(loginUser));
     }
