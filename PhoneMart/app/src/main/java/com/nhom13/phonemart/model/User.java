@@ -12,9 +12,9 @@ public class User {
     private Boolean isVerified;
 
     private List<Order> orders;
+    private List<Product> favoriteProducts;
 
-
-    public User(int id, String email, String firstName, String lastName, String otp, String password, Boolean isVerified, List<Order> orders) {
+    public User(int id, String email, String firstName, String lastName, String otp, String password, Boolean isVerified, List<Order> orders, List<Product> favoriteProducts) {
         this.id = id;
         this.email = email;
         this.firstName = firstName;
@@ -23,6 +23,7 @@ public class User {
         this.password = password;
         this.isVerified = isVerified;
         this.orders = orders;
+        this.favoriteProducts = favoriteProducts;
     }
 
 
@@ -88,5 +89,9 @@ public class User {
 
     public void setOrders(List<Order> orders) {
         this.orders = orders;
+    }
+
+    public List<Product> getFavoriteProducts() {
+        return favoriteProducts;
     }
 }

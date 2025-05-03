@@ -14,6 +14,12 @@ public interface CartAPI {
             @Header("Authorization") String token
     );
 
+    @GET("carts/cart/user-id/{userId}")
+    Call<ApiResponse> getCartByUserId(
+            @Path("userId") Long userId,
+            @Header("Authorization") String token
+    );
+
     @GET("carts/cart/{cartId}/clear")
     Call<ApiResponse> clearCart(@Path("cartId") Long cartId);
 

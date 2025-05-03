@@ -54,6 +54,7 @@ public class CartFragment extends Fragment implements View.OnClickListener, OnCa
     private RecyclerView rvCartItems;
     private CartAPI cartAPI;
     private CartItemAPI cartItemAPI;
+    private Long userId;
     private Long cartId;
     private CartDto cartDto;
     private TextView textView_totalProducts, textView_totalPrice, textView_address, textView_branch;
@@ -62,10 +63,10 @@ public class CartFragment extends Fragment implements View.OnClickListener, OnCa
         // Required empty public constructor
     }
 
-    public static CartFragment newInstance(Long cartId) {
+    public static CartFragment newInstance(Long userId) {
         CartFragment fragment = new CartFragment();
         Bundle args = new Bundle();
-        args.putLong("cartId", cartId);
+        args.putLong("userId", userId);
         fragment.setArguments(args);
         return fragment;
     }
@@ -78,16 +79,16 @@ public class CartFragment extends Fragment implements View.OnClickListener, OnCa
         cartItemAPI = RetrofitClient.getClient().create(CartItemAPI.class);
 
         if (getArguments() != null) {
-            cartId = getArguments().getLong("cartId");
-            getCartById(cartId);
+            userId = getArguments().getLong("userId");
+            getCartByUserId();
         }
 
     }
 
-    private void getCartById(Long cartId) {
+    private void getCartByUserId() {
         String accessToken = TokenUtils.getAccessToken(requireContext());
 
-        cartAPI.getCart(cartId, "Bearer " + accessToken).enqueue(new Callback<ApiResponse>() {
+        cartAPI.getCartByUserId(userId, "Bearer " + accessToken).enqueue(new Callback<ApiResponse>() {
             @Override
             public void onResponse(Call<ApiResponse> call, Response<ApiResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
@@ -102,7 +103,7 @@ public class CartFragment extends Fragment implements View.OnClickListener, OnCa
                             // lưu lại token mới
                             TokenUtils.saveTokens(requireContext(), jwtResponse.getAccessToken(), jwtResponse.getRefreshToken());
                             // gọi lại API với token mới
-                            getCartById(cartId);
+                            getCartByUserId();
                         }
 
                         @Override
@@ -110,11 +111,13 @@ public class CartFragment extends Fragment implements View.OnClickListener, OnCa
                             Toast.makeText(requireContext(), errorMessage, Toast.LENGTH_LONG).show();
                         }
                     });
-                } else {
+                }
+                // cart rỗng nên bên api ném exception và chưa kịp trả về ApiResponse --> body null
+                else if (response.code() == 404){
                     try {
                         Log.d("error", "onResponse: " + response.errorBody().string());
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        throw new RuntimeException(e);
                     }
                 }
             }
@@ -126,10 +129,55 @@ public class CartFragment extends Fragment implements View.OnClickListener, OnCa
         });
     }
 
+//    private void getCartById(Long cartId) {
+//        String accessToken = TokenUtils.getAccessToken(requireContext());
+//
+//        cartAPI.getCart(cartId, "Bearer " + accessToken).enqueue(new Callback<ApiResponse>() {
+//            @Override
+//            public void onResponse(Call<ApiResponse> call, Response<ApiResponse> response) {
+//                if (response.isSuccessful() && response.body() != null) {
+//                    handleCartResponse(response);
+//                } else if (response.code() == 401) {
+//                    // Token hết hạn → gọi refresh
+//                    String refreshToken = TokenUtils.getRefreshToken(requireContext());
+//
+//                    TokenUtils.createNewAccessToken(refreshToken, new TokenCallback() {
+//                        @Override
+//                        public void onSuccess(JwtResponse jwtResponse) {
+//                            // lưu lại token mới
+//                            TokenUtils.saveTokens(requireContext(), jwtResponse.getAccessToken(), jwtResponse.getRefreshToken());
+//                            // gọi lại API với token mới
+//                            getCartById(cartId);
+//                        }
+//
+//                        @Override
+//                        public void onFailure(String errorMessage) {
+//                            Toast.makeText(requireContext(), errorMessage, Toast.LENGTH_LONG).show();
+//                        }
+//                    });
+//                } else {
+//                    try {
+//                        Log.d("error", "onResponse: " + response.errorBody().string());
+//                    } catch (IOException e) {
+//                        e.printStackTrace();
+//                    }
+//                }
+//            }
+//
+//            @Override
+//            public void onFailure(Call<ApiResponse> call, Throwable throwable) {
+//                Log.d("onFailure", "onFailure: " + throwable.getMessage());
+//            }
+//        });
+//    }
+
     private void handleCartResponse(Response<ApiResponse> response) {
         Gson gson = new Gson();
         String json = gson.toJson(response.body().getData());
         cartDto = gson.fromJson(json, CartDto.class);
+
+        // khi chuyển qua cartFragment và cart đã có sẵn thì gán vào cartId để update/delete cartItem
+        cartId = cartDto.getId();
 
         cartItemDtos = new ArrayList<>(cartDto.getCartItems());
         // sort theo totalPrice
@@ -162,7 +210,7 @@ public class CartFragment extends Fragment implements View.OnClickListener, OnCa
         backBtn = view.findViewById(R.id.userProfileBackImg);
         rvCartItems = view.findViewById(R.id.rvCart);
 
-        textView_totalProducts = view.findViewById(R.id.textView_totalProducts);
+        textView_totalProducts = view.findViewById(R.id.textView_brand);
         textView_totalPrice = view.findViewById(R.id.textView_totalPrice);
         textView_address = view.findViewById(R.id.textView_address);
         textView_branch = view.findViewById(R.id.textView_branch);
@@ -236,7 +284,7 @@ public class CartFragment extends Fragment implements View.OnClickListener, OnCa
     @Override
     public void onClickProductItem(int position) {
         ProductDto productDto = cartItemDtos.get(position).getProduct();
-        FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.main_frag_container, ProductDetailFragment.newInstance(productDto));
+        FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.main_frag_container, ProductDetailFragment.newInstance(productDto, userId));
     }
 
     private void updateCartItem(Long productId, int quantity) {
@@ -266,7 +314,7 @@ public class CartFragment extends Fragment implements View.OnClickListener, OnCa
                 }
 
                 // call api để lấy lại danh sách và cập nhật totalProducts/totalPrice
-                getCartById(cartId);
+                getCartByUserId();
             }
 
             @Override
@@ -301,6 +349,9 @@ public class CartFragment extends Fragment implements View.OnClickListener, OnCa
                         }
                     });
                 }
+
+                // cập nhật lại UI
+                getCartByUserId();
             }
 
             @Override
@@ -314,6 +365,7 @@ public class CartFragment extends Fragment implements View.OnClickListener, OnCa
     @Override
     public void onResume() {
         super.onResume();
-        getCartById(cartId);
+        getCartByUserId();
     }
+
 }
