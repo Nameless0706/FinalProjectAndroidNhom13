@@ -88,8 +88,13 @@ public class ResetPasswordFragment extends Fragment implements View.OnClickListe
     private void resetPassword(){
         String newPassword = newPasswordEt.getText().toString();
         String confirmPassword = confirmPasswordEt.getText().toString();
-        if(TextUtils.isEmpty(newPassword) || TextUtils.isEmpty(confirmPassword)){
+        if (TextUtils.isEmpty(newPassword) || TextUtils.isEmpty(confirmPassword)){
             DialogUtils.ShowDialog(getContext(), R.layout.error_dialog, "Thất bại", "Vui lòng điền đầy đủ thông tin");
+            return;
+        }
+
+        else if (!newPassword.equals(confirmPassword)){
+            DialogUtils.ShowDialog(getContext(), R.layout.error_dialog, "Thất bại", "Mật khẩu không trùng khớp");
             return;
         }
 

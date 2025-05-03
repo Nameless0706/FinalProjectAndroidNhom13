@@ -58,6 +58,9 @@ public class CartFragment extends Fragment implements View.OnClickListener, OnCa
     private CartDto cartDto;
     private TextView textView_totalProducts, textView_totalPrice, textView_address, textView_branch;
 
+    private final int UNAUTHORIZE_CODE = 401;
+
+
     public CartFragment() {
         // Required empty public constructor
     }
@@ -92,7 +95,7 @@ public class CartFragment extends Fragment implements View.OnClickListener, OnCa
             public void onResponse(Call<ApiResponse> call, Response<ApiResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     handleCartResponse(response);
-                } else if (response.code() == 401) {
+                } else if (response.code() == UNAUTHORIZE_CODE) {
                     // Token hết hạn → gọi refresh
                     String refreshToken = TokenUtils.getRefreshToken(requireContext());
 
@@ -245,7 +248,7 @@ public class CartFragment extends Fragment implements View.OnClickListener, OnCa
         cartItemAPI.updateCartItem(cartId, productId, quantity, "Bearer " + accessToken).enqueue(new Callback<ApiResponse>() {
             @Override
             public void onResponse(Call<ApiResponse> call, Response<ApiResponse> response) {
-                if (response.code() == 401) {
+                if (response.code() == UNAUTHORIZE_CODE) {
                     // Token hết hạn → gọi refresh
                     String refreshToken = TokenUtils.getRefreshToken(requireContext());
 
@@ -282,7 +285,7 @@ public class CartFragment extends Fragment implements View.OnClickListener, OnCa
         cartItemAPI.deleteCartItem(cartId, productId, "Bearer " + accessToken).enqueue(new Callback<ApiResponse>() {
             @Override
             public void onResponse(Call<ApiResponse> call, Response<ApiResponse> response) {
-                if (response.code() == 401) {
+                if (response.code() == UNAUTHORIZE_CODE) {
                     // Token hết hạn → gọi refresh
                     String refreshToken = TokenUtils.getRefreshToken(requireContext());
 

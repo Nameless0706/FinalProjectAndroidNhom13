@@ -4,6 +4,7 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -22,7 +23,7 @@ import com.nhom13.phonemart.util.FragmentUtils;
  * Use the {@link BaseFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class BaseFragment extends Fragment {
+public class BaseFragment extends Fragment{
 
     private static final String LOGIN_USER = "login_user";
 
@@ -63,6 +64,19 @@ public class BaseFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         // Initialize your views or setup listeners here
 
+
+        //requireActivity().getSupportFragmentManager().addOnBackStackChangedListener(this);
+
+        requireActivity().getSupportFragmentManager().setFragmentResultListener("user_updated", getViewLifecycleOwner(), (requestKey, bundle) -> {
+            UserDto updatedUser = (UserDto) bundle.getSerializable("updated_user");
+            if (updatedUser != null) {
+                user = updatedUser;  // update the local user
+                Log.d("BaseFragment", "User updated: " + user.getFirstName());
+
+            }
+        });
+
+
         FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.base_frag_container, HomePageFragment.newInstance(user));
 
         navigationView = view.findViewById(R.id.bottom_nav_bar);
@@ -86,6 +100,7 @@ public class BaseFragment extends Fragment {
         });
 
     }
+
 
 
 

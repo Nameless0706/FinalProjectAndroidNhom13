@@ -52,18 +52,10 @@ public class ImageUtils {
         });
     }
 
-    public static void loadUserImage(Context context,UserDto loginUser, ImageView profileImg){
-        ImageDto loginUserImageDto = loginUser.getImage();
+    public static void getUserImage(Context context, UserDto user){
+        ImageDto loginUserImageDto = user.getImage();
 
-        if (loginUserImageDto != null){
-            ImageUtils.loadImageIntoImageView(context, (long) loginUser.getImage().getId(), profileImg);
-        }
-        // trường hợp user chưa upload ảnh thì xuất ảnh mặc định
-        else {
-            Glide.with(context)
-                    .load(R.drawable.profile)
-                    .into(profileImg);
-        }
+//
     }
     private static void logByteArray(byte[] bytes) {
         if (bytes != null) {

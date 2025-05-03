@@ -58,6 +58,7 @@ public class UserFragment extends Fragment implements View.OnClickListener{
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             loginUser = (UserDto) getArguments().getSerializable(LOGIN_USER);
+
         }
     }
 
