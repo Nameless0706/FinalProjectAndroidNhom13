@@ -18,28 +18,19 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import com.nhom13.phonemart.R;
-import com.nhom13.phonemart.api.BranchAPI;
-import com.nhom13.phonemart.api.RetrofitClient;
 import com.nhom13.phonemart.dto.BranchDto;
-import com.nhom13.phonemart.model.response.ApiResponse;
+import com.nhom13.phonemart.model.interfaces.BranchCallback;
+import com.nhom13.phonemart.service.BranchService;
 import com.nhom13.phonemart.util.FragmentUtils;
 
-import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Objects;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class MapsFragment extends Fragment {
 
     private GoogleMap mMap;
     private List<BranchDto> branchDtos;
-    private BranchAPI branchAPI;
 
     private OnMapReadyCallback callback = new OnMapReadyCallback() {
 
@@ -107,10 +98,27 @@ public class MapsFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater,
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        getAllBranches();
+
+        getBranchDtos();
 
         // tạo View từ file xml
         return inflater.inflate(R.layout.fragment_maps, container, false);
+    }
+
+    private void getBranchDtos() {
+        BranchService service = new BranchService();
+        service.getAllBranches(new BranchCallback() {
+            @Override
+            public void onSuccess(List<BranchDto> branches) {
+                branchDtos = branches;
+            }
+
+            @Override
+            public void onError(Throwable t) {
+                Log.d("error", "onError: " + t.getMessage());
+            }
+        });
+
     }
 
     @Override
@@ -122,35 +130,6 @@ public class MapsFragment extends Fragment {
         if (mapFragment != null) {
             mapFragment.getMapAsync(callback);
         }
-    }
-
-    private void getAllBranches() {
-        branchAPI = RetrofitClient.getClient().create(BranchAPI.class);
-        branchAPI.getAllBranches().enqueue(new Callback<ApiResponse>() {
-            @Override
-            public void onResponse(Call<ApiResponse> call, Response<ApiResponse> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    try {
-                        Object data = response.body().getData();
-                        Gson gson = new Gson();
-                        String json = gson.toJson(data);
-
-                        Type listType = new TypeToken<List<BranchDto>>() {
-                        }.getType();
-                        branchDtos = gson.fromJson(json, listType);
-                    } catch (Exception e) {
-                        Log.e("ParseError", "Failed to parse branch data", e);
-                    }
-                } else {
-                    Log.e("APIError", "Response not successful or body is null");
-                }
-            }
-
-            @Override
-            public void onFailure(Call<ApiResponse> call, Throwable t) {
-                Log.e("ApiError", "API call failed: " + t.getMessage());
-            }
-        });
     }
 
 }

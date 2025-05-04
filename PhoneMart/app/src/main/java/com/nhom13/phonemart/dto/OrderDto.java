@@ -19,16 +19,19 @@ public class OrderDto implements Serializable {
 	private LocalDate orderDate;
 	private OrderStatus orderStatus;
 	private BigDecimal totalAmount;
+	private String address;
 	private Set<OrderItemDto> orderItems;
+	private BranchDto branch;
 
-	public OrderDto(Long id, LocalDate orderDate, OrderStatus orderStatus, BigDecimal totalAmount, Set<OrderItemDto> orderItems) {
+	public OrderDto(Long id, LocalDate orderDate, OrderStatus orderStatus, BigDecimal totalAmount, String address, Set<OrderItemDto> orderItems, BranchDto branch) {
 		this.id = id;
 		this.orderDate = orderDate;
 		this.orderStatus = orderStatus;
 		this.totalAmount = totalAmount;
+		this.address = address;
 		this.orderItems = orderItems;
+		this.branch = branch;
 	}
-
 
 	public Long getId() {
 		return id;
@@ -70,5 +73,11 @@ public class OrderDto implements Serializable {
 		this.orderItems = orderItems;
 	}
 
+	public String getAddress() {
+		return address;
+	}
 
+	public BranchDto getBranch() {
+		return branch;
+	}
 }

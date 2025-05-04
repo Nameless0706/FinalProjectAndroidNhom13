@@ -5,13 +5,13 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.nhom13.phonemart.dto.UserDto;
+import com.nhom13.phonemart.ui.FavoriteFragment;
 import com.nhom13.phonemart.ui.HomePageFragment;
 import com.nhom13.phonemart.ui.MapsFragment;
 import com.nhom13.phonemart.ui.UserFragment;
@@ -76,7 +76,7 @@ public class BaseFragment extends Fragment {
                 selected = new MapsFragment();
             }
             else if (idItem == R.id.favorite) {
-                selected = HomePageFragment.newInstance(user);
+                selected = FavoriteFragment.newInstance(user.getId());
             }
             else {
                 selected = UserFragment.newInstance(user);
@@ -87,6 +87,9 @@ public class BaseFragment extends Fragment {
 
     }
 
-
-
+    @Override
+    public void onResume() {
+        super.onResume();
+        navigationView.setSelectedItemId(R.id.home);
+    }
 }

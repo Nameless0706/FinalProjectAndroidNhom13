@@ -22,6 +22,7 @@ import android.widget.Toast;
 import android.widget.ViewFlipper;
 
 import com.bumptech.glide.Glide;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.nhom13.phonemart.R;
@@ -114,7 +115,6 @@ public class HomePageFragment extends Fragment implements RecyclerViewInterface,
         viewAllTv.setOnClickListener(this);
 
         actionViewFlipperMain();
-
     }
 
     // Hàm Flipper
@@ -273,4 +273,5 @@ public class HomePageFragment extends Fragment implements RecyclerViewInterface,
         return false; // Return false if action is not handled
 
     }
+
 }
