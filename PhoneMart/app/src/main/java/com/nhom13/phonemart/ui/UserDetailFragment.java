@@ -217,9 +217,7 @@ public class UserDetailFragment extends Fragment implements View.OnClickListener
                 if (response.isSuccessful()){
                     Toast.makeText(requireContext(), editUserFirstName + " " + editUserLastName, Toast.LENGTH_SHORT).show();
                     updateImage();
-                    getUpdatedUser();
                     DialogUtils.ShowDialog(requireContext(), R.layout.success_dialog, "Thành công", "Cập nhật thông tin thành công");
-
                 }
                 else if (response.code() == UNAUTHORIZE_CODE){
                     String refreshToken = TokenUtils.getRefreshToken(requireContext());
@@ -377,61 +375,6 @@ public class UserDetailFragment extends Fragment implements View.OnClickListener
     }
 
 
-
-    private void getUpdatedUser(){
-        String accessToken = "Bearer " + TokenUtils.getAccessToken(requireContext());
-        UserAPI userAPI1 = RetrofitClient.getClient().create(UserAPI.class);
-        userAPI1.getUserById(edit_user.getId(), accessToken).enqueue(new Callback<ApiResponse>() {
-            @Override
-            public void onResponse(@NonNull Call<ApiResponse> call, @NonNull Response<ApiResponse> response) {
-
-                if (response.isSuccessful()){
-                    Gson gson = new Gson();
-                    String json = gson.toJson(response.body().getData());
-                    updatedUser = gson.fromJson(json, UserDto.class);
-
-                    //Truyền updated user vào Bundle
-                    Bundle result = new Bundle();
-                    result.putSerializable("updated_user", updatedUser);
-                    requireActivity().getSupportFragmentManager().setFragmentResult("user_update_result", result);
-                }
-
-                else if (response.code() == UNAUTHORIZE_CODE){
-                    String refreshToken = TokenUtils.getRefreshToken(requireContext());
-
-                    TokenUtils.createNewAccessToken(refreshToken, new TokenCallback() {
-                        @Override
-                        public void onSuccess(JwtResponse jwtResponse) {
-
-                            // lưu lại token mới
-                            TokenUtils.saveTokens(requireContext(), jwtResponse.getAccessToken(), jwtResponse.getRefreshToken());
-
-                            // gọi lại API với token mới
-                            getUpdatedUser();
-                        }
-
-                        @Override
-                        public void onFailure(String errorMessage) {
-                            Toast.makeText(requireContext(), errorMessage, Toast.LENGTH_LONG).show();
-                        }
-                    });
-                } else {
-                    try {
-                        Log.d("error", "onResponse: " + response.errorBody().string());
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-
-            @Override
-            public void onFailure(@NonNull Call<ApiResponse> call, @NonNull Throwable throwable) {
-                Log.d("Updated user", "Cant get updated user");
-
-            }
-        });
-    }
-
     @Override
     public void onResume() {
         BottomNavigationView navBar = requireActivity().findViewById(R.id.bottom_nav_bar);
@@ -446,6 +389,9 @@ public class UserDetailFragment extends Fragment implements View.OnClickListener
         } else {
             if (edit_user.getImage() != null){
                 ImageUtils.loadImageIntoImageView(getContext(), (long) edit_user.getImage().getId(), profileImg);
+            }
+            else{
+                Log.d("Null image", "Null");
             }
             //Log.d("Uri", "Loaded default user image from server");
         }
