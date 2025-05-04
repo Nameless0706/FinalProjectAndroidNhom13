@@ -115,7 +115,6 @@ public class HomePageFragment extends Fragment implements RecyclerViewInterface,
         viewAllTv.setOnClickListener(this);
 
         actionViewFlipperMain();
-
     }
 
     // Hàm Flipper
@@ -241,6 +240,7 @@ public class HomePageFragment extends Fragment implements RecyclerViewInterface,
 
             case "product":
                 ProductDto selectedProduct = productList.get(position);
+
                 FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.base_frag_container, ProductDetailFragment.newInstance(selectedProduct, loginUser.getId()));
                 break;
         }
@@ -254,6 +254,7 @@ public class HomePageFragment extends Fragment implements RecyclerViewInterface,
         } else {
             selected = new AllProductFragment();
         }
+
         FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.base_frag_container, selected);
 
     }
@@ -266,6 +267,7 @@ public class HomePageFragment extends Fragment implements RecyclerViewInterface,
             if (!query.isEmpty()) {
                 // You can trigger a search or filter operation here
                 Toast.makeText(getContext(), "Searching for: " + query, Toast.LENGTH_SHORT).show();
+
                 FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.base_frag_container, new AllProductFragment());
                 // For example, call your search function here or update your UI
             }

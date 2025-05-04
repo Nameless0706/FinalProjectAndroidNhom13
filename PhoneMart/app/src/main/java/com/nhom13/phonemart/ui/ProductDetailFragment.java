@@ -17,6 +17,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewFlipper;
 
+import com.bumptech.glide.Glide;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.gson.Gson;
 import com.nhom13.phonemart.R;
 import com.nhom13.phonemart.api.CartItemAPI;
@@ -327,4 +329,14 @@ public class ProductDetailFragment extends Fragment implements View.OnClickListe
             }
         });
     }
+
+    @Override
+    public void onResume() {
+        BottomNavigationView navBar = requireActivity().findViewById(R.id.bottom_nav_bar);
+        navBar.setVisibility(View.GONE);
+
+        super.onResume();
+    }
+
+
 }

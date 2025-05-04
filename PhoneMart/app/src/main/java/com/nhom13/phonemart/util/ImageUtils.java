@@ -33,6 +33,7 @@ public class ImageUtils {
                     try {
                         Glide.with(context)
                                 .load(response.body().bytes())
+                                .centerCrop()
                                 .into(imageView);
                     } catch (IOException e) {
                         throw new RuntimeException(e);

@@ -6,14 +6,13 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.nhom13.phonemart.dto.UserDto;
-import com.nhom13.phonemart.ui.AllProductFragment;
+import com.nhom13.phonemart.ui.FavoriteFragment;
 import com.nhom13.phonemart.ui.HomePageFragment;
 import com.nhom13.phonemart.ui.MapsFragment;
 import com.nhom13.phonemart.ui.UserFragment;
@@ -24,6 +23,7 @@ import com.nhom13.phonemart.util.FragmentUtils;
  * Use the {@link BaseFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
+
 public class BaseFragment extends Fragment{
 
     private static final String LOGIN_USER = "login_user";
@@ -65,18 +65,7 @@ public class BaseFragment extends Fragment{
         super.onViewCreated(view, savedInstanceState);
         // Initialize your views or setup listeners here
 
-
-        //requireActivity().getSupportFragmentManager().addOnBackStackChangedListener(this);
-
-        requireActivity().getSupportFragmentManager().setFragmentResultListener("user_updated", getViewLifecycleOwner(), (requestKey, bundle) -> {
-            UserDto updatedUser = (UserDto) bundle.getSerializable("updated_user");
-            if (updatedUser != null) {
-                user = updatedUser;  // update the local user
-                Log.d("BaseFragment", "User updated: " + user.getFirstName());
-
-            }
-        });
-
+ 
 
         FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.base_frag_container, HomePageFragment.newInstance(user));
 
@@ -91,7 +80,8 @@ public class BaseFragment extends Fragment{
                 selected = new MapsFragment();
             }
             else if (idItem == R.id.favorite) {
-                selected = HomePageFragment.newInstance(user);
+
+                selected = FavoriteFragment.newInstance(user.getId());
             }
             else {
                 selected = UserFragment.newInstance(user);
