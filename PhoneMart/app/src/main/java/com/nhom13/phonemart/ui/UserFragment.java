@@ -17,6 +17,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.nhom13.phonemart.R;
 import com.nhom13.phonemart.dto.ImageDto;
 import com.nhom13.phonemart.dto.UserDto;
@@ -106,11 +107,18 @@ public class UserFragment extends Fragment implements View.OnClickListener{
     public void onClick(View view) {
 
         if (view.getId() == R.id.editUserDetailImg){
-            FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.main_frag_container, UserDetailFragment.newInstance(loginUser));
+            FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.base_frag_container, UserDetailFragment.newInstance(loginUser));
         }
 
         else{
 
         }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        BottomNavigationView navBar = requireActivity().findViewById(R.id.bottom_nav_bar);
+        navBar.setVisibility(View.VISIBLE);
     }
 }

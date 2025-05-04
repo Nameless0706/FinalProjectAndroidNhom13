@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.nhom13.phonemart.dto.UserDto;
+import com.nhom13.phonemart.ui.AllProductFragment;
 import com.nhom13.phonemart.ui.HomePageFragment;
 import com.nhom13.phonemart.ui.MapsFragment;
 import com.nhom13.phonemart.ui.UserFragment;
@@ -99,6 +100,15 @@ public class BaseFragment extends Fragment{
             return true;
         });
 
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        BottomNavigationView navBar = requireActivity().findViewById(R.id.bottom_nav_bar);
+        if (navBar != null) {
+            navBar.setVisibility(View.VISIBLE);
+        }
     }
 
 

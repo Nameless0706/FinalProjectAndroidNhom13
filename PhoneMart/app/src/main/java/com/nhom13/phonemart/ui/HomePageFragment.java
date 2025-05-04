@@ -22,6 +22,7 @@ import android.widget.Toast;
 import android.widget.ViewFlipper;
 
 import com.bumptech.glide.Glide;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.nhom13.phonemart.R;
@@ -240,7 +241,7 @@ public class HomePageFragment extends Fragment implements RecyclerViewInterface,
 
             case "product":
                 ProductDto selectedProduct = productList.get(position);
-                FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.main_frag_container, ProductDetailFragment.newInstance(selectedProduct, loginUser.getId()));
+                FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.base_frag_container, ProductDetailFragment.newInstance(selectedProduct, loginUser.getId()));
                 break;
         }
     }
@@ -253,7 +254,7 @@ public class HomePageFragment extends Fragment implements RecyclerViewInterface,
         } else {
             selected = new AllProductFragment();
         }
-        FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.main_frag_container, selected);
+        FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.base_frag_container, selected);
 
     }
 
@@ -265,12 +266,19 @@ public class HomePageFragment extends Fragment implements RecyclerViewInterface,
             if (!query.isEmpty()) {
                 // You can trigger a search or filter operation here
                 Toast.makeText(getContext(), "Searching for: " + query, Toast.LENGTH_SHORT).show();
-                FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.main_frag_container, new AllProductFragment());
+                FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.base_frag_container, new AllProductFragment());
                 // For example, call your search function here or update your UI
             }
             return true; // Return true if the action is handled
         }
         return false; // Return false if action is not handled
 
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        BottomNavigationView navBar = requireActivity().findViewById(R.id.bottom_nav_bar);
+        navBar.setVisibility(View.VISIBLE);
     }
 }

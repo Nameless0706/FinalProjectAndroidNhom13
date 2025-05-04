@@ -15,6 +15,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.gson.Gson;
 import com.nhom13.phonemart.R;
 import com.nhom13.phonemart.adapter.CartAdapter;
@@ -287,7 +288,7 @@ public class CartFragment extends Fragment implements View.OnClickListener, OnCa
     @Override
     public void onClickProductItem(int position) {
         ProductDto productDto = cartItemDtos.get(position).getProduct();
-        FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.main_frag_container, ProductDetailFragment.newInstance(productDto, userId));
+        FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.base_frag_container, ProductDetailFragment.newInstance(productDto, userId));
     }
 
     private void updateCartItem(Long productId, int quantity) {
@@ -367,8 +368,12 @@ public class CartFragment extends Fragment implements View.OnClickListener, OnCa
     // nhờ vào addToBackStack() trong loadFragment() của FragmentUtils nên khi click chuyển sang ProductDetailFragment, CartFragment vẫn còn giữ trong bộ nhớ --> các biến vẫn còn giữ giá trị --> click back thì chỉ cần gọi getCartById là có thể load lại
     @Override
     public void onResume() {
+        BottomNavigationView navBar = requireActivity().findViewById(R.id.bottom_nav_bar);
+        navBar.setVisibility(View.GONE);
         super.onResume();
         getCartByUserId();
     }
+
+
 
 }

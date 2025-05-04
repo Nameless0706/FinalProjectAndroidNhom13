@@ -233,7 +233,7 @@ public class ProductDetailFragment extends Fragment implements View.OnClickListe
             Toast.makeText(requireContext(), response.body().getMessage(), Toast.LENGTH_SHORT).show();
         } else if (viewId == R.id.button_buy) {
             // nếu đưa thẳng vào buyProduct() thì sẽ gặp lỗi async
-            FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.main_frag_container, CartFragment.newInstance(userId));
+            FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.base_frag_container, CartFragment.newInstance(userId));
         }
     }
 

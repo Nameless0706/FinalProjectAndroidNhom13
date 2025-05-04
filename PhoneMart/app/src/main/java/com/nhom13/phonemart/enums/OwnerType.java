@@ -1,5 +1,5 @@
 package com.nhom13.phonemart.enums;
 
 public enum OwnerType {
-	PRODUCT, CATEGORY, USER
+	PRODUCT, CATEGORY, USER, BRANCH
 }

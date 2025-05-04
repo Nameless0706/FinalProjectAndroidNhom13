@@ -14,7 +14,7 @@ import retrofit2.http.Path;
 public interface UserAPI {
 
     @GET("users/user/id/{userId}")
-    Call<ApiResponse> getUser (@Path("userId") Long userId,
+    Call<ApiResponse> getUserById (@Path("userId") Long userId,
                                @Header("Authorization") String token);
     @PUT("users/user/{userId}/update")
     Call<ApiResponse> updateUserInfo(

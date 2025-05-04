@@ -15,6 +15,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.tabs.TabLayout;
 import com.nhom13.phonemart.R;
 import com.nhom13.phonemart.adapter.ProductAdapter;
@@ -139,8 +140,14 @@ public class AllProductFragment extends Fragment implements RecyclerViewInterfac
 
     @Override
     public void onItemClick(int position, String source) {
-        FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.main_frag_container, new ProductDetailFragment());
+        FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.base_frag_container, new ProductDetailFragment());
     }
 
+    @Override
+    public void onResume() {
+        BottomNavigationView navBar = requireActivity().findViewById(R.id.bottom_nav_bar);
+        navBar.setVisibility(View.GONE);
+        super.onResume();
+    }
 
 }

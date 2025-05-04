@@ -30,6 +30,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.nhom13.phonemart.R;
 import com.nhom13.phonemart.adapter.ChooseImageAdapter;
 import com.nhom13.phonemart.adapter.RecyclerViewInterface;
@@ -249,5 +250,12 @@ public class ChooseImageFragment extends Fragment implements View.OnClickListene
 
         //Chỗ này có thể đưa tới fragment mới để xác nhận, phòng trường hợp người dùng ấn nhầm
         requireActivity().getSupportFragmentManager().popBackStack();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        BottomNavigationView navBar = requireActivity().findViewById(R.id.bottom_nav_bar);
+        navBar.setVisibility(View.GONE);
     }
 }

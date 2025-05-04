@@ -9,11 +9,6 @@
         android:icon="@drawable/baseline_map_24"
         android:id="@+id/map"/>
 
-    <item android:title=""
-        android:icon="@drawable/view_all_product_ico"
-        android:id="@+id/view_all_prod" />
-
-
     <item android:title="Favorite"
         android:icon="@drawable/baseline_heart_24"
         android:id="@+id/favorite"/>

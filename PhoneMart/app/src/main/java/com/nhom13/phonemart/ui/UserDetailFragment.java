@@ -23,6 +23,7 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.gson.Gson;
 import com.nhom13.phonemart.R;
@@ -31,6 +32,7 @@ import com.nhom13.phonemart.api.RetrofitClient;
 import com.nhom13.phonemart.api.UserAPI;
 import com.nhom13.phonemart.dto.CartDto;
 import com.nhom13.phonemart.dto.UserDto;
+import com.nhom13.phonemart.enums.OwnerType;
 import com.nhom13.phonemart.model.interfaces.TokenCallback;
 import com.nhom13.phonemart.model.request.UserUpdateRequest;
 import com.nhom13.phonemart.model.response.ApiResponse;
@@ -45,6 +47,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
@@ -157,7 +162,7 @@ public class UserDetailFragment extends Fragment implements View.OnClickListener
 
     private void Mapping(View view){
         profileImg = (ImageView) view.findViewById(R.id.editUserDetailProfileImg);
-        backImg = (ImageView) view.findViewById(R.id.chooseBackImg);
+        backImg = (ImageView) view.findViewById(R.id.userDetailBackImg);
         imgGroup = (ConstraintLayout) view.findViewById(R.id.userDetailImgGroup);
         firstNameEt = (TextInputLayout) view.findViewById(R.id.userDetailFirstNameTv);
         lastNameEt = (TextInputLayout) view.findViewById(R.id.userDetailLastNameTv);
@@ -167,13 +172,14 @@ public class UserDetailFragment extends Fragment implements View.OnClickListener
 
     @Override
     public void onClick(View view) {
-        if (view.getId() == R.id.chooseBackImg){
+        if (view.getId() == R.id.userDetailBackImg){
             requireActivity().getSupportFragmentManager().popBackStack();
+
 
         }
         else if (view.getId() == R.id.userDetailImgGroup){
             //Toast.makeText(getContext(), "Container clicked", Toast.LENGTH_SHORT).show();
-            FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.main_frag_container, new ChooseImageFragment());
+            FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.base_frag_container, new ChooseImageFragment());
         }
 
         else{
@@ -256,59 +262,114 @@ public class UserDetailFragment extends Fragment implements View.OnClickListener
         // Chỉ gọi khi có thay đổi ảnh
         if (isImageChanged) {
 
+
             String strRealPath = RealPathUtils.getRealPath(requireContext(), loaded_image_uri);
             Log.d("UploadImage", strRealPath);
             Log.d("UploadImage", "Not using default image");
             File file = new File(strRealPath);
-            RequestBody requestBodyImage = RequestBody.create(MediaType.parse("image/jpeg"), file);
-            MultipartBody.Part multipartBodyImage = MultipartBody.Part.createFormData("multipartFile", file.getName(), requestBodyImage);
 
 
-
-            long imageId = edit_user.getImage().getId();
             String token = "Bearer " + TokenUtils.getAccessToken(requireContext());
             imageAPI = RetrofitClient.getClient().create(ImageAPI.class);
+            if (edit_user.getImage() != null){
 
-            // Retrofit image upload
-            imageAPI.updateImage(multipartBodyImage, imageId, token).enqueue(new Callback<ApiResponse>() {
-                @Override
-                public void onResponse(@NonNull Call<ApiResponse> call, @NonNull Response<ApiResponse> response) {
-                    if (response.isSuccessful()) {
-                        loaded_image_uri = null;  // Clear it
-                        isImageChanged = false;   // Reset the flag
-                        Toast.makeText(requireContext(), "Image uploaded!", Toast.LENGTH_SHORT).show();
+                RequestBody requestBodyImage = RequestBody.create(MediaType.parse("image/jpeg"), file);
+                MultipartBody.Part multipartBodyImage = MultipartBody.Part.createFormData("multipartFile", file.getName(), requestBodyImage);
+                long imageId = edit_user.getImage().getId();
+
+                // Image update
+                imageAPI.updateImage(multipartBodyImage, imageId, token).enqueue(new Callback<ApiResponse>() {
+                    @Override
+                    public void onResponse(@NonNull Call<ApiResponse> call, @NonNull Response<ApiResponse> response) {
+                        if (response.isSuccessful()) {
+                            loaded_image_uri = null;
+                            isImageChanged = false;
+                            Toast.makeText(requireContext(), "Image uploaded!", Toast.LENGTH_SHORT).show();
+                        }
+                        else if (response.code() == UNAUTHORIZE_CODE){
+                            String refreshToken = TokenUtils.getRefreshToken(requireContext());
+
+                            TokenUtils.createNewAccessToken(refreshToken, new TokenCallback() {
+                                @Override
+                                public void onSuccess(JwtResponse jwtResponse) {
+                                    // lưu lại token mới
+                                    TokenUtils.saveTokens(requireContext(), jwtResponse.getAccessToken(), jwtResponse.getRefreshToken());
+                                    // gọi lại API với token mới
+                                    updateImage();
+                                }
+
+                                @Override
+                                public void onFailure(String errorMessage) {
+                                    Toast.makeText(requireContext(), errorMessage, Toast.LENGTH_LONG).show();
+                                }
+                            });
+                        }
+                        else {
+                            Log.e("Image Upload", "Failed with code " + response.code());
+                            Toast.makeText(requireContext(), "Failed to upload image", Toast.LENGTH_SHORT).show();
+                        }
                     }
-                    else if (response.code() == UNAUTHORIZE_CODE){
-                        String refreshToken = TokenUtils.getRefreshToken(requireContext());
 
-                        TokenUtils.createNewAccessToken(refreshToken, new TokenCallback() {
-                            @Override
-                            public void onSuccess(JwtResponse jwtResponse) {
-                                // lưu lại token mới
-                                TokenUtils.saveTokens(requireContext(), jwtResponse.getAccessToken(), jwtResponse.getRefreshToken());
-                                // gọi lại API với token mới
-                                updateImage();
+
+                    @Override
+                    public void onFailure(@NonNull Call<ApiResponse> call, @NonNull Throwable t) {
+                        Log.e("Image Upload", "Error: " + t.getMessage());
+                        Toast.makeText(requireContext(), "Image upload error", Toast.LENGTH_SHORT).show();
+                    }
+                });
+
+            }
+
+            else{
+
+                RequestBody requestBodyImage = RequestBody.create(MediaType.parse("image/jpeg"), file);
+                MultipartBody.Part filePart = MultipartBody.Part.createFormData("multipartFiles", file.getName(), requestBodyImage);
+                imageAPI.addImage(Collections.singletonList(filePart), edit_user.getId(), (OwnerType.USER)).enqueue(new Callback<ApiResponse>() {
+                    @Override
+                    public void onResponse(@NonNull Call<ApiResponse> call, @NonNull Response<ApiResponse> response) {
+                        if (response.isSuccessful()) {
+                            loaded_image_uri = null;
+                            isImageChanged = false;
+                            Toast.makeText(requireContext(), "Image added!", Toast.LENGTH_SHORT).show();
+                        }
+                        else if (response.code() == UNAUTHORIZE_CODE){
+                            String refreshToken = TokenUtils.getRefreshToken(requireContext());
+
+                            TokenUtils.createNewAccessToken(refreshToken, new TokenCallback() {
+                                @Override
+                                public void onSuccess(JwtResponse jwtResponse) {
+                                    // lưu lại token mới
+                                    TokenUtils.saveTokens(requireContext(), jwtResponse.getAccessToken(), jwtResponse.getRefreshToken());
+                                    // gọi lại API với token mới
+                                    updateImage();
+                                }
+
+                                @Override
+                                public void onFailure(String errorMessage) {
+                                    Toast.makeText(requireContext(), errorMessage, Toast.LENGTH_LONG).show();
+                                }
+                            });
+                        }
+                        else {
+                            Log.e("Image Adding", "Failed with code " + response.code());
+                            try {
+                                Log.d("error", "onResponse: " + response.errorBody().string());
+                            } catch (IOException e) {
+                                throw new RuntimeException(e);
                             }
-
-                            @Override
-                            public void onFailure(String errorMessage) {
-                                Toast.makeText(requireContext(), errorMessage, Toast.LENGTH_LONG).show();
-                            }
-                        });
+                            Toast.makeText(requireContext(), "Failed to add image", Toast.LENGTH_SHORT).show();
+                        }
                     }
-                    else {
-                        Log.e("Image Upload", "Failed with code " + response.code());
-                        Toast.makeText(requireContext(), "Failed to upload image", Toast.LENGTH_SHORT).show();
+
+                    @Override
+                    public void onFailure(@NonNull Call<ApiResponse> call, @NonNull Throwable t) {
+                        Log.e("Image add", "Error: " + t.getMessage());
+                        Toast.makeText(requireContext(), "Image upload error", Toast.LENGTH_SHORT).show();
                     }
-                }
+                });
+            }
 
 
-                @Override
-                public void onFailure(@NonNull Call<ApiResponse> call, @NonNull Throwable t) {
-                    Log.e("Image Upload", "Error: " + t.getMessage());
-                    Toast.makeText(requireContext(), "Image upload error", Toast.LENGTH_SHORT).show();
-                }
-            });
 
         } else {
             Log.d("Image Upload", "Skipped upload because user is using default image.");
@@ -320,7 +381,7 @@ public class UserDetailFragment extends Fragment implements View.OnClickListener
     private void getUpdatedUser(){
         String accessToken = "Bearer " + TokenUtils.getAccessToken(requireContext());
         UserAPI userAPI1 = RetrofitClient.getClient().create(UserAPI.class);
-        userAPI1.getUser(edit_user.getId(), accessToken).enqueue(new Callback<ApiResponse>() {
+        userAPI1.getUserById(edit_user.getId(), accessToken).enqueue(new Callback<ApiResponse>() {
             @Override
             public void onResponse(@NonNull Call<ApiResponse> call, @NonNull Response<ApiResponse> response) {
 
@@ -373,6 +434,9 @@ public class UserDetailFragment extends Fragment implements View.OnClickListener
 
     @Override
     public void onResume() {
+        BottomNavigationView navBar = requireActivity().findViewById(R.id.bottom_nav_bar);
+        navBar.setVisibility(View.GONE);
+
         super.onResume();
         if (loaded_image_uri != null) {
             Glide.with(requireContext())
@@ -380,7 +444,9 @@ public class UserDetailFragment extends Fragment implements View.OnClickListener
                     .into(profileImg);
             //Log.d("Uri", "Loaded selected image: " + loaded_image_uri);
         } else {
-            ImageUtils.loadImageIntoImageView(getContext(), (long) edit_user.getImage().getId(), profileImg);
+            if (edit_user.getImage() != null){
+                ImageUtils.loadImageIntoImageView(getContext(), (long) edit_user.getImage().getId(), profileImg);
+            }
             //Log.d("Uri", "Loaded default user image from server");
         }
     }
