@@ -60,6 +60,8 @@ public class ResetPasswordFragment extends Fragment implements View.OnClickListe
         if (getArguments() != null) {
             user_email = getArguments().getString(USER_EMAIL);
         }
+        authAPI = RetrofitClient.getClient().create(AuthAPI.class);
+
     }
 
     @Override
@@ -98,7 +100,6 @@ public class ResetPasswordFragment extends Fragment implements View.OnClickListe
             return;
         }
 
-        authAPI = RetrofitClient.getClient().create(AuthAPI.class);
         authAPI.resetPassword(user_email, newPassword).enqueue(new Callback<ApiResponse>() {
             @Override
             public void onResponse(@NonNull Call<ApiResponse> call, @NonNull Response<ApiResponse> response) {

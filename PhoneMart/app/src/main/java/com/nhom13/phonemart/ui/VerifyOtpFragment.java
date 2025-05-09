@@ -76,6 +76,8 @@ public class VerifyOtpFragment extends Fragment implements View.OnClickListener{
             user_email = getArguments().getString(USER_EMAIL);
             context = getArguments().getString(CONTEXT);
         }
+        authAPI = RetrofitClient.getClient().create(AuthAPI.class);
+
     }
 
     @Override
@@ -100,7 +102,6 @@ public class VerifyOtpFragment extends Fragment implements View.OnClickListener{
         confirmBtn = view.findViewById(R.id.verify_confirmBtn);
         otp = view.findViewById(R.id.otpPv);
         resendTv = view.findViewById(R.id.resendOtpTv);
-        authAPI = RetrofitClient.getClient().create(AuthAPI.class);
 
     }
 

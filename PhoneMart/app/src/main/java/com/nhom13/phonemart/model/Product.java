@@ -8,6 +8,7 @@ import androidx.annotation.NonNull;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -19,6 +20,8 @@ public class Product implements Serializable {
 
     private int inventory;
     private String description;
+
+    private String dateAdded;
 
     private Category category;
     private Set<Image> images = new HashSet<>();
@@ -98,4 +101,8 @@ public class Product implements Serializable {
     public void setImages(Set<Image> images) {
         this.images = images;
     }
+
+    public String getDateAdded() {return dateAdded;}
+
+    public void setDateAdded(String dateAdded) {this.dateAdded = dateAdded;}
 }

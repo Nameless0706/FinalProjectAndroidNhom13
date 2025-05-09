@@ -7,6 +7,7 @@ import androidx.annotation.NonNull;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 
@@ -18,6 +19,8 @@ public class ProductDto implements Serializable {
 	private BigDecimal price;
 	private int inventory;
 	private String description;
+
+	private String dateAdded;
 	private CategoryDto category;
 	private List<ImageDto> images;
 
@@ -96,4 +99,7 @@ public class ProductDto implements Serializable {
 		this.images = images;
 	}
 
+	public String getDateAdded() {return dateAdded;}
+
+	public void setDateAdded(String dateAdded) {this.dateAdded = dateAdded;}
 }

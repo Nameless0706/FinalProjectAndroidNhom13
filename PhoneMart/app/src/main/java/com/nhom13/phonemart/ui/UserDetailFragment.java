@@ -1,19 +1,13 @@
 package com.nhom13.phonemart.ui;
 
-import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentResultListener;
 
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,18 +19,18 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.textfield.TextInputLayout;
-import com.google.gson.Gson;
 import com.nhom13.phonemart.R;
 import com.nhom13.phonemart.api.ImageAPI;
 import com.nhom13.phonemart.api.RetrofitClient;
 import com.nhom13.phonemart.api.UserAPI;
-import com.nhom13.phonemart.dto.CartDto;
 import com.nhom13.phonemart.dto.UserDto;
 import com.nhom13.phonemart.enums.OwnerType;
+import com.nhom13.phonemart.model.interfaces.GeneralCallBack;
 import com.nhom13.phonemart.model.interfaces.TokenCallback;
 import com.nhom13.phonemart.model.request.UserUpdateRequest;
 import com.nhom13.phonemart.model.response.ApiResponse;
 import com.nhom13.phonemart.model.response.JwtResponse;
+import com.nhom13.phonemart.service.UserService;
 import com.nhom13.phonemart.util.DialogUtils;
 import com.nhom13.phonemart.util.FragmentUtils;
 import com.nhom13.phonemart.util.ImageUtils;
@@ -44,12 +38,8 @@ import com.nhom13.phonemart.util.RealPathUtils;
 import com.nhom13.phonemart.util.TokenUtils;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
@@ -57,7 +47,6 @@ import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.http.Multipart;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -112,6 +101,9 @@ public class UserDetailFragment extends Fragment implements View.OnClickListener
         if (getArguments() != null) {
             edit_user = (UserDto) getArguments().getSerializable(EDIT_USER);
         }
+        userAPI = RetrofitClient.getClient().create(UserAPI.class);
+        imageAPI = RetrofitClient.getClient().create(ImageAPI.class);
+
     }
 
     @Override
@@ -126,6 +118,8 @@ public class UserDetailFragment extends Fragment implements View.OnClickListener
 
         super.onViewCreated(view, savedInstanceState);
         Mapping(view);
+
+
 
         requireActivity().getSupportFragmentManager().setFragmentResultListener("image_result", getViewLifecycleOwner(), new FragmentResultListener() {
             @Override
@@ -144,6 +138,7 @@ public class UserDetailFragment extends Fragment implements View.OnClickListener
             }
         });
 
+
         backImg.setOnClickListener(this);
         imgGroup.setOnClickListener(this);
         confirmBtn.setOnClickListener(this);
@@ -154,7 +149,7 @@ public class UserDetailFragment extends Fragment implements View.OnClickListener
         firstNameEt.getEditText().setText(edit_user.getFirstName());
         lastNameEt.getEditText().setText(edit_user.getLastName());
 
-
+        getUpdatedUser();
 
 
 
@@ -162,17 +157,17 @@ public class UserDetailFragment extends Fragment implements View.OnClickListener
 
     private void Mapping(View view){
         profileImg = (ImageView) view.findViewById(R.id.editUserDetailProfileImg);
-        backImg = (ImageView) view.findViewById(R.id.userDetailBackImg);
+        backImg = (ImageView) view.findViewById(R.id.updatePasswordBackImg);
         imgGroup = (ConstraintLayout) view.findViewById(R.id.userDetailImgGroup);
         firstNameEt = (TextInputLayout) view.findViewById(R.id.userDetailFirstNameTv);
-        lastNameEt = (TextInputLayout) view.findViewById(R.id.userDetailLastNameTv);
-        confirmBtn = (Button) view.findViewById(R.id.userDetailConfirmBtn);
+        lastNameEt = (TextInputLayout) view.findViewById(R.id.updatePasswordConfirmPasswordTv);
+        confirmBtn = (Button) view.findViewById(R.id.updatePasswordConfirmBtn);
 
     }
 
     @Override
     public void onClick(View view) {
-        if (view.getId() == R.id.userDetailBackImg){
+        if (view.getId() == R.id.updatePasswordBackImg){
             requireActivity().getSupportFragmentManager().popBackStack();
 
 
@@ -184,6 +179,9 @@ public class UserDetailFragment extends Fragment implements View.OnClickListener
 
         else{
             updateUserDetails();
+            firstNameEt.setEnabled(false);
+            lastNameEt.setEnabled(false);
+
         }
     }
 
@@ -210,7 +208,6 @@ public class UserDetailFragment extends Fragment implements View.OnClickListener
         UserUpdateRequest updateRequestBody = new UserUpdateRequest(editUserFirstName, editUserLastName);
 
 
-        userAPI = RetrofitClient.getClient().create(UserAPI.class);
         userAPI.updateUserInfo(edit_user.getId(), updateRequestBody, "Bearer " + accessToken).enqueue(new Callback<ApiResponse>() {
             @Override
             public void onResponse(@NonNull Call<ApiResponse> call, @NonNull Response<ApiResponse> response) {
@@ -268,7 +265,6 @@ public class UserDetailFragment extends Fragment implements View.OnClickListener
 
 
             String token = "Bearer " + TokenUtils.getAccessToken(requireContext());
-            imageAPI = RetrofitClient.getClient().create(ImageAPI.class);
             if (edit_user.getImage() != null){
 
                 RequestBody requestBodyImage = RequestBody.create(MediaType.parse("image/jpeg"), file);
@@ -374,6 +370,23 @@ public class UserDetailFragment extends Fragment implements View.OnClickListener
         }
     }
 
+    private void getUpdatedUser() {
+        UserService userService = new UserService(requireContext());
+        userService.getUserDto(edit_user.getId(), new GeneralCallBack<UserDto>() {
+            @Override
+            public void onSuccess(UserDto result) {
+                edit_user = result;
+                firstNameEt.getEditText().setText(edit_user.getFirstName());
+                lastNameEt.getEditText().setText(edit_user.getLastName());
+            }
+
+            @Override
+            public void onError(Throwable t) {
+                Toast.makeText(requireContext(), t.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
 
     @Override
     public void onResume() {
@@ -381,6 +394,9 @@ public class UserDetailFragment extends Fragment implements View.OnClickListener
         navBar.setVisibility(View.GONE);
 
         super.onResume();
+
+        getUpdatedUser();
+
         if (loaded_image_uri != null) {
             Glide.with(requireContext())
                     .load(loaded_image_uri)

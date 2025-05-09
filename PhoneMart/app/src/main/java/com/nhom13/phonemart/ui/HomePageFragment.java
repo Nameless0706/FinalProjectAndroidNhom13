@@ -58,7 +58,7 @@ public class HomePageFragment extends Fragment implements RecyclerViewInterface,
     private ImageView cartImg;
 
     private TextView userNameTv, viewAllTv;
-    private EditText searchStr;
+    private EditText searchBar;
     private List<CategoryDto> categoryList;
     private List<ProductDto> productList;
     private CategoryAdapter categoryAdapter;
@@ -90,6 +90,9 @@ public class HomePageFragment extends Fragment implements RecyclerViewInterface,
         if (getArguments() != null) {
             loginUser = (UserDto) getArguments().getSerializable(LOGIN_USER);
         }
+        categoryAPI = RetrofitClient.getClient().create(CategoryAPI.class);
+        productAPI = RetrofitClient.getClient().create(ProductAPI.class);
+
     }
 
     @Override
@@ -111,7 +114,7 @@ public class HomePageFragment extends Fragment implements RecyclerViewInterface,
         getPopularProducts();
 
         cartImg.setOnClickListener(this);
-        searchStr.setOnEditorActionListener(this);
+        searchBar.setOnEditorActionListener(this);
         viewAllTv.setOnClickListener(this);
 
         actionViewFlipperMain();
@@ -151,7 +154,7 @@ public class HomePageFragment extends Fragment implements RecyclerViewInterface,
 
     private void Mapping(View view) {
         cartImg = (ImageView) view.findViewById(R.id.imageView_cart);
-        searchStr = (EditText) view.findViewById(R.id.searchEt);
+        searchBar = (EditText) view.findViewById(R.id.searchEt);
         rvCategories = (RecyclerView) view.findViewById(R.id.categoryRv);
         rvProducts = (RecyclerView) view.findViewById(R.id.popularProductRv);
         userNameTv = (TextView) view.findViewById(R.id.userNameTv);
@@ -161,7 +164,6 @@ public class HomePageFragment extends Fragment implements RecyclerViewInterface,
 
     private void getAllCategories() {
         categoryList = new ArrayList<>();
-        categoryAPI = RetrofitClient.getClient().create(CategoryAPI.class);
         categoryAPI.getAllCategories().enqueue(new Callback<ApiResponse>() {
             @Override
             public void onResponse(@NonNull Call<ApiResponse> call, @NonNull Response<ApiResponse> response) {
@@ -169,8 +171,7 @@ public class HomePageFragment extends Fragment implements RecyclerViewInterface,
 
                     Gson gson = new Gson();
                     String json = gson.toJson(response.body().getData());
-                    Type listType = new TypeToken<List<CategoryDto>>() {
-                    }.getType();
+                    Type listType = new TypeToken<List<CategoryDto>>() {}.getType();
                     categoryList = gson.fromJson(json, listType);
 
 
@@ -200,7 +201,6 @@ public class HomePageFragment extends Fragment implements RecyclerViewInterface,
 
     private void getPopularProducts() {
         productList = new ArrayList<>();
-        productAPI = RetrofitClient.getClient().create(ProductAPI.class);
         productAPI.getAllProducts().enqueue(new Callback<ApiResponse>() {
             @Override
             public void onResponse(@NonNull Call<ApiResponse> call, @NonNull Response<ApiResponse> response) {
@@ -208,8 +208,7 @@ public class HomePageFragment extends Fragment implements RecyclerViewInterface,
 
                     Gson gson = new Gson();
                     String json = gson.toJson(response.body().getData());
-                    Type listType = new TypeToken<List<ProductDto>>() {
-                    }.getType();
+                    Type listType = new TypeToken<List<ProductDto>>() {}.getType();
                     productList = gson.fromJson(json, listType);
 
                     popularProductAdapter = new PopularProductAdapter(getContext(), productList, HomePageFragment.this);
@@ -231,7 +230,6 @@ public class HomePageFragment extends Fragment implements RecyclerViewInterface,
 
     @Override
     public void onItemClick(int position, String source) {
-        // Note: Tao fragment bang constructor de gan cac thong tin, bay gio chi tam thoi load
         switch (source) {
             case "category":
                 CategoryDto selectedCategory = categoryList.get(position);
@@ -252,7 +250,7 @@ public class HomePageFragment extends Fragment implements RecyclerViewInterface,
         if (view.getId() == R.id.imageView_cart) {
             selected = CartFragment.newInstance(loginUser.getId());
         } else {
-            selected = new AllProductFragment();
+            selected = AllProductFragment.newInstance(loginUser.getId(), null);
         }
 
         FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.base_frag_container, selected);
@@ -262,18 +260,15 @@ public class HomePageFragment extends Fragment implements RecyclerViewInterface,
     @Override
     public boolean onEditorAction(TextView textView, int actionId, KeyEvent keyEvent) {
         if (actionId == EditorInfo.IME_ACTION_SEARCH || actionId == EditorInfo.IME_ACTION_DONE) {
-            // Handle Enter (or search) key press
-            String query = searchStr.getText().toString().trim();
+            String query = searchBar.getText().toString().trim();
             if (!query.isEmpty()) {
-                // You can trigger a search or filter operation here
                 Toast.makeText(getContext(), "Searching for: " + query, Toast.LENGTH_SHORT).show();
 
-                FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.base_frag_container, new AllProductFragment());
-                // For example, call your search function here or update your UI
+                FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.base_frag_container, AllProductFragment.newInstance(loginUser.getId(), query));
             }
-            return true; // Return true if the action is handled
+            return true;
         }
-        return false; // Return false if action is not handled
+        return false;
 
     }
 
@@ -282,5 +277,7 @@ public class HomePageFragment extends Fragment implements RecyclerViewInterface,
         super.onResume();
         BottomNavigationView navBar = requireActivity().findViewById(R.id.bottom_nav_bar);
         navBar.setVisibility(View.VISIBLE);
+        searchBar.setText("");
+
     }
 }

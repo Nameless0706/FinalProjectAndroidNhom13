@@ -1,5 +1,6 @@
 package com.nhom13.phonemart.api;
 
+import com.nhom13.phonemart.model.request.UserPasswordUpdateRequest;
 import com.nhom13.phonemart.model.request.UserUpdateRequest;
 import com.nhom13.phonemart.model.response.ApiResponse;
 
@@ -20,6 +21,12 @@ public interface UserAPI {
     Call<ApiResponse> updateUserInfo(
             @Path("userId") Long userId,
             @Body UserUpdateRequest userUpdateRequest,
+            @Header("Authorization") String token);
+
+    @PUT("users/user/{userId}/update-password")
+    Call<ApiResponse> updateUserPassword(
+            @Path("userId") Long userId,
+            @Body UserPasswordUpdateRequest userPasswordUpdateRequest,
             @Header("Authorization") String token);
     @PUT("users/user/favorite/{userId}/{productId}")
     Call<ApiResponse> saveFavoriteProduct(

@@ -15,12 +15,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.nhom13.phonemart.R;
 import com.nhom13.phonemart.dto.ImageDto;
 import com.nhom13.phonemart.dto.UserDto;
+import com.nhom13.phonemart.model.interfaces.GeneralCallBack;
+import com.nhom13.phonemart.service.UserService;
 import com.nhom13.phonemart.util.FragmentUtils;
 import com.nhom13.phonemart.util.ImageUtils;
 
@@ -79,8 +82,12 @@ public class UserFragment extends Fragment implements View.OnClickListener{
         editUserDetailImg.setOnClickListener(this);
         editUserPasswordImg.setOnClickListener(this);
 
+
         String name = loginUser.getFirstName() + " " + loginUser.getLastName();
         userNameTv.setText(name);
+
+        getUpdatedUser();
+
 
 
         ImageDto loginUserImageDto = loginUser.getImage();
@@ -93,6 +100,8 @@ public class UserFragment extends Fragment implements View.OnClickListener{
                     .load(R.drawable.profile)
                     .into(profileImg);
         }
+
+
     }
 
     private void Mapping(View view) {
@@ -103,6 +112,22 @@ public class UserFragment extends Fragment implements View.OnClickListener{
 
     }
 
+    private void getUpdatedUser() {
+        UserService userService = new UserService(requireContext());
+        userService.getUserDto(loginUser.getId(), new GeneralCallBack<UserDto>() {
+            @Override
+            public void onSuccess(UserDto result) {
+                loginUser = result;
+                userNameTv.setText(String.format("%s %s", result.getFirstName(), result.getLastName()));
+            }
+
+            @Override
+            public void onError(Throwable t) {
+                Toast.makeText(requireContext(), t.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
     @Override
     public void onClick(View view) {
 
@@ -111,7 +136,7 @@ public class UserFragment extends Fragment implements View.OnClickListener{
         }
 
         else{
-
+            FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.base_frag_container, UpdatePasswordFragment.newInstance(loginUser));
         }
     }
 

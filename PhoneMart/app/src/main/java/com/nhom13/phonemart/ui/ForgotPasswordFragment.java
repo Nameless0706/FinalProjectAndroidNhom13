@@ -61,7 +61,7 @@ public class ForgotPasswordFragment extends Fragment implements View.OnClickList
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        authAPI = RetrofitClient.getClient().create(AuthAPI.class);
     }
 
     @Override
@@ -105,7 +105,6 @@ public class ForgotPasswordFragment extends Fragment implements View.OnClickList
     }
 
     private void sendConfirmOtp(){
-        authAPI = RetrofitClient.getClient().create(AuthAPI.class);
         String email = forgotEmailEt.getText().toString();
         authAPI.forgotPassword(email).enqueue(new Callback<ApiResponse>() {
             @Override

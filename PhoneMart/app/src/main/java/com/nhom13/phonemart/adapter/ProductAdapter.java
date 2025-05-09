@@ -14,28 +14,29 @@ import com.bumptech.glide.Glide;
 import com.nhom13.phonemart.R;
 import com.nhom13.phonemart.dto.ProductDto;
 import com.nhom13.phonemart.model.Product;
+import com.nhom13.phonemart.model.interfaces.OnProductItemActionListener;
 
 import java.util.List;
 
 public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductViewHolder>{
 
-    private final RecyclerViewInterface recyclerViewInterface;
+    private OnProductItemActionListener onProductItemActionListener;
     private Context context;
     private List<ProductDto> products;
 
 
 
-    public ProductAdapter(Context context, List<ProductDto> products, RecyclerViewInterface recyclerViewInterface) {
+    public ProductAdapter(Context context, List<ProductDto> products, OnProductItemActionListener onProductItemActionListener) {
         this.context = context;
         this.products = products;
-        this.recyclerViewInterface = recyclerViewInterface;
+        this.onProductItemActionListener = onProductItemActionListener;
     }
 
     @NonNull
     @Override
     public ProductViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(context).inflate(R.layout.item_product, parent, false);
-        return new ProductViewHolder(view, recyclerViewInterface);
+        return new ProductViewHolder(view, onProductItemActionListener);
     }
 
     @Override
@@ -67,24 +68,24 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
 
         ImageView productImg;
 
+        OnProductItemActionListener onProductItemActionListener;
 
 
-        public ProductViewHolder(@NonNull View itemView, RecyclerViewInterface recyclerViewInterface) {
+        public ProductViewHolder(@NonNull View itemView, OnProductItemActionListener onProductItemActionListener) {
             super(itemView);
             productNameTv = itemView.findViewById(R.id.prodNameTv);
             productPriceTv = itemView.findViewById(R.id.prodPriceTv);
             productImg = itemView.findViewById(R.id.prodImg);
 
 
+
+            this.onProductItemActionListener = onProductItemActionListener;
+
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    if (recyclerViewInterface != null){
-                        int position = getBindingAdapterPosition();
-
-                        if (position != RecyclerView.NO_POSITION){
-                            recyclerViewInterface.onItemClick(position, "product");
-                        }
+                    if (onProductItemActionListener != null){
+                        onProductItemActionListener.onClickProductItem(getBindingAdapterPosition());
                     }
                 }
             });
