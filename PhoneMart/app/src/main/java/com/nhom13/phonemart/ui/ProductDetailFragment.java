@@ -5,7 +5,6 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,40 +16,25 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewFlipper;
 
-import com.bumptech.glide.Glide;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.google.gson.Gson;
 import com.nhom13.phonemart.R;
 import com.nhom13.phonemart.api.CartItemAPI;
-import com.nhom13.phonemart.api.RetrofitClient;
-import com.nhom13.phonemart.api.UserAPI;
 import com.nhom13.phonemart.dto.ImageDto;
 import com.nhom13.phonemart.dto.ProductDto;
 import com.nhom13.phonemart.dto.UserDto;
-import com.nhom13.phonemart.model.interfaces.TokenCallback;
-import com.nhom13.phonemart.model.response.ApiResponse;
-import com.nhom13.phonemart.model.response.JwtResponse;
+import com.nhom13.phonemart.model.interfaces.GeneralCallBack;
+import com.nhom13.phonemart.service.CartItemService;
+import com.nhom13.phonemart.service.UserService;
 import com.nhom13.phonemart.util.FragmentUtils;
 import com.nhom13.phonemart.util.ImageUtils;
-import com.nhom13.phonemart.util.TokenUtils;
 
 import java.util.Random;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link ProductDetailFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
 public class ProductDetailFragment extends Fragment implements View.OnClickListener {
 
-    private UserAPI userAPI;
     private Long userId;
-    private UserDto userDto;
-
+    private CartItemService cartItemService;
+    private UserService userService;
     private static final String PRODUCT_DTO = "product_dto";
     private ProductDto productDto;
     private CartItemAPI cartItemAPI;
@@ -58,7 +42,6 @@ public class ProductDetailFragment extends Fragment implements View.OnClickListe
     private ViewFlipper viewFlipper_productImage;
     private TextView textView_productName, textView_price, textView_brand, textView_description, textView_sold, textView_inventory, textView_category;
     private Button button_addToCart, button_buy;
-
     boolean isFavorite = false;
 
     public ProductDetailFragment() {
@@ -77,8 +60,8 @@ public class ProductDetailFragment extends Fragment implements View.OnClickListe
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        cartItemAPI = RetrofitClient.getClient().create(CartItemAPI.class);
-        userAPI = RetrofitClient.getClient().create(UserAPI.class);
+        cartItemService = new CartItemService(requireContext());
+        userService = new UserService(requireContext());
 
         if (getArguments() != null) {
             productDto = (ProductDto) getArguments().getSerializable(PRODUCT_DTO);
@@ -126,7 +109,7 @@ public class ProductDetailFragment extends Fragment implements View.OnClickListe
         setProductImages();
 
         textView_productName.setText(productDto.getName());
-        textView_price.setText("$ " + productDto.getPrice());
+        textView_price.setText(String.format("$ %s", productDto.getPrice()));
         textView_brand.setText(productDto.getBrand());
         textView_sold.setText(String.valueOf(getRandomSold()));
         textView_inventory.setText(String.valueOf(productDto.getInventory()));
@@ -162,12 +145,21 @@ public class ProductDetailFragment extends Fragment implements View.OnClickListe
 
     @Override
     public void onClick(View view) {
-        Fragment selected = null;
         // cả addProductToCart/buyProduct phải check viewId để xử lý response
         if (view.getId() == R.id.imageView_back) {
             requireActivity().getSupportFragmentManager().popBackStack();
         } else if (view.getId() == R.id.button_addToCart) {
-            addProductToCart(view.getId());
+            cartItemService.addProductToCart(view.getId(), productDto.getId(), new GeneralCallBack<String>() {
+                @Override
+                public void onSuccess(String result) {
+                    Toast.makeText(requireContext(), result, Toast.LENGTH_SHORT).show();
+                }
+
+                @Override
+                public void onError(Throwable t) {
+                    Toast.makeText(requireContext(), t.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            });
         } else if (view.getId() == R.id.button_buy) {
             buyProduct(view.getId());
         } else if (view.getId() == R.id.imageView_favourite) {
@@ -184,148 +176,62 @@ public class ProductDetailFragment extends Fragment implements View.OnClickListe
             imageView.setImageResource(R.drawable.baseline_favorite_24);
         }
 
-        handleSaveFavoriteProduct();
+        userService.handleSaveFavoriteProduct(userId, productDto.getId(), new GeneralCallBack<UserDto>() {
+            @Override
+            public void onSuccess(UserDto result) {
+
+            }
+
+            @Override
+            public void onError(Throwable t) {
+                Toast.makeText(requireContext(), t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
 
         // Đảo trạng thái
         isFavorite = !isFavorite;
     }
 
     private void buyProduct(int viewId) {
-        addProductToCart(viewId);
-    }
-
-    private void addProductToCart(int viewId) {
-        String accessToken = TokenUtils.getAccessToken(requireContext());
-
-        cartItemAPI.addCartItem(productDto.getId(), 1, "Bearer " + accessToken).enqueue(new Callback<ApiResponse>() {
+        cartItemService.addProductToCart(viewId, productDto.getId(), new GeneralCallBack<String>() {
             @Override
-            public void onResponse(Call<ApiResponse> call, Response<ApiResponse> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    handleAddProductResponse(viewId, response);
-                } else if (response.code() == 401) {
-                    // Token hết hạn → gọi refresh
-                    String refreshToken = TokenUtils.getRefreshToken(requireContext());
-
-                    TokenUtils.createNewAccessToken(refreshToken, new TokenCallback() {
-                        @Override
-                        public void onSuccess(JwtResponse jwtResponse) {
-                            // lưu lại token mới
-                            TokenUtils.saveTokens(requireContext(), jwtResponse.getAccessToken(), jwtResponse.getRefreshToken());
-                            // gọi lại API với token mới
-                            addProductToCart(viewId);
-                        }
-
-                        @Override
-                        public void onFailure(String errorMessage) {
-                            Toast.makeText(requireContext(), errorMessage, Toast.LENGTH_LONG).show();
-                        }
-                    });
+            public void onSuccess(String result) {
+                if (viewId == R.id.button_addToCart) {
+                    Toast.makeText(requireContext(), result, Toast.LENGTH_SHORT).show();
+                } else if (viewId == R.id.button_buy) {
+                    // nếu đưa thẳng vào buyProduct() thì sẽ gặp lỗi async
+                    FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.base_frag_container, CartFragment.newInstance(userId));
                 }
             }
 
             @Override
-            public void onFailure(Call<ApiResponse> call, Throwable throwable) {
-                Log.d("onFailure", "onFailure: " + throwable.getMessage());
+            public void onError(Throwable t) {
+                Toast.makeText(getContext(), t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
 
-    private void handleAddProductResponse(int viewId, Response<ApiResponse> response) {
-        if (viewId == R.id.button_addToCart) {
-            Toast.makeText(requireContext(), response.body().getMessage(), Toast.LENGTH_SHORT).show();
-        } else if (viewId == R.id.button_buy) {
-            // nếu đưa thẳng vào buyProduct() thì sẽ gặp lỗi async
-            FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.base_frag_container, CartFragment.newInstance(userId));
-        }
-    }
-
-    private void getUserById() {
-        String accessToken = TokenUtils.getAccessToken(requireContext());
-
-        userAPI.getUserById(userId, "Bearer " + accessToken).enqueue(new Callback<ApiResponse>() {
+    private void getUserById(){
+        userService.getUserDto(userId, new GeneralCallBack<UserDto>() {
             @Override
-            public void onResponse(Call<ApiResponse> call, Response<ApiResponse> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    handleGetUserResponse(response);
-                } else if (response.code() == 401) {
-                    // Token hết hạn → gọi refresh
-                    String refreshToken = TokenUtils.getRefreshToken(requireContext());
+            public void onSuccess(UserDto result) {
+                for (ProductDto product : result.getFavoriteProducts()) {
+                    if (product.getId().equals(productDto.getId())) {
+                        isFavorite = true;
+                        break;
+                    }
+                }
 
-                    TokenUtils.createNewAccessToken(refreshToken, new TokenCallback() {
-                        @Override
-                        public void onSuccess(JwtResponse jwtResponse) {
-                            // lưu lại token mới
-                            TokenUtils.saveTokens(requireContext(), jwtResponse.getAccessToken(), jwtResponse.getRefreshToken());
-                            // gọi lại API với token mới
-                            getUserById();
-                        }
-
-                        @Override
-                        public void onFailure(String errorMessage) {
-                            Toast.makeText(requireContext(), errorMessage, Toast.LENGTH_LONG).show();
-                            Log.d("onFailure", "onFailure: " + requireContext());
-                        }
-                    });
+                if (isFavorite) {
+                    imageView_favourite.setImageResource(R.drawable.baseline_favorite_24);
+                } else {
+                    imageView_favourite.setImageResource(R.drawable.baseline_favorite_border_24);
                 }
             }
 
             @Override
-            public void onFailure(Call<ApiResponse> call, Throwable throwable) {
-                Log.d("onFailure", "onFailure: " + throwable.getMessage());
-            }
-        });
-    }
-
-    private void handleGetUserResponse(Response<ApiResponse> response) {
-        Gson gson = new Gson();
-        String json = gson.toJson(response.body().getData());
-        userDto = gson.fromJson(json, UserDto.class);
-
-        for (ProductDto product : userDto.getFavoriteProducts()) {
-            if (product.getId().equals(productDto.getId())) {
-                isFavorite = true;
-                break;
-            }
-        }
-
-        if (isFavorite) {
-            imageView_favourite.setImageResource(R.drawable.baseline_favorite_24);
-        } else {
-            imageView_favourite.setImageResource(R.drawable.baseline_favorite_border_24);
-        }
-    }
-
-    private void handleSaveFavoriteProduct() {
-        String accessToken = TokenUtils.getAccessToken(requireContext());
-
-        userAPI.saveFavoriteProduct(userId, productDto.getId(), "Bearer " + accessToken).enqueue(new Callback<ApiResponse>() {
-            @Override
-            public void onResponse(Call<ApiResponse> call, Response<ApiResponse> response) {
-                if (response.code() == 401) {
-                    // Token hết hạn → gọi refresh
-                    String refreshToken = TokenUtils.getRefreshToken(requireContext());
-
-                    TokenUtils.createNewAccessToken(refreshToken, new TokenCallback() {
-                        @Override
-                        public void onSuccess(JwtResponse jwtResponse) {
-                            // lưu lại token mới
-                            TokenUtils.saveTokens(requireContext(), jwtResponse.getAccessToken(), jwtResponse.getRefreshToken());
-                            // gọi lại API với token mới
-                            handleSaveFavoriteProduct();
-                        }
-
-                        @Override
-                        public void onFailure(String errorMessage) {
-                            Toast.makeText(requireContext(), errorMessage, Toast.LENGTH_LONG).show();
-                            Log.d("onFailure", "onFailure: " + requireContext());
-                        }
-                    });
-                }
-            }
-
-            @Override
-            public void onFailure(Call<ApiResponse> call, Throwable throwable) {
-                Log.d("onFailure", "onFailure: " + throwable.getMessage());
+            public void onError(Throwable t) {
+                Toast.makeText(requireContext(), t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -337,6 +243,5 @@ public class ProductDetailFragment extends Fragment implements View.OnClickListe
 
         super.onResume();
     }
-
 
 }

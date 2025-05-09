@@ -1,12 +1,10 @@
 package com.nhom13.phonemart.ui;
 
-import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.LayoutInflater;
@@ -84,8 +82,8 @@ public class AllProductFragment extends Fragment implements RecyclerViewInterfac
     }
 
     public void Mapping(View view){
-        tabLayout = view.findViewById(R.id.filterTabLayout);
-        rvProduct = view.findViewById(R.id.rvProducts);
+        tabLayout = view.findViewById(R.id.tabLayout);
+        rvProduct = view.findViewById(R.id.recycleView_product);
         backImg = view.findViewById(R.id.allProductBackImg);
     }
 

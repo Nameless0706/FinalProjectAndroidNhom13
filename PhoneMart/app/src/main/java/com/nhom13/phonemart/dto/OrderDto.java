@@ -1,29 +1,25 @@
 package com.nhom13.phonemart.dto;
 
-import android.os.Parcel;
-import android.os.Parcelable;
-
-import androidx.annotation.NonNull;
-
 import com.nhom13.phonemart.enums.OrderStatus;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.time.LocalDate;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Set;
 
 
 
 public class OrderDto implements Serializable {
 	private Long id;
-	private LocalDate orderDate;
+	private Date orderDate;
 	private OrderStatus orderStatus;
 	private BigDecimal totalAmount;
 	private String address;
 	private Set<OrderItemDto> orderItems;
 	private BranchDto branch;
 
-	public OrderDto(Long id, LocalDate orderDate, OrderStatus orderStatus, BigDecimal totalAmount, String address, Set<OrderItemDto> orderItems, BranchDto branch) {
+	public OrderDto(Long id, Date orderDate, OrderStatus orderStatus, BigDecimal totalAmount, String address, Set<OrderItemDto> orderItems, BranchDto branch) {
 		this.id = id;
 		this.orderDate = orderDate;
 		this.orderStatus = orderStatus;
@@ -41,11 +37,11 @@ public class OrderDto implements Serializable {
 		this.id = id;
 	}
 
-	public LocalDate getOrderDate() {
+	public Date getOrderDate() {
 		return orderDate;
 	}
 
-	public void setOrderDate(LocalDate orderDate) {
+	public void setOrderDate(Date orderDate) {
 		this.orderDate = orderDate;
 	}
 
@@ -73,11 +69,24 @@ public class OrderDto implements Serializable {
 		this.orderItems = orderItems;
 	}
 
+	public void setAddress(String address) {
+		this.address = address;
+	}
+
+	public void setBranch(BranchDto branch) {
+		this.branch = branch;
+	}
+
 	public String getAddress() {
 		return address;
 	}
 
 	public BranchDto getBranch() {
 		return branch;
+	}
+
+	public String convertDate(){
+		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+		return sdf.format(orderDate);
 	}
 }

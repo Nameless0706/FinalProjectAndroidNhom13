@@ -1,21 +1,13 @@
 package com.nhom13.phonemart.api;
 
-import com.nhom13.phonemart.model.Category;
 import com.nhom13.phonemart.model.request.CreateUserRequest;
 import com.nhom13.phonemart.model.request.GoogleLoginRequest;
 import com.nhom13.phonemart.model.request.LoginRequest;
 import com.nhom13.phonemart.model.response.ApiResponse;
-import com.nhom13.phonemart.model.response.JwtResponse;
-
-import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.http.Body;
-import retrofit2.http.Field;
-import retrofit2.http.FormUrlEncoded;
-import retrofit2.http.GET;
 import retrofit2.http.POST;
-import retrofit2.http.Part;
 import retrofit2.http.Query;
 
 public interface AuthAPI {
@@ -42,4 +34,7 @@ public interface AuthAPI {
 
     @POST("auth/refresh-token")
     Call<ApiResponse> createNewAccessToken(@Query("reft") String refreshToken);
+
+    @POST("auth/logout")
+    Call<ApiResponse> logout(@Query("refreshToken") String refreshToken);
 }

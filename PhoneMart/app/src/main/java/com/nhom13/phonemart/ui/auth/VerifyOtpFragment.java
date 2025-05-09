@@ -1,4 +1,4 @@
-package com.nhom13.phonemart.ui;
+package com.nhom13.phonemart.ui.auth;
 
 import android.os.Bundle;
 
@@ -19,14 +19,12 @@ import com.google.gson.JsonParser;
 import com.nhom13.phonemart.R;
 import com.nhom13.phonemart.api.AuthAPI;
 import com.nhom13.phonemart.api.RetrofitClient;
-import com.nhom13.phonemart.model.request.CreateUserRequest;
 import com.nhom13.phonemart.model.response.ApiResponse;
-import com.nhom13.phonemart.ui.auth.LoginFragment;
+import com.nhom13.phonemart.ui.ResetPasswordFragment;
 import com.nhom13.phonemart.util.DialogUtils;
 import com.nhom13.phonemart.util.FragmentUtils;
 
 import java.io.IOException;
-import java.util.Objects;
 
 import retrofit2.Call;
 import retrofit2.Callback;

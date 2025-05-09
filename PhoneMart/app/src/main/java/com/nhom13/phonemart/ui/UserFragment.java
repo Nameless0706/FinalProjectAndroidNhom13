@@ -1,50 +1,39 @@
 package com.nhom13.phonemart.ui;
 
-import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentResultListener;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.nhom13.phonemart.BaseFragment;
 import com.nhom13.phonemart.R;
 import com.nhom13.phonemart.dto.ImageDto;
 import com.nhom13.phonemart.dto.UserDto;
+import com.nhom13.phonemart.service.AuthService;
 import com.nhom13.phonemart.util.FragmentUtils;
 import com.nhom13.phonemart.util.ImageUtils;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link UserFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
-public class UserFragment extends Fragment implements View.OnClickListener{
+public class UserFragment extends Fragment implements View.OnClickListener {
 
     private static final String LOGIN_USER = "login_user";
-
     private ImageView profileImg, editUserDetailImg, editUserPasswordImg;
-
-    private TextView userNameTv;
-
+    private TextView userNameTv, textView_user_orderNumber, textView_user_favoriteProductNumber, textView_user_shippingOrderNumber;
+    private LinearLayout linearLayout_orders, linearLayout_favorites, linearLayout_shipping;
+    private Button button_logout;
     private UserDto loginUser;
 
-
     public UserFragment() {
-        // Required empty public constructor
     }
-
-
 
     public static UserFragment newInstance(UserDto userDto) {
         UserFragment fragment = new UserFragment();
@@ -78,6 +67,11 @@ public class UserFragment extends Fragment implements View.OnClickListener{
 
         editUserDetailImg.setOnClickListener(this);
         editUserPasswordImg.setOnClickListener(this);
+        linearLayout_orders.setOnClickListener(this);
+        linearLayout_favorites.setOnClickListener(this);
+        linearLayout_shipping.setOnClickListener(this);
+
+        button_logout.setOnClickListener(this);
 
         String name = loginUser.getFirstName() + " " + loginUser.getLastName();
         userNameTv.setText(name);
@@ -101,17 +95,35 @@ public class UserFragment extends Fragment implements View.OnClickListener{
         editUserPasswordImg = (ImageView) view.findViewById(R.id.editUserPasswordImg);
         userNameTv = (TextView) view.findViewById(R.id.profileUsernameTv);
 
+        textView_user_orderNumber = view.findViewById(R.id.textView_user_orderNumber);
+        textView_user_favoriteProductNumber = view.findViewById(R.id.textView_user_favoriteProductNumber);
+        textView_user_shippingOrderNumber = view.findViewById(R.id.textView_user_shippingOrderNumber);
+
+        linearLayout_orders = view.findViewById(R.id.linearLayout_orders);
+        linearLayout_favorites = view.findViewById(R.id.linearLayout_favorites);
+        linearLayout_shipping = view.findViewById(R.id.linearLayout_shipping);
+
+        button_logout = view.findViewById(R.id.button_logout);
     }
 
     @Override
     public void onClick(View view) {
-
-        if (view.getId() == R.id.editUserDetailImg){
+        if (view.getId() == R.id.editUserDetailImg) {
             FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.base_frag_container, UserDetailFragment.newInstance(loginUser));
-        }
+        } else if (view.getId() == R.id.linearLayout_orders) {
+            FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.base_frag_container, OrderFragment.newInstance(loginUser.getId(), "None"));
+        } else if (view.getId() == R.id.linearLayout_favorites) {
+            FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.base_frag_container, FavoriteFragment.newInstance(loginUser.getId()));
 
-        else{
+            BottomNavigationView navBar = requireActivity().findViewById(R.id.bottom_nav_bar);
+            navBar.setSelectedItemId(R.id.favorite);
+        } else if (view.getId() == R.id.linearLayout_shipping) {
+            FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.base_frag_container, OrderFragment.newInstance(loginUser.getId(), "Shipping"));
+        } else if (view.getId() == R.id.button_logout) {
+            AuthService authService = new AuthService(requireContext());
+            authService.logout();
 
+            FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.main_frag_container, BaseFragment.newInstance(loginUser));
         }
     }
 

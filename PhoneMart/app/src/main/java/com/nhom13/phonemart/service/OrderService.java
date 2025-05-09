@@ -2,19 +2,14 @@ package com.nhom13.phonemart.service;
 
 import android.content.Context;
 
-import androidx.annotation.NonNull;
-
 import com.google.gson.Gson;
-import com.nhom13.phonemart.R;
+import com.nhom13.phonemart.api.OrderAPI;
 import com.nhom13.phonemart.api.RetrofitClient;
-import com.nhom13.phonemart.api.UserAPI;
-import com.nhom13.phonemart.dto.UserDto;
+import com.nhom13.phonemart.dto.OrderDto;
 import com.nhom13.phonemart.model.interfaces.GeneralCallBack;
 import com.nhom13.phonemart.model.interfaces.TokenCallback;
-import com.nhom13.phonemart.model.request.UserUpdateRequest;
 import com.nhom13.phonemart.model.response.ApiResponse;
 import com.nhom13.phonemart.model.response.JwtResponse;
-import com.nhom13.phonemart.util.DialogUtils;
 import com.nhom13.phonemart.util.TokenUtils;
 
 import java.io.IOException;
@@ -23,33 +18,30 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class UserService {
-    private UserAPI userAPI;
+public class OrderService {
+    private OrderAPI orderAPI;
     private Context context;
-    private ImageService imageService;
 
-    public UserService(Context context) {
+    public OrderService(Context context) {
         this.context = context;
 
-        userAPI = RetrofitClient.getClient().create(UserAPI.class);
-        imageService = new ImageService(context);
+        orderAPI = RetrofitClient.getClient().create(OrderAPI.class);
     }
 
-    public void getUserDto(Long userId, GeneralCallBack<UserDto> callback) {
+    public void placeOrder(Long userId, Long branchId, String address, GeneralCallBack<OrderDto> generalCallBack) {
         String accessToken = TokenUtils.getAccessToken(context);
 
-        userAPI.getUserById(userId, "Bearer " + accessToken).enqueue(new Callback<ApiResponse>() {
+        orderAPI.placeOrder(userId, branchId, address, "Bearer " + accessToken).enqueue(new Callback<ApiResponse>() {
             @Override
             public void onResponse(Call<ApiResponse> call, Response<ApiResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     Object rawData = response.body().getData();
 
-                    // Đảm bảo ép kiểu đúng
                     Gson gson = new Gson();
                     String json = gson.toJson(rawData);
-                    UserDto userDto = gson.fromJson(json, UserDto.class);
+                    OrderDto orderDto = gson.fromJson(json, OrderDto.class);
 
-                    callback.onSuccess(userDto);
+                    generalCallBack.onSuccess(orderDto);
                 } else if (response.code() == 401) {
                     // Token hết hạn → gọi refresh
                     String refreshToken = TokenUtils.getRefreshToken(context);
@@ -60,46 +52,45 @@ public class UserService {
                             // lưu lại token mới
                             TokenUtils.saveTokens(context, jwtResponse.getAccessToken(), jwtResponse.getRefreshToken());
                             // gọi lại API với token mới
-                            getUserDto(userId, callback);
+                            placeOrder(userId, branchId, address, generalCallBack);
                         }
 
                         @Override
                         public void onFailure(String errorMessage) {
-                            callback.onError(new Exception("Token refresh failed: " + errorMessage));
+                            generalCallBack.onError(new Exception(errorMessage));
                         }
                     });
                 } else {
                     try {
                         String errorBody = response.errorBody() != null ? response.errorBody().string() : "Unknown error";
-                        callback.onError(new Exception("API Error: " + errorBody));
+                        generalCallBack.onError(new Exception("API Error: " + errorBody));
                     } catch (IOException e) {
-                        callback.onError(e);
+                        generalCallBack.onError(e);
                     }
                 }
             }
 
             @Override
             public void onFailure(Call<ApiResponse> call, Throwable throwable) {
-                callback.onError(throwable);
+                generalCallBack.onError(throwable);
             }
         });
     }
 
-    public void handleSaveFavoriteProduct(Long userId, Long productId, GeneralCallBack<UserDto> generalCallBack) {
+    public void getOrderById(Long orderId, GeneralCallBack<OrderDto> generalCallBack) {
         String accessToken = TokenUtils.getAccessToken(context);
 
-        userAPI.saveFavoriteProduct(userId, productId, "Bearer " + accessToken).enqueue(new Callback<ApiResponse>() {
+        orderAPI.getOrderById(orderId, "Bearer " + accessToken).enqueue(new Callback<ApiResponse>() {
             @Override
             public void onResponse(Call<ApiResponse> call, Response<ApiResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     Object rawData = response.body().getData();
 
-                    // Đảm bảo ép kiểu đúng
                     Gson gson = new Gson();
                     String json = gson.toJson(rawData);
-                    UserDto userDto = gson.fromJson(json, UserDto.class);
+                    OrderDto orderDto = gson.fromJson(json, OrderDto.class);
 
-                    generalCallBack.onSuccess(userDto);
+                    generalCallBack.onSuccess(orderDto);
                 } else if (response.code() == 401) {
                     // Token hết hạn → gọi refresh
                     String refreshToken = TokenUtils.getRefreshToken(context);
@@ -110,7 +101,7 @@ public class UserService {
                             // lưu lại token mới
                             TokenUtils.saveTokens(context, jwtResponse.getAccessToken(), jwtResponse.getRefreshToken());
                             // gọi lại API với token mới
-                            handleSaveFavoriteProduct(userId, productId, generalCallBack);
+                            getOrderById(orderId, generalCallBack);
                         }
 
                         @Override
@@ -118,6 +109,13 @@ public class UserService {
                             generalCallBack.onError(new Exception(errorMessage));
                         }
                     });
+                } else {
+                    try {
+                        String errorBody = response.errorBody() != null ? response.errorBody().string() : "Unknown error";
+                        generalCallBack.onError(new Exception("API Error: " + errorBody));
+                    } catch (IOException e) {
+                        generalCallBack.onError(e);
+                    }
                 }
             }
 
@@ -128,24 +126,22 @@ public class UserService {
         });
     }
 
-    public void updateUserDetails(Long userId, UserUpdateRequest updateRequestBody, GeneralCallBack<UserDto> generalCallBack) {
+    public void cancelOrder(Long orderId, GeneralCallBack<OrderDto> generalCallBack){
         String accessToken = TokenUtils.getAccessToken(context);
 
-        userAPI.updateUserInfo(userId, updateRequestBody, "Bearer " + accessToken).enqueue(new Callback<ApiResponse>() {
+        orderAPI.cancelOrder(orderId, "Bearer " + accessToken).enqueue(new Callback<ApiResponse>() {
             @Override
-            public void onResponse(@NonNull Call<ApiResponse> call, @NonNull Response<ApiResponse> response) {
+            public void onResponse(Call<ApiResponse> call, Response<ApiResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     Object rawData = response.body().getData();
 
-                    // Đảm bảo ép kiểu đúng
                     Gson gson = new Gson();
                     String json = gson.toJson(rawData);
-                    UserDto userDto = gson.fromJson(json, UserDto.class);
+                    OrderDto orderDto = gson.fromJson(json, OrderDto.class);
 
-                    generalCallBack.onSuccess(userDto);
-
-                    DialogUtils.ShowDialog(context, R.layout.success_dialog, "Thành công", "Cập nhật thông tin thành công");
+                    generalCallBack.onSuccess(orderDto);
                 } else if (response.code() == 401) {
+                    // Token hết hạn → gọi refresh
                     String refreshToken = TokenUtils.getRefreshToken(context);
 
                     TokenUtils.createNewAccessToken(refreshToken, new TokenCallback() {
@@ -154,7 +150,7 @@ public class UserService {
                             // lưu lại token mới
                             TokenUtils.saveTokens(context, jwtResponse.getAccessToken(), jwtResponse.getRefreshToken());
                             // gọi lại API với token mới
-                            updateUserDetails(userId, updateRequestBody, generalCallBack);
+                            cancelOrder(orderId, generalCallBack);
                         }
 
                         @Override
@@ -164,19 +160,18 @@ public class UserService {
                     });
                 } else {
                     try {
-                        String errorMessage = response.errorBody().string();
-                        generalCallBack.onError(new Exception(errorMessage));
+                        String errorBody = response.errorBody() != null ? response.errorBody().string() : "Unknown error";
+                        generalCallBack.onError(new Exception("API Error: " + errorBody));
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        generalCallBack.onError(e);
                     }
                 }
             }
 
             @Override
-            public void onFailure(@NonNull Call<ApiResponse> call, @NonNull Throwable throwable) {
+            public void onFailure(Call<ApiResponse> call, Throwable throwable) {
                 generalCallBack.onError(throwable);
             }
         });
-
     }
 }

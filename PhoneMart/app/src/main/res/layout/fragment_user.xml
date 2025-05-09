@@ -26,7 +26,7 @@
             <androidx.cardview.widget.CardView
                 android:id="@+id/view6"
                 android:layout_width="match_parent"
-                android:layout_height="250dp">
+                android:layout_height="wrap_content">
 
 
                 <LinearLayout
@@ -60,21 +60,23 @@
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="200dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
                 android:orientation="horizontal">
 
                 <androidx.cardview.widget.CardView
                     android:layout_width="match_parent"
                     android:layout_height="120dp"
                     android:layout_gravity="center"
-                    android:layout_marginLeft="10dp"
-                    android:layout_marginRight="16dp"
+                    android:layout_margin="16dp"
                     android:layout_weight="1"
                     app:cardCornerRadius="10dp">
 
                     <LinearLayout
+                        android:id="@+id/linearLayout_orders"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
+                        android:gravity="center"
                         android:orientation="vertical">
 
                         <ImageView
@@ -86,7 +88,7 @@
                             android:src="@drawable/order_ico" />
 
                         <TextView
-                            android:id="@+id/textView33"
+                            android:id="@+id/textView_user_orderNumber"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="center_horizontal"
@@ -110,14 +112,15 @@
                     android:layout_width="match_parent"
                     android:layout_height="120dp"
                     android:layout_gravity="center"
-                    android:layout_marginLeft="10dp"
-                    android:layout_marginRight="16dp"
+                    android:layout_margin="16dp"
                     android:layout_weight="1"
                     app:cardCornerRadius="10dp">
 
                     <LinearLayout
+                        android:id="@+id/linearLayout_favorites"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
+                        android:gravity="center"
                         android:orientation="vertical">
 
                         <ImageView
@@ -129,7 +132,7 @@
                             android:src="@drawable/red_heart_ico" />
 
                         <TextView
-                            android:id="@+id/textView36"
+                            android:id="@+id/textView_user_favoriteProductNumber"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="center_horizontal"
@@ -153,14 +156,15 @@
                     android:layout_width="match_parent"
                     android:layout_height="120dp"
                     android:layout_gravity="center"
-                    android:layout_marginLeft="10dp"
-                    android:layout_marginRight="16dp"
+                    android:layout_margin="16dp"
                     android:layout_weight="1"
                     app:cardCornerRadius="10dp">
 
                     <LinearLayout
+                        android:id="@+id/linearLayout_shipping"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
+                        android:gravity="center"
                         android:orientation="vertical">
 
                         <ImageView
@@ -172,7 +176,7 @@
                             android:src="@drawable/delivery_truck_ico" />
 
                         <TextView
-                            android:id="@+id/textView46"
+                            android:id="@+id/textView_user_shippingOrderNumber"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="center_horizontal"
@@ -198,6 +202,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="16dp"
+                android:layout_marginTop="24dp"
                 android:layout_marginBottom="16dp"
                 android:text="Account Settings"
                 android:textSize="25sp"
@@ -313,6 +318,20 @@
                     app:layout_constraintTop_toTopOf="@+id/textView44" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <Button
+                android:id="@+id/button_logout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="24dp"
+                android:layout_marginEnd="16dp"
+                android:background="@drawable/custom_button_border"
+                android:drawableLeft="@drawable/baseline_logout_24"
+                android:text="Logout"
+                android:textColor="#D76A6A"
+                android:textSize="18sp"
+                android:textStyle="bold" />
 
 
         </LinearLayout>
