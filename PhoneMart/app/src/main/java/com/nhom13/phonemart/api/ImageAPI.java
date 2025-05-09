@@ -31,6 +31,5 @@ public interface ImageAPI {
     @Multipart
     @PUT("images/image/{imageId}/update")
     Call<ApiResponse> updateImage(@Part MultipartBody.Part multipartFile,
-                                  @Path("imageId") Long imageId,
-                                  @Header("Authorization") String token);
+                                  @Path("imageId") Long imageId);
 }

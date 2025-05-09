@@ -2,28 +2,25 @@ package com.nhom13.phonemart.ui;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
-import android.location.Address;
-import android.location.Geocoder;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.google.gson.Gson;
 import com.nhom13.phonemart.R;
 import com.nhom13.phonemart.adapter.CartAdapter;
 import com.nhom13.phonemart.api.CartAPI;
@@ -32,47 +29,40 @@ import com.nhom13.phonemart.api.RetrofitClient;
 import com.nhom13.phonemart.dto.BranchDto;
 import com.nhom13.phonemart.dto.CartDto;
 import com.nhom13.phonemart.dto.CartItemDto;
+import com.nhom13.phonemart.dto.OrderDto;
 import com.nhom13.phonemart.dto.ProductDto;
 import com.nhom13.phonemart.model.interfaces.BranchCallback;
+import com.nhom13.phonemart.model.interfaces.GeneralCallBack;
 import com.nhom13.phonemart.model.interfaces.LocationCallback;
 import com.nhom13.phonemart.model.interfaces.OnCartItemActionListener;
-import com.nhom13.phonemart.model.interfaces.TokenCallback;
-import com.nhom13.phonemart.model.response.ApiResponse;
-import com.nhom13.phonemart.model.response.JwtResponse;
 import com.nhom13.phonemart.service.BranchService;
+import com.nhom13.phonemart.service.CartItemService;
+import com.nhom13.phonemart.service.CartService;
 import com.nhom13.phonemart.service.LocationService;
+import com.nhom13.phonemart.service.OrderService;
 import com.nhom13.phonemart.util.DialogUtils;
 import com.nhom13.phonemart.util.FragmentUtils;
-import com.nhom13.phonemart.util.TokenUtils;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Locale;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link CartFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
 public class CartFragment extends Fragment implements View.OnClickListener, OnCartItemActionListener {
     private CartAdapter adapter;
     private RecyclerView rvCartItems;
     private CartAPI cartAPI;
     private CartItemAPI cartItemAPI;
     private Long userId, cartId;
+    private CartService cartService;
+    private CartItemService cartItemService;
     private CartDto cartDto;
     private List<CartItemDto> cartItemDtos;
     private BranchDto branchDto;
     private ImageView backBtn, imageView_location;
     private TextView textView_totalProducts, textView_totalPrice, textView_branch;
     private EditText editText_address;
+    private Button button_order;
 
     private final int UNAUTHORIZE_CODE = 401;
 
@@ -93,67 +83,36 @@ public class CartFragment extends Fragment implements View.OnClickListener, OnCa
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        cartService = new CartService(requireContext());
+        cartItemService = new CartItemService(requireContext());
+
         cartAPI = RetrofitClient.getClient().create(CartAPI.class);
         cartItemAPI = RetrofitClient.getClient().create(CartItemAPI.class);
 
         if (getArguments() != null) {
             userId = getArguments().getLong("userId");
             getCartByUserId();
+            // lấy tọa độ chuyển thành địa chỉ, lấy branch gần nhất
+            getYourCurrentLocation();
         }
     }
 
-    private void getCartByUserId() {
-        String accessToken = TokenUtils.getAccessToken(requireContext());
-
-        cartAPI.getCartByUserId(userId, "Bearer " + accessToken).enqueue(new Callback<ApiResponse>() {
+    private void getCartByUserId(){
+        cartService.getCartByUserId(userId, new GeneralCallBack<CartDto>() {
             @Override
-            public void onResponse(Call<ApiResponse> call, Response<ApiResponse> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    handleCartResponse(response);
-
-                } else if (response.code() == UNAUTHORIZE_CODE) {
-                    // Token hết hạn → gọi refresh
-                    String refreshToken = TokenUtils.getRefreshToken(requireContext());
-
-                    TokenUtils.createNewAccessToken(refreshToken, new TokenCallback() {
-                        @Override
-                        public void onSuccess(JwtResponse jwtResponse) {
-                            // lưu lại token mới
-                            TokenUtils.saveTokens(requireContext(), jwtResponse.getAccessToken(), jwtResponse.getRefreshToken());
-                            // gọi lại API với token mới
-                            getCartByUserId();
-                        }
-
-                        @Override
-                        public void onFailure(String errorMessage) {
-                            Toast.makeText(requireContext(), errorMessage, Toast.LENGTH_LONG).show();
-                        }
-                    });
-                }
-                // cart rỗng nên bên api ném exception và chưa kịp trả về ApiResponse --> body null
-
-                else if (response.code() == 404) {
-                    try {
-                        Log.d("error", "onResponse: " + response.errorBody().string());
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
+            public void onSuccess(CartDto result) {
+                cartDto = result;
+                handleCartResponse(result);
             }
 
             @Override
-            public void onFailure(Call<ApiResponse> call, Throwable throwable) {
-                Log.d("onFailure", "onFailure: " + throwable.getMessage());
+            public void onError(Throwable t) {
+                Toast.makeText(getContext(), t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
 
-
-    private void handleCartResponse(Response<ApiResponse> response) {
-        Gson gson = new Gson();
-        String json = gson.toJson(response.body().getData());
-        cartDto = gson.fromJson(json, CartDto.class);
-
+    private void handleCartResponse(CartDto cartDto) {
         // khi chuyển qua cartFragment và cart đã có sẵn thì gán vào cartId để update/delete cartItem
         cartId = cartDto.getId();
 
@@ -183,6 +142,7 @@ public class CartFragment extends Fragment implements View.OnClickListener, OnCa
         Mapping(view);
         backBtn.setOnClickListener(this);
         imageView_location.setOnClickListener(this);
+        button_order.setOnClickListener(this);
     }
 
     private void Mapping(View view) {
@@ -196,8 +156,9 @@ public class CartFragment extends Fragment implements View.OnClickListener, OnCa
         textView_branch = view.findViewById(R.id.textView_branch);
 
         editText_address = view.findViewById(R.id.editText_address);
-    }
 
+        button_order = view.findViewById(R.id.orderBtn);
+    }
 
     private void mappingData() {
         int count = 0;
@@ -209,8 +170,6 @@ public class CartFragment extends Fragment implements View.OnClickListener, OnCa
         textView_totalProducts.setText(String.valueOf(count));
         textView_totalPrice.setText(String.format("$ %s", cartDto.getTotalAmount()));
 
-        // lấy tọa độ chuyển thành địa chỉ, lấy branch gần nhất
-        getYourCurrentLocation();
     }
 
     private void setAdapters() {
@@ -224,13 +183,14 @@ public class CartFragment extends Fragment implements View.OnClickListener, OnCa
     public void onClick(View view) {
         if (view.getId() == R.id.userProfileBackImg) {
             requireActivity().getSupportFragmentManager().popBackStack();
-
         } else if (view.getId() == R.id.imageView_location) {
             // Yêu cầu quyền vị trí từ Fragment
             requestPermissions(
                     new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                     1
             );
+        } else if (view.getId() == R.id.orderBtn) {
+            placeOrder();
         }
     }
 
@@ -253,7 +213,17 @@ public class CartFragment extends Fragment implements View.OnClickListener, OnCa
         }
 
         // Gọi API cập nhật
-        updateCartItem(cartItemDto.getProduct().getId(), newQuantity);
+        cartItemService.updateCartItem(cartId, cartItemDto.getProduct().getId(), newQuantity, new GeneralCallBack<String>() {
+            @Override
+            public void onSuccess(String result) {
+                getCartByUserId();
+            }
+
+            @Override
+            public void onError(Throwable t) {
+                Toast.makeText(getContext(), t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
 
         // Cập nhật UI
         cartItemDto.setQuantity(newQuantity);
@@ -264,7 +234,17 @@ public class CartFragment extends Fragment implements View.OnClickListener, OnCa
     @Override
     public void onDeleteCartItem(int position) {
         CartItemDto cartItemDto = cartItemDtos.get(position);
-        deleteCartItem(cartItemDto.getProduct().getId());
+        cartItemService.deleteCartItem(cartId, cartItemDto.getProduct().getId(), new GeneralCallBack<String>() {
+            @Override
+            public void onSuccess(String result) {
+                getCartByUserId();
+            }
+
+            @Override
+            public void onError(Throwable t) {
+                Toast.makeText(getContext(), t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
 
         // cập nhật UI
         cartItemDtos.remove(position);
@@ -276,82 +256,6 @@ public class CartFragment extends Fragment implements View.OnClickListener, OnCa
         ProductDto productDto = cartItemDtos.get(position).getProduct();
 
         FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.base_frag_container, ProductDetailFragment.newInstance(productDto, userId));
-    }
-
-    private void updateCartItem(Long productId, int quantity) {
-        String accessToken = TokenUtils.getAccessToken(requireContext());
-
-        cartItemAPI.updateCartItem(cartId, productId, quantity, "Bearer " + accessToken).enqueue(new Callback<ApiResponse>() {
-            @Override
-            public void onResponse(Call<ApiResponse> call, Response<ApiResponse> response) {
-
-                if (response.code() == UNAUTHORIZE_CODE) {
-                    // Token hết hạn → gọi refresh
-                    String refreshToken = TokenUtils.getRefreshToken(requireContext());
-
-                    TokenUtils.createNewAccessToken(refreshToken, new TokenCallback() {
-                        @Override
-                        public void onSuccess(JwtResponse jwtResponse) {
-                            // lưu lại token mới
-                            TokenUtils.saveTokens(requireContext(), jwtResponse.getAccessToken(), jwtResponse.getRefreshToken());
-                            // gọi lại API với token mới
-                            updateCartItem(productId, quantity);
-                        }
-
-                        @Override
-                        public void onFailure(String errorMessage) {
-                            Toast.makeText(requireContext(), errorMessage, Toast.LENGTH_LONG).show();
-                        }
-                    });
-                }
-
-                // call api để lấy lại danh sách và cập nhật totalProducts/totalPrice
-                getCartByUserId();
-            }
-
-            @Override
-            public void onFailure(Call<ApiResponse> call, Throwable throwable) {
-                Log.d("onFailure", "onFailure: " + throwable.getMessage());
-            }
-        });
-    }
-
-    private void deleteCartItem(Long productId) {
-        String accessToken = TokenUtils.getAccessToken(requireContext());
-
-        cartItemAPI.deleteCartItem(cartId, productId, "Bearer " + accessToken).enqueue(new Callback<ApiResponse>() {
-            @Override
-            public void onResponse(Call<ApiResponse> call, Response<ApiResponse> response) {
-
-                if (response.code() == UNAUTHORIZE_CODE) {
-                    // Token hết hạn → gọi refresh
-                    String refreshToken = TokenUtils.getRefreshToken(requireContext());
-
-                    TokenUtils.createNewAccessToken(refreshToken, new TokenCallback() {
-                        @Override
-                        public void onSuccess(JwtResponse jwtResponse) {
-                            // lưu lại token mới
-                            TokenUtils.saveTokens(requireContext(), jwtResponse.getAccessToken(), jwtResponse.getRefreshToken());
-                            // gọi lại API với token mới
-                            deleteCartItem(productId);
-                        }
-
-                        @Override
-                        public void onFailure(String errorMessage) {
-                            Toast.makeText(requireContext(), errorMessage, Toast.LENGTH_LONG).show();
-                        }
-                    });
-                }
-
-                // cập nhật lại UI
-                getCartByUserId();
-            }
-
-            @Override
-            public void onFailure(Call<ApiResponse> call, Throwable throwable) {
-                Log.d("onFailure", "onFailure: " + throwable.getMessage());
-            }
-        });
     }
 
     // nhờ vào addToBackStack() trong loadFragment() của FragmentUtils nên khi click chuyển sang ProductDetailFragment, CartFragment vẫn còn giữ trong bộ nhớ --> các biến vẫn còn giữ giá trị --> click back thì chỉ cần gọi getCartById là có thể load lại
@@ -406,5 +310,27 @@ public class CartFragment extends Fragment implements View.OnClickListener, OnCa
                 Log.d("error", "onError: " + t.getMessage());
             }
         });
+    }
+
+    private void placeOrder() {
+        if (!TextUtils.isEmpty(editText_address.getText()) && branchDto != null && cartDto != null && cartItemDtos != null && !cartItemDtos.isEmpty()){
+            OrderService orderService = new OrderService(requireContext());
+
+            String address = String.valueOf(editText_address.getText());
+
+            orderService.placeOrder(userId, branchDto.getId(), address, new GeneralCallBack<OrderDto>() {
+                @Override
+                public void onSuccess(OrderDto result) {
+                    FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.base_frag_container, OrderDetailsFragment.newInstance(userId, result.getId()));
+
+                    DialogUtils.ShowDialog(getContext(), R.layout.success_dialog, "Thanks!", "Order placed successfully");
+                }
+
+                @Override
+                public void onError(Throwable t) {
+                    Toast.makeText(requireContext(), t.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
     }
 }

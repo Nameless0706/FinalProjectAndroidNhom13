@@ -46,7 +46,7 @@ public class FavoriteProductsAdapter extends RecyclerView.Adapter<FavoriteProduc
             ImageUtils.loadImageIntoImageView(context, product.getImages().get(0).getId(), holder.productImg);
         } else {
             // Optionally load a placeholder or fallback image
-            holder.productImg.setImageResource(R.drawable.delivery_truck_ico);
+            holder.productImg.setImageResource(R.drawable.ic_launcher_background);
         }
     }
 

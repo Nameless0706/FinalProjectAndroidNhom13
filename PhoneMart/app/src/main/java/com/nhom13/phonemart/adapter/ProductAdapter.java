@@ -15,6 +15,7 @@ import com.nhom13.phonemart.R;
 import com.nhom13.phonemart.dto.ProductDto;
 import com.nhom13.phonemart.model.Product;
 import com.nhom13.phonemart.model.interfaces.OnProductItemActionListener;
+import com.nhom13.phonemart.util.ImageUtils;
 
 import java.util.List;
 
@@ -46,10 +47,12 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
         holder.productPriceTv.setText(String.valueOf(product.getPrice()));
 
 
-        Glide.with(context)
-                .load(product.getImages())
-                .error(R.drawable.ic_launcher_background)
-                .into(holder.productImg);
+        if (product.getImages() != null && !product.getImages().isEmpty()) {
+            ImageUtils.loadImageIntoImageView(context, product.getImages().get(0).getId(), holder.productImg);
+        } else {
+            // Optionally load a placeholder or fallback image
+            holder.productImg.setImageResource(R.drawable.ic_launcher_background);
+        }
 
 
 

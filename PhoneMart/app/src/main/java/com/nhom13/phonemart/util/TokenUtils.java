@@ -29,6 +29,11 @@ public class TokenUtils {
         return prefs.getString("refresh_token", null);
     }
 
+    public static void clearAllAuthData(Context context) {
+        SharedPreferences prefs = context.getSharedPreferences("auth", Context.MODE_PRIVATE);
+        prefs.edit().clear().apply();
+    }
+
     public static void saveTokens(Context context, String accessToken, String refreshToken) {
         SharedPreferences prefs = context.getSharedPreferences("auth", Context.MODE_PRIVATE);
         prefs.edit()

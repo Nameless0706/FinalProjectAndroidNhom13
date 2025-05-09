@@ -1,13 +1,11 @@
 package com.nhom13.phonemart.ui;
 
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.util.Log;
@@ -54,6 +52,7 @@ import retrofit2.Response;
  * Use the {@link AllProductFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
+
 public class AllProductFragment extends Fragment implements View.OnClickListener, TabLayout.OnTabSelectedListener, OnProductItemActionListener, TextView.OnEditorActionListener {
 
     private EditText searchBar;
@@ -64,7 +63,9 @@ public class AllProductFragment extends Fragment implements View.OnClickListener
     private ProductAdapter adapter;
     private TabLayout tabLayout;
 
+
     private List<ProductDto> productList = new ArrayList<>();
+
 
     private ProductAPI productApi;
 
@@ -87,6 +88,7 @@ public class AllProductFragment extends Fragment implements View.OnClickListener
     public AllProductFragment() {
         // Required empty public constructor
     }
+
 
     public static AllProductFragment newInstance(Long userId, String searchString) {
         AllProductFragment fragment = new AllProductFragment();
@@ -119,6 +121,7 @@ public class AllProductFragment extends Fragment implements View.OnClickListener
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState){
         super.onViewCreated(view, savedInstanceState);
         Mapping(view);
+
         if (searchString == null) {
             getAllProducts();
         }
@@ -150,6 +153,7 @@ public class AllProductFragment extends Fragment implements View.OnClickListener
 
 
         tabLayout.addOnTabSelectedListener(this);
+
         searchBar.setOnEditorActionListener(this);
         backImg.setOnClickListener(this);
         filterImg.setOnClickListener(this);
@@ -161,12 +165,13 @@ public class AllProductFragment extends Fragment implements View.OnClickListener
     }
 
     public void Mapping(View view){
-        tabLayout = view.findViewById(R.id.filterTabLayout);
-        rvProduct = view.findViewById(R.id.rvProducts);
+        tabLayout = view.findViewById(R.id.tabLayout);
+        rvProduct = view.findViewById(R.id.recycleView_product);
         backImg = view.findViewById(R.id.allProductBackImg);
         filterImg = view.findViewById(R.id.allProductFilterImg);
         searchBar = view.findViewById(R.id.allProductSearchEt);
     }
+
 
     private void setAdapter(){
         adapter = new ProductAdapter(getContext(), productList, AllProductFragment.this);
@@ -175,6 +180,7 @@ public class AllProductFragment extends Fragment implements View.OnClickListener
         GridLayoutManager gridLayoutManager = new GridLayoutManager(getContext(), spanCount);
         rvProduct.setLayoutManager(gridLayoutManager);
     }
+
 
     private void getAllProducts(){
         productApi.getAllProducts().enqueue(new Callback<ApiResponse>() {
@@ -225,7 +231,7 @@ public class AllProductFragment extends Fragment implements View.OnClickListener
 
                 else{
                     productList = null;
-                    DialogUtils.ShowDialog(requireContext(), R.layout.error_dialog, "Thất bại", "Không tìm thấy sản phẩm với tên " + searchString);
+                    DialogUtils.ShowDialog(requireContext(), R.layout.error_dialog, "Th?t b?i", "Kh�ng t�m th?y s?n ph?m v?i t�n " + searchString);
                 }
 
 
@@ -268,7 +274,7 @@ public class AllProductFragment extends Fragment implements View.OnClickListener
             });
         }
 
-        //Set lại flipper
+        //Set l?i flipper
         isDateDescending = !isDateDescending;
 
 
@@ -299,7 +305,7 @@ public class AllProductFragment extends Fragment implements View.OnClickListener
             }
         });
 
-        //Set lại flipper
+        //Set l?i flipper
         isPriceAscending = !isPriceAscending;
 
         if (adapter != null) {
@@ -340,6 +346,7 @@ public class AllProductFragment extends Fragment implements View.OnClickListener
 
 
     @Override
+
     public void onTabReselected(TabLayout.Tab tab) {
         switch (tab.getPosition()) {
             case 0:
@@ -358,11 +365,14 @@ public class AllProductFragment extends Fragment implements View.OnClickListener
     }
 
     @Override
+
     public void onTabUnselected(TabLayout.Tab tab) {
 
     }
 
     @Override
+
+
     public void onClickProductItem(int position) {
         ProductDto productDto = productList.get(position);
         FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.base_frag_container, ProductDetailFragment.newInstance(productDto, userId));

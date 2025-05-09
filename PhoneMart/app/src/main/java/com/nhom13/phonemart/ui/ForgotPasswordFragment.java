@@ -15,14 +15,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.nhom13.phonemart.R;
 import com.nhom13.phonemart.api.AuthAPI;
 import com.nhom13.phonemart.api.RetrofitClient;
 import com.nhom13.phonemart.model.response.ApiResponse;
-import com.nhom13.phonemart.ui.auth.LoginFragment;
 import com.nhom13.phonemart.ui.auth.RegisterFragment;
+import com.nhom13.phonemart.ui.auth.VerifyOtpFragment;
 import com.nhom13.phonemart.util.FragmentUtils;
 
 import java.io.IOException;
