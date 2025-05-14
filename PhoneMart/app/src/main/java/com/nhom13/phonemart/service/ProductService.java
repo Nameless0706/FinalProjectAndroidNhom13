@@ -40,7 +40,7 @@ public class ProductService {
                     callback.onSuccess(response.body().getMessage());
                 }
                 else{
-                    callback.onError(new Exception("Kh�ng th? c?p nh?t s? lu?ng d� b�n c?a s?n ph?m. M� l?i: " + response.code()));
+                    callback.onError(new Exception("Không thể cập nhật số luợng đã bán của sản phẩm. Mã lỗi: " + response.code()));
                 }
             }
 
@@ -72,7 +72,7 @@ public class ProductService {
                 }
 
                 else{
-                    callback.onError(new Exception("Kh�ng th? l?y danh s�ch s?n ph?m"));
+                    callback.onError(new Exception("Không thể lấy danh sách sản phẩm"));
                 }
 
             }
@@ -104,7 +104,7 @@ public class ProductService {
                 }
 
                 else{
-                    callback.onError(new Exception("Kh�ng th? t�m s?n ph?m v?i t�n " + productName));
+                    callback.onError(new Exception("Không thể tìm sản phẩm với tên " + productName));
                 }
 
             }
@@ -127,7 +127,7 @@ public class ProductService {
                     List<ProductDto> productDtos = gson.fromJson(json, listType);
                     callback.onSuccess(productDtos);
                 } else {
-                    callback.onError(new Exception("Kh�ng th? t?i s?n ph?m trong danh m?c " + categoryName));
+                    callback.onError(new Exception("Không thể tải sản phẩmm trong danh mục " + categoryName));
                 }
             }
 

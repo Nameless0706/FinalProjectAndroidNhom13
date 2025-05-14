@@ -28,10 +28,10 @@ public class OrderService {
         orderAPI = RetrofitClient.getClient().create(OrderAPI.class);
     }
 
-    public void placeOrder(Long userId, Long branchId, String address, GeneralCallBack<OrderDto> generalCallBack) {
+    public void placeOrder(Long userId, Long branchId, String address, String paymentMethod, String cardType, GeneralCallBack<OrderDto> generalCallBack) {
         String accessToken = TokenUtils.getAccessToken(context);
 
-        orderAPI.placeOrder(userId, branchId, address, "Bearer " + accessToken).enqueue(new Callback<ApiResponse>() {
+        orderAPI.placeOrder(userId, branchId, address, paymentMethod, cardType, "Bearer " + accessToken).enqueue(new Callback<ApiResponse>() {
             @Override
             public void onResponse(Call<ApiResponse> call, Response<ApiResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
@@ -52,7 +52,7 @@ public class OrderService {
                             // lưu lại token mới
                             TokenUtils.saveTokens(context, jwtResponse.getAccessToken(), jwtResponse.getRefreshToken());
                             // gọi lại API với token mới
-                            placeOrder(userId, branchId, address, generalCallBack);
+                            placeOrder(userId, branchId, address, paymentMethod, cardType, generalCallBack);
                         }
 
                         @Override
