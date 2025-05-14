@@ -31,6 +31,7 @@ import com.nhom13.phonemart.dto.CartDto;
 import com.nhom13.phonemart.dto.CartItemDto;
 import com.nhom13.phonemart.dto.OrderDto;
 import com.nhom13.phonemart.dto.ProductDto;
+import com.nhom13.phonemart.model.CartItem;
 import com.nhom13.phonemart.model.interfaces.BranchCallback;
 import com.nhom13.phonemart.model.interfaces.GeneralCallBack;
 import com.nhom13.phonemart.model.interfaces.LocationCallback;
@@ -40,6 +41,7 @@ import com.nhom13.phonemart.service.CartItemService;
 import com.nhom13.phonemart.service.CartService;
 import com.nhom13.phonemart.service.LocationService;
 import com.nhom13.phonemart.service.OrderService;
+import com.nhom13.phonemart.service.ProductService;
 import com.nhom13.phonemart.util.DialogUtils;
 import com.nhom13.phonemart.util.FragmentUtils;
 
@@ -55,6 +57,8 @@ public class CartFragment extends Fragment implements View.OnClickListener, OnCa
     private CartItemAPI cartItemAPI;
     private Long userId, cartId;
     private CartService cartService;
+
+    private ProductService productService;
     private CartItemService cartItemService;
     private CartDto cartDto;
     private List<CartItemDto> cartItemDtos;
@@ -86,8 +90,12 @@ public class CartFragment extends Fragment implements View.OnClickListener, OnCa
         cartService = new CartService(requireContext());
         cartItemService = new CartItemService(requireContext());
 
+        productService = new ProductService(requireContext());
+
         cartAPI = RetrofitClient.getClient().create(CartAPI.class);
         cartItemAPI = RetrofitClient.getClient().create(CartItemAPI.class);
+
+
 
         if (getArguments() != null) {
             userId = getArguments().getLong("userId");
@@ -107,7 +115,7 @@ public class CartFragment extends Fragment implements View.OnClickListener, OnCa
 
             @Override
             public void onError(Throwable t) {
-                Toast.makeText(getContext(), t.getMessage(), Toast.LENGTH_SHORT).show();
+                //Toast.makeText(getContext(), t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -331,6 +339,21 @@ public class CartFragment extends Fragment implements View.OnClickListener, OnCa
                     Toast.makeText(requireContext(), t.getMessage(), Toast.LENGTH_SHORT).show();
                 }
             });
+
+            for(CartItemDto cartItemDto : cartDto.getCartItems()){
+                productService.updateProductSoldCount(cartItemDto.getProduct().getId(), cartItemDto.getQuantity(), new GeneralCallBack<String>() {
+                    @Override
+                    public void onSuccess(String result) {
+                        // Không cần xử lý
+                    }
+
+                    @Override
+                    public void onError(Throwable t) {
+                        Toast.makeText(requireContext(), t.getMessage(), Toast.LENGTH_SHORT).show();
+
+                    }
+                });
+            }
         }
     }
 }

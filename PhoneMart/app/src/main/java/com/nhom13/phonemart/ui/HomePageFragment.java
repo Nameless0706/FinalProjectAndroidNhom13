@@ -179,7 +179,6 @@ public class HomePageFragment extends Fragment implements RecyclerViewInterface,
                         if (category.getImage() != null) {
                             Log.d("Imagehere", "Image: " + category.getImage().getId());
                         }
-                        Log.d("Category", "ID: " + category.getId() + ", Name: " + category.getName());
                     }
 
                     categoryAdapter = new CategoryAdapter(getContext(), categoryList, HomePageFragment.this);
@@ -233,12 +232,12 @@ public class HomePageFragment extends Fragment implements RecyclerViewInterface,
         switch (source) {
             case "category":
                 CategoryDto selectedCategory = categoryList.get(position);
-                Toast.makeText(getContext(), "Clicked category: " + selectedCategory.getName(), Toast.LENGTH_SHORT).show();
+                String categoryName = selectedCategory.getName();
+                FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.base_frag_container, AllProductFragment.newInstance(loginUser.getId(), null, categoryName));
                 break;
 
             case "product":
                 ProductDto selectedProduct = productList.get(position);
-
                 FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.base_frag_container, ProductDetailFragment.newInstance(selectedProduct, loginUser.getId()));
                 break;
         }
@@ -250,7 +249,7 @@ public class HomePageFragment extends Fragment implements RecyclerViewInterface,
         if (view.getId() == R.id.imageView_cart) {
             selected = CartFragment.newInstance(loginUser.getId());
         } else {
-            selected = AllProductFragment.newInstance(loginUser.getId(), null);
+            selected = AllProductFragment.newInstance(loginUser.getId(), null, null);
         }
 
         FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.base_frag_container, selected);
@@ -264,7 +263,7 @@ public class HomePageFragment extends Fragment implements RecyclerViewInterface,
             if (!query.isEmpty()) {
                 Toast.makeText(getContext(), "Searching for: " + query, Toast.LENGTH_SHORT).show();
 
-                FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.base_frag_container, AllProductFragment.newInstance(loginUser.getId(), query));
+                FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.base_frag_container, AllProductFragment.newInstance(loginUser.getId(), query, null));
             }
             return true;
         }

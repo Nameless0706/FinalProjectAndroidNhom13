@@ -19,6 +19,8 @@ public class Product implements Serializable {
     private BigDecimal price;
 
     private int inventory;
+
+    private int soldCount;
     private String description;
 
     private String dateAdded;
@@ -27,12 +29,13 @@ public class Product implements Serializable {
     private Set<Image> images = new HashSet<>();
 
 
-    public Product(Long id, String name, String brand, BigDecimal price, int inventory, String description, Category category, Set<Image> images) {
+    public Product(Long id, String name, String brand, BigDecimal price, int inventory, int soldCount, String description, Category category, Set<Image> images) {
         this.id = id;
         this.name = name;
         this.brand = brand;
         this.price = price;
         this.inventory = inventory;
+        this.soldCount = soldCount;
         this.description = description;
         this.category = category;
         this.images = images;
@@ -105,4 +108,8 @@ public class Product implements Serializable {
     public String getDateAdded() {return dateAdded;}
 
     public void setDateAdded(String dateAdded) {this.dateAdded = dateAdded;}
+
+    public int getSoldCount() {return soldCount;}
+
+    public void setSoldCount(int soldCount) {this.soldCount = soldCount;}
 }
