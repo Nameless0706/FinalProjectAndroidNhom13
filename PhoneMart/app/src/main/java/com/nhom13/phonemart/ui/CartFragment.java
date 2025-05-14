@@ -67,9 +67,7 @@ public class CartFragment extends Fragment implements View.OnClickListener, OnCa
     private TextView textView_totalProducts, textView_totalPrice, textView_branch;
     private EditText editText_address;
     private Button button_order;
-
-    private final int UNAUTHORIZE_CODE = 401;
-
+    private boolean isFirstLoad = true;
 
     public CartFragment() {
         // Required empty public constructor
@@ -90,7 +88,7 @@ public class CartFragment extends Fragment implements View.OnClickListener, OnCa
         cartService = new CartService(requireContext());
         cartItemService = new CartItemService(requireContext());
 
-        productService = new ProductService(requireContext());
+        productService = new ProductService();
 
         cartAPI = RetrofitClient.getClient().create(CartAPI.class);
         cartItemAPI = RetrofitClient.getClient().create(CartItemAPI.class);
@@ -105,12 +103,16 @@ public class CartFragment extends Fragment implements View.OnClickListener, OnCa
         }
     }
 
-    private void getCartByUserId(){
+    private void getCartByUserId() {
         cartService.getCartByUserId(userId, new GeneralCallBack<CartDto>() {
             @Override
             public void onSuccess(CartDto result) {
-                cartDto = result;
-                handleCartResponse(result);
+                if (result != null) {
+                    cartDto = result;
+                    handleCartResponse(result);
+                } else {
+                    DialogUtils.ShowDialog(getContext(), R.layout.error_dialog, "Load failure", "Please Login!");
+                }
             }
 
             @Override
@@ -272,7 +274,14 @@ public class CartFragment extends Fragment implements View.OnClickListener, OnCa
         BottomNavigationView navBar = requireActivity().findViewById(R.id.bottom_nav_bar);
         navBar.setVisibility(View.GONE);
         super.onResume();
-        getCartByUserId();
+
+        if (isFirstLoad) {
+            // Đánh dấu đã load lần đầu
+            isFirstLoad = false;
+        } else {
+            // Gọi lại API khi quay lại fragment
+            getCartByUserId();
+        }
     }
 
     @Override
@@ -321,7 +330,7 @@ public class CartFragment extends Fragment implements View.OnClickListener, OnCa
     }
 
     private void placeOrder() {
-        if (!TextUtils.isEmpty(editText_address.getText()) && branchDto != null && cartDto != null && cartItemDtos != null && !cartItemDtos.isEmpty()){
+        if (!TextUtils.isEmpty(editText_address.getText()) && branchDto != null && cartDto != null && cartItemDtos != null && !cartItemDtos.isEmpty()) {
             OrderService orderService = new OrderService(requireContext());
 
             String address = String.valueOf(editText_address.getText());

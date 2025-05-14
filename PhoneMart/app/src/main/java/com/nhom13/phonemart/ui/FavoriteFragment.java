@@ -16,7 +16,6 @@ import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.bumptech.glide.Glide;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.nhom13.phonemart.R;
 import com.nhom13.phonemart.adapter.FavoriteProductsAdapter;
@@ -25,8 +24,8 @@ import com.nhom13.phonemart.dto.UserDto;
 import com.nhom13.phonemart.model.interfaces.GeneralCallBack;
 import com.nhom13.phonemart.model.interfaces.OnProductItemActionListener;
 import com.nhom13.phonemart.service.UserService;
+import com.nhom13.phonemart.util.DialogUtils;
 import com.nhom13.phonemart.util.FragmentUtils;
-import com.nhom13.phonemart.util.ImageUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -109,9 +108,11 @@ public class FavoriteFragment extends Fragment implements OnProductItemActionLis
 
     private void filterListener(String newText) {
         List<ProductDto> list = new ArrayList<>();
-        for (ProductDto productDto : productDtos) {
-            if (productDto.getName().toLowerCase().contains(newText.toLowerCase()) || productDto.getDescription().toLowerCase().contains(newText.toLowerCase())) {
-                list.add(productDto);
+        if (productDtos != null) {
+            for (ProductDto productDto : productDtos) {
+                if (productDto.getName().toLowerCase().contains(newText.toLowerCase()) || productDto.getDescription().toLowerCase().contains(newText.toLowerCase())) {
+                    list.add(productDto);
+                }
             }
         }
 
@@ -125,12 +126,16 @@ public class FavoriteFragment extends Fragment implements OnProductItemActionLis
         userService.getUserDto(userId, new GeneralCallBack<UserDto>() {
             @Override
             public void onSuccess(UserDto result) {
-                userDto = result;
-                productDtos = new ArrayList<>(result.getFavoriteProducts());
+                if (result != null) {
+                    userDto = result;
+                    productDtos = new ArrayList<>(result.getFavoriteProducts());
 
-                textView_userName.setText(String.format("%s %s", result.getFirstName(), result.getLastName()));
+                    textView_userName.setText(String.format("%s %s", result.getFirstName(), result.getLastName()));
 
-                setAdapters(productDtos);
+                    setAdapters(productDtos);
+                } else {
+                    DialogUtils.ShowDialog(getContext(), R.layout.error_dialog, "Load failure", "Please Login!");
+                }
             }
 
             @Override
@@ -155,10 +160,9 @@ public class FavoriteFragment extends Fragment implements OnProductItemActionLis
 
     @Override
     public void onResume() {
-        BottomNavigationView navBar = requireActivity().findViewById(R.id.bottom_nav_bar);
-        navBar.setVisibility(View.VISIBLE);
-
         super.onResume();
 
+        BottomNavigationView navBar = requireActivity().findViewById(R.id.bottom_nav_bar);
+        navBar.setVisibility(View.VISIBLE);
     }
 }

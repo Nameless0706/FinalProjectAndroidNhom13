@@ -1,6 +1,8 @@
 package com.nhom13.phonemart.ui.auth;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -31,6 +33,7 @@ import com.nhom13.phonemart.model.request.LoginRequest;
 import com.nhom13.phonemart.model.response.ApiResponse;
 import com.nhom13.phonemart.model.response.JwtResponse;
 import com.nhom13.phonemart.ui.ForgotPasswordFragment;
+import com.nhom13.phonemart.ui.HomePageFragment;
 import com.nhom13.phonemart.util.DialogUtils;
 import com.nhom13.phonemart.util.FragmentUtils;
 import com.nhom13.phonemart.util.TokenUtils;
@@ -47,7 +50,7 @@ import retrofit2.Response;
 public class LoginFragment extends Fragment implements View.OnClickListener {
 
 
-    private Button loginBtn, button_loginGoogle;
+    private Button loginBtn, button_loginGoogle, button_skipLogin;
     private TextView signupTv;
     private TextView forgotTv;
 
@@ -123,6 +126,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
         // Setting click listeners
         loginBtn.setOnClickListener(this);
         button_loginGoogle.setOnClickListener(this);
+        button_skipLogin.setOnClickListener(this);
         signupTv.setOnClickListener(this);
         forgotTv.setOnClickListener(this);
         return view;
@@ -140,6 +144,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
         passwordEt = view.findViewById(R.id.loginPasswordEt);
         loginBtn = view.findViewById(R.id.loginBtn);
         button_loginGoogle = view.findViewById(R.id.button_addToCart);
+        button_skipLogin = view.findViewById(R.id.button_skipLogin);
         signupTv = view.findViewById(R.id.signUpTv);
         forgotTv = view.findViewById(R.id.forgotPasswordTv);
     }
@@ -152,6 +157,9 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
             return;
         } else if (view.getId() == R.id.button_addToCart) {
             loginWithGoogle();
+            return;
+        } else if (view.getId() == R.id.button_skipLogin) {
+            skipLogin();
             return;
         } else if (view.getId() == R.id.signUpTv) {
             selected = new RegisterFragment();
@@ -253,7 +261,22 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
         // lưu lại token mới
         TokenUtils.saveTokens(requireContext(), jwt.getAccessToken(), jwt.getRefreshToken());
 
+        saveUserId(loginUser.getId());
+
         FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.main_frag_container, BaseFragment.newInstance(loginUser));
     }
 
+    private void saveUserId(Long userId) {
+        SharedPreferences prefs = requireActivity().getSharedPreferences("auth", Context.MODE_PRIVATE);
+        prefs.edit()
+                .putLong("userId", userId)
+                .apply();
+    }
+
+    private void skipLogin() {
+        // tạo 1 userDto ko có thật (id = 0) để có thể truyền tạo fragment
+        UserDto userDto = new UserDto(0L);
+
+        FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.main_frag_container, BaseFragment.newInstance(userDto));
+    }
 }

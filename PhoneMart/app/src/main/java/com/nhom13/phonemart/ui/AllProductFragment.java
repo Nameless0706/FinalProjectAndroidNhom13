@@ -1,5 +1,6 @@
 package com.nhom13.phonemart.ui;
 
+import android.annotation.SuppressLint;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -103,6 +104,9 @@ public class AllProductFragment extends Fragment implements View.OnClickListener
 
         viewModel.getProductList().observe(getViewLifecycleOwner(), products -> {
             if (products != null) {
+
+                productList = products;
+
                 if (!isDataLoaded) {
                     originalProductList = new ArrayList<>(products);
                     productList = new ArrayList<>(originalProductList);
@@ -285,6 +289,7 @@ public class AllProductFragment extends Fragment implements View.OnClickListener
             if (!query.isEmpty()) {
                 searchString = query;
                 viewModel.getProductsByName(searchString);
+
             }
             return true;
         }

@@ -1,8 +1,7 @@
 package com.nhom13.phonemart.service;
 
 import android.content.Context;
-import android.util.Log;
-import android.widget.Toast;
+import android.text.TextUtils;
 
 import com.google.gson.Gson;
 import com.nhom13.phonemart.api.CartAPI;
@@ -32,6 +31,11 @@ public class CartService {
 
     public void getCartByUserId(Long userId, GeneralCallBack<CartDto> generalCallBack) {
         String accessToken = TokenUtils.getAccessToken(context);
+
+        if (TextUtils.isEmpty(accessToken)) {
+            generalCallBack.onSuccess(null);
+            return;
+        }
 
         cartAPI.getCartByUserId(userId, "Bearer " + accessToken).enqueue(new Callback<ApiResponse>() {
             @Override

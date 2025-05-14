@@ -1,27 +1,22 @@
 package com.nhom13.phonemart;
 
 import android.os.Bundle;
-import android.os.Handler;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
-import android.widget.ImageView;
-import android.widget.ViewFlipper;
+import android.text.TextUtils;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
-import androidx.fragment.app.Fragment;
 
-import com.bumptech.glide.Glide;
-import com.nhom13.phonemart.databinding.ActivityMainBinding;
+import com.nhom13.phonemart.dto.UserDto;
+import com.nhom13.phonemart.model.interfaces.GeneralCallBack;
+import com.nhom13.phonemart.service.UserService;
 import com.nhom13.phonemart.ui.auth.LoginFragment;
-import com.nhom13.phonemart.ui.auth.RegisterFragment;
+import com.nhom13.phonemart.util.DialogUtils;
 import com.nhom13.phonemart.util.FragmentUtils;
-
-import java.util.ArrayList;
-import java.util.List;
+import com.nhom13.phonemart.util.TokenUtils;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -36,6 +31,31 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
 
-        FragmentUtils.loadFragment(getSupportFragmentManager(), R.id.main_frag_container, new LoginFragment());
+        // khi logout là xóa hết dữ liệu trong file auth nên chỉ cần check accessToken là đủ
+        String accessToken = TokenUtils.getAccessToken(MainActivity.this);
+        Long userId = TokenUtils.getUserId(MainActivity.this);
+
+        if (TextUtils.isEmpty(accessToken)) {
+            FragmentUtils.loadFragment(getSupportFragmentManager(), R.id.main_frag_container, new LoginFragment());
+        } else {
+            getUserById(userId);
+        }
+    }
+
+    private void getUserById(Long userId) {
+        UserService userService = new UserService(MainActivity.this);
+        userService.getUserDto(userId, new GeneralCallBack<UserDto>() {
+            // refreshToken còn hạn nên chỉ việc call API lại để lấy UserDto
+            @Override
+            public void onSuccess(UserDto result) {
+                FragmentUtils.loadFragment(MainActivity.this.getSupportFragmentManager(), R.id.main_frag_container, BaseFragment.newInstance(result));
+            }
+
+            // refreshToken hết hạn nên chuyển về LoginFragment và xuất Dialog
+            @Override
+            public void onError(Throwable t) {
+                FragmentUtils.loadFragment(getSupportFragmentManager(), R.id.main_frag_container, new LoginFragment());
+            }
+        });
     }
 }

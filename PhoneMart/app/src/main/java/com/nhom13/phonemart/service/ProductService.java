@@ -27,10 +27,7 @@ import retrofit2.Response;
 public class ProductService {
     private ProductAPI productAPI;
 
-    private Context context;
-
-    public ProductService(Context context){
-        this.context = context;
+    public ProductService(){
         productAPI = RetrofitClient.getClient().create(ProductAPI.class);
     }
 
@@ -43,7 +40,7 @@ public class ProductService {
                     callback.onSuccess(response.body().getMessage());
                 }
                 else{
-                    callback.onError(new Exception("Không thể cập nhật số lượng đã bán của sản phẩm. Mã lỗi: " + response.code()));
+                    callback.onError(new Exception("Kh�ng th? c?p nh?t s? lu?ng d� b�n c?a s?n ph?m. M� l?i: " + response.code()));
                 }
             }
 
@@ -75,7 +72,7 @@ public class ProductService {
                 }
 
                 else{
-                    callback.onError(new Exception("Không thể lấy danh sách sản phẩm"));
+                    callback.onError(new Exception("Kh�ng th? l?y danh s�ch s?n ph?m"));
                 }
 
             }
@@ -107,7 +104,7 @@ public class ProductService {
                 }
 
                 else{
-                    callback.onError(new Exception("Không thể tìm sản phẩm với tên " + productName));
+                    callback.onError(new Exception("Kh�ng th? t�m s?n ph?m v?i t�n " + productName));
                 }
 
             }
@@ -130,7 +127,7 @@ public class ProductService {
                     List<ProductDto> productDtos = gson.fromJson(json, listType);
                     callback.onSuccess(productDtos);
                 } else {
-                    callback.onError(new Exception("Không thể tải sản phẩm trong danh mục " + categoryName));
+                    callback.onError(new Exception("Kh�ng th? t?i s?n ph?m trong danh m?c " + categoryName));
                 }
             }
 
@@ -140,4 +137,35 @@ public class ProductService {
             }
         });
     }
+
+    public void getRelatedProducts(String categoryName, GeneralCallBack<List<ProductDto>> generalCallBack) {
+        productAPI.getRelatedProducts(categoryName).enqueue(new Callback<ApiResponse>() {
+            @Override
+            public void onResponse(Call<ApiResponse> call, Response<ApiResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    try {
+                        Object data = response.body().getData();
+                        Gson gson = new Gson();
+                        String json = gson.toJson(data);
+
+                        Type listType = new TypeToken<List<ProductDto>>() {}.getType();
+                        List<ProductDto> productDtos = gson.fromJson(json, listType);
+
+                        generalCallBack.onSuccess(productDtos);
+                    } catch (Exception e) {
+                        generalCallBack.onError(e);
+                    }
+                } else {
+                    generalCallBack.onError(new Exception("Response not successful or body is null"));
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ApiResponse> call, Throwable t) {
+                generalCallBack.onError(t);
+            }
+        });
+    }
 }
+
+

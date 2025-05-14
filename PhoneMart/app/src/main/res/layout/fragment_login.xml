@@ -167,7 +167,7 @@
         android:layout_width="150dp"
         android:layout_height="wrap_content"
         android:background="@drawable/custom_button_border"
-        android:drawableLeft="@drawable/baseline_navigate_next_24"
+        android:drawableLeft="@drawable/baseline_double_arrow_24"
         android:text="Skip"
         android:textColor="#2892E7"
         android:textSize="18sp"

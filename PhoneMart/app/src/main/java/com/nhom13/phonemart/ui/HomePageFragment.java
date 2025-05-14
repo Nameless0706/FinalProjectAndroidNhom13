@@ -35,7 +35,9 @@ import com.nhom13.phonemart.api.RetrofitClient;
 import com.nhom13.phonemart.dto.CategoryDto;
 import com.nhom13.phonemart.dto.ProductDto;
 import com.nhom13.phonemart.dto.UserDto;
+import com.nhom13.phonemart.model.interfaces.GeneralCallBack;
 import com.nhom13.phonemart.model.response.ApiResponse;
+import com.nhom13.phonemart.service.UserService;
 import com.nhom13.phonemart.util.DialogUtils;
 import com.nhom13.phonemart.util.FragmentUtils;
 
@@ -107,8 +109,8 @@ public class HomePageFragment extends Fragment implements RecyclerViewInterface,
         // Initialize your views or setup listeners here
         Mapping(view);
 
-        String name = loginUser.getFirstName() + " " + loginUser.getLastName();
-        userNameTv.setText(name);
+        // cover trường hợp logout
+        SetUserName();
 
         getAllCategories();
         getPopularProducts();
@@ -122,11 +124,6 @@ public class HomePageFragment extends Fragment implements RecyclerViewInterface,
 
     // Hàm Flipper
     private void actionViewFlipperMain() {
-//        List<String> arrayListFlipper = new ArrayList<>();
-//        arrayListFlipper.add("http://app.iotstar.vn:8081/appfoods/flipper/quangcao.png");
-//        arrayListFlipper.add("http://app.iotstar.vn:8081/appfoods/flipper/coffee.jpg");
-//        arrayListFlipper.add("http://app.iotstar.vn:8081/appfoods/flipper/companypizza.jpeg");
-//        arrayListFlipper.add("http://app.iotstar.vn:8081/appfoods/flipper/themoingon.jpeg");
 
         List<Integer> arrayListFlipper = new ArrayList<>();
         arrayListFlipper.add(R.drawable.arrow);
@@ -171,7 +168,8 @@ public class HomePageFragment extends Fragment implements RecyclerViewInterface,
 
                     Gson gson = new Gson();
                     String json = gson.toJson(response.body().getData());
-                    Type listType = new TypeToken<List<CategoryDto>>() {}.getType();
+                    Type listType = new TypeToken<List<CategoryDto>>() {
+                    }.getType();
                     categoryList = gson.fromJson(json, listType);
 
 
@@ -207,7 +205,8 @@ public class HomePageFragment extends Fragment implements RecyclerViewInterface,
 
                     Gson gson = new Gson();
                     String json = gson.toJson(response.body().getData());
-                    Type listType = new TypeToken<List<ProductDto>>() {}.getType();
+                    Type listType = new TypeToken<List<ProductDto>>() {
+                    }.getType();
                     productList = gson.fromJson(json, listType);
 
                     popularProductAdapter = new PopularProductAdapter(getContext(), productList, HomePageFragment.this);
@@ -277,6 +276,23 @@ public class HomePageFragment extends Fragment implements RecyclerViewInterface,
         BottomNavigationView navBar = requireActivity().findViewById(R.id.bottom_nav_bar);
         navBar.setVisibility(View.VISIBLE);
         searchBar.setText("");
+    }
 
+    private void SetUserName() {
+        UserService userService = new UserService(requireContext());
+        userService.getUserDto(loginUser.getId(), new GeneralCallBack<UserDto>() {
+            @Override
+            public void onSuccess(UserDto result) {
+                if (result != null) {
+                    String name = result.getFirstName() + " " + result.getLastName();
+                    userNameTv.setText(name);
+                }
+            }
+
+            @Override
+            public void onError(Throwable t) {
+                Toast.makeText(getContext(), t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 }

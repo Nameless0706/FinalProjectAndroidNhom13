@@ -4,7 +4,11 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,31 +22,36 @@ import android.widget.ViewFlipper;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.nhom13.phonemart.R;
-import com.nhom13.phonemart.api.CartItemAPI;
+import com.nhom13.phonemart.adapter.ProductAdapter;
 import com.nhom13.phonemart.dto.ImageDto;
 import com.nhom13.phonemart.dto.ProductDto;
 import com.nhom13.phonemart.dto.UserDto;
 import com.nhom13.phonemart.model.interfaces.GeneralCallBack;
+import com.nhom13.phonemart.model.interfaces.OnProductItemActionListener;
 import com.nhom13.phonemart.service.CartItemService;
+import com.nhom13.phonemart.service.ProductService;
 import com.nhom13.phonemart.service.UserService;
+import com.nhom13.phonemart.util.DialogUtils;
 import com.nhom13.phonemart.util.FragmentUtils;
 import com.nhom13.phonemart.util.ImageUtils;
 
+import java.util.List;
 import java.util.Random;
 
-public class ProductDetailFragment extends Fragment implements View.OnClickListener {
+public class ProductDetailFragment extends Fragment implements View.OnClickListener, OnProductItemActionListener {
 
     private Long userId;
     private CartItemService cartItemService;
     private UserService userService;
     private static final String PRODUCT_DTO = "product_dto";
     private ProductDto productDto;
-    private CartItemAPI cartItemAPI;
     private ImageView imageView_back, imageView_favourite;
     private ViewFlipper viewFlipper_productImage;
     private TextView textView_productName, textView_price, textView_brand, textView_description, textView_sold, textView_inventory, textView_category;
     private Button button_addToCart, button_buy;
     boolean isFavorite = false;
+    private RecyclerView recyclerView_relatedProducts;
+    private List<ProductDto> productDtos;
 
     public ProductDetailFragment() {
     }
@@ -103,6 +112,8 @@ public class ProductDetailFragment extends Fragment implements View.OnClickListe
         textView_description = view.findViewById(R.id.textView_description);
         button_addToCart = view.findViewById(R.id.button_addToCart);
         button_buy = view.findViewById(R.id.button_buy);
+
+        recyclerView_relatedProducts = view.findViewById(R.id.recyclerView_relatedProducts);
     }
 
     private void mappingData() {
@@ -152,7 +163,11 @@ public class ProductDetailFragment extends Fragment implements View.OnClickListe
             cartItemService.addProductToCart(view.getId(), productDto.getId(), new GeneralCallBack<String>() {
                 @Override
                 public void onSuccess(String result) {
-                    Toast.makeText(requireContext(), result, Toast.LENGTH_SHORT).show();
+                    if (!TextUtils.isEmpty(result)) {
+                        Toast.makeText(requireContext(), result, Toast.LENGTH_SHORT).show();
+                    } else {
+                        DialogUtils.ShowDialog(getContext(), R.layout.error_dialog, "Load failure", "Please Login!");
+                    }
                 }
 
                 @Override
@@ -170,16 +185,21 @@ public class ProductDetailFragment extends Fragment implements View.OnClickListe
     private void saveFavoriteProduct(View view) {
         ImageView imageView = (ImageView) view;
 
-        if (isFavorite) {
-            imageView.setImageResource(R.drawable.baseline_favorite_border_24);
-        } else {
-            imageView.setImageResource(R.drawable.baseline_favorite_24);
-        }
-
         userService.handleSaveFavoriteProduct(userId, productDto.getId(), new GeneralCallBack<UserDto>() {
             @Override
             public void onSuccess(UserDto result) {
+                if (result != null) {
+                    if (isFavorite) {
+                        imageView.setImageResource(R.drawable.baseline_favorite_border_24);
+                    } else {
+                        imageView.setImageResource(R.drawable.baseline_favorite_24);
+                    }
 
+                    // Đảo trạng thái
+                    isFavorite = !isFavorite;
+                } else {
+                    DialogUtils.ShowDialog(getContext(), R.layout.error_dialog, "Load failure", "Please Login!");
+                }
             }
 
             @Override
@@ -188,19 +208,21 @@ public class ProductDetailFragment extends Fragment implements View.OnClickListe
             }
         });
 
-        // Đảo trạng thái
-        isFavorite = !isFavorite;
     }
 
     private void buyProduct(int viewId) {
         cartItemService.addProductToCart(viewId, productDto.getId(), new GeneralCallBack<String>() {
             @Override
             public void onSuccess(String result) {
-                if (viewId == R.id.button_addToCart) {
-                    Toast.makeText(requireContext(), result, Toast.LENGTH_SHORT).show();
-                } else if (viewId == R.id.button_buy) {
-                    // nếu đưa thẳng vào buyProduct() thì sẽ gặp lỗi async
-                    FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.base_frag_container, CartFragment.newInstance(userId));
+                if (!TextUtils.isEmpty(result)) {
+                    if (viewId == R.id.button_addToCart) {
+                        Toast.makeText(requireContext(), result, Toast.LENGTH_SHORT).show();
+                    } else if (viewId == R.id.button_buy) {
+                        // nếu đưa thẳng vào buyProduct() thì sẽ gặp lỗi async
+                        FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.base_frag_container, CartFragment.newInstance(userId));
+                    }
+                } else {
+                    DialogUtils.ShowDialog(getContext(), R.layout.error_dialog, "Load failure", "Please Login!");
                 }
             }
 
@@ -211,21 +233,23 @@ public class ProductDetailFragment extends Fragment implements View.OnClickListe
         });
     }
 
-    private void getUserById(){
+    private void getUserById() {
         userService.getUserDto(userId, new GeneralCallBack<UserDto>() {
             @Override
             public void onSuccess(UserDto result) {
-                for (ProductDto product : result.getFavoriteProducts()) {
-                    if (product.getId().equals(productDto.getId())) {
-                        isFavorite = true;
-                        break;
+                if (result != null) {
+                    for (ProductDto product : result.getFavoriteProducts()) {
+                        if (product.getId().equals(productDto.getId())) {
+                            isFavorite = true;
+                            break;
+                        }
                     }
-                }
 
-                if (isFavorite) {
-                    imageView_favourite.setImageResource(R.drawable.baseline_favorite_24);
-                } else {
-                    imageView_favourite.setImageResource(R.drawable.baseline_favorite_border_24);
+                    if (isFavorite) {
+                        imageView_favourite.setImageResource(R.drawable.baseline_favorite_24);
+                    } else {
+                        imageView_favourite.setImageResource(R.drawable.baseline_favorite_border_24);
+                    }
                 }
             }
 
@@ -236,12 +260,42 @@ public class ProductDetailFragment extends Fragment implements View.OnClickListe
         });
     }
 
+    private void getRelatedProducts() {
+        ProductService productService = new ProductService();
+        productService.getRelatedProducts(productDto.getCategory().getName(), new GeneralCallBack<List<ProductDto>>() {
+            @Override
+            public void onSuccess(List<ProductDto> result) {
+                productDtos = result;
+                setAdapter(result);
+            }
+
+            @Override
+            public void onError(Throwable t) {
+                Toast.makeText(requireContext(), t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void setAdapter(List<ProductDto> productDtos){
+        ProductAdapter adapter = new ProductAdapter(requireContext(), productDtos, this);
+        recyclerView_relatedProducts.setAdapter(adapter);
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
+        recyclerView_relatedProducts.setLayoutManager(linearLayoutManager);
+    }
+
     @Override
     public void onResume() {
+        super.onResume();
+
         BottomNavigationView navBar = requireActivity().findViewById(R.id.bottom_nav_bar);
         navBar.setVisibility(View.GONE);
 
-        super.onResume();
+        getRelatedProducts();
     }
 
+    @Override
+    public void onClickProductItem(int position) {
+        ProductDto productDto = productDtos.get(position);
+        FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.base_frag_container, ProductDetailFragment.newInstance(productDto, userId));
+    }
 }

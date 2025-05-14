@@ -5,6 +5,7 @@ import android.util.Log;
 
 import com.nhom13.phonemart.api.AuthAPI;
 import com.nhom13.phonemart.api.RetrofitClient;
+import com.nhom13.phonemart.model.interfaces.GeneralCallBack;
 import com.nhom13.phonemart.model.response.ApiResponse;
 import com.nhom13.phonemart.util.TokenUtils;
 
@@ -24,11 +25,11 @@ public class AuthService {
         authAPI = RetrofitClient.getClient().create(AuthAPI.class);
     }
 
-    public void logout() {
+    public void logout(GeneralCallBack<String> generalCallBack) {
         String refreshToken = TokenUtils.getRefreshToken(context);
 
         if (refreshToken == null) {
-            // Token không tồn tại => có thể đã đăng xuất
+            // Token không tồn tại => đã đăng xuất
             return;
         }
 
@@ -38,20 +39,21 @@ public class AuthService {
                 if (response.isSuccessful() && response.body() != null) {
                     // Xóa token khỏi SharedPreferences
                     TokenUtils.clearAllAuthData(context);
+                    generalCallBack.onSuccess(response.body().getMessage());
                 } else {
                     // Xử lý lỗi từ phía server (ví dụ token không còn tồn tại)
                     try {
-                        Log.d("error", "Server error: " + response.errorBody().string());
+                        String errorMessage = response.errorBody().string();
+                        generalCallBack.onError(new Exception(errorMessage));
                     } catch (IOException e) {
-                        Log.d("error", "onResponse: " + e.getMessage());
+                        generalCallBack.onError(e);
                     }
                 }
             }
 
             @Override
             public void onFailure(Call<ApiResponse> call, Throwable t) {
-                // Xử lý lỗi kết nối (timeout, no internet,...)
-                Log.d("error", "API call failed: " + t.getMessage());
+                generalCallBack.onError(t);
             }
         });
     }
