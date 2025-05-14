@@ -43,7 +43,7 @@
                     android:id="@+id/userNameTv"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Thang Huynh"
+                    android:text="Guest"
                     android:textColor="@color/black"
                     android:textSize="18sp"
                     android:textStyle="bold"
@@ -117,7 +117,7 @@
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/categoryRv"
                 android:layout_width="match_parent"
-                android:layout_height="70dp"
+                android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:paddingStart="16dp"
                 android:paddingEnd="16dp" />

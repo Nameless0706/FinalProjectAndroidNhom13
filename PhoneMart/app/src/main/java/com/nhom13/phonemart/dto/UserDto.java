@@ -13,6 +13,10 @@ public class UserDto implements Serializable {
     private Set<OrderDto> orders;
     private Set<ProductDto> favoriteProducts;
 
+    public UserDto(Long id) {
+        this.id = id;
+    }
+
     public UserDto(Long id, String firstName, String lastName, String email, ImageDto image, CartDto cart, Set<OrderDto> orders, Set<ProductDto> favoriteProducts) {
         this.id = id;
         this.firstName = firstName;

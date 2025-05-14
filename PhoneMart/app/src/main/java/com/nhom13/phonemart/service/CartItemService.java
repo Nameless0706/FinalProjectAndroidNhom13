@@ -1,6 +1,7 @@
 package com.nhom13.phonemart.service;
 
 import android.content.Context;
+import android.text.TextUtils;
 
 import com.nhom13.phonemart.api.CartItemAPI;
 import com.nhom13.phonemart.api.RetrofitClient;
@@ -18,7 +19,7 @@ public class CartItemService {
     private CartItemAPI cartItemAPI;
     private Context context;
 
-    public CartItemService(Context context){
+    public CartItemService(Context context) {
         this.context = context;
 
         cartItemAPI = RetrofitClient.getClient().create(CartItemAPI.class);
@@ -99,6 +100,11 @@ public class CartItemService {
 
     public void addProductToCart(int viewId, Long productId, GeneralCallBack<String> generalCallBack) {
         String accessToken = TokenUtils.getAccessToken(context);
+
+        if (TextUtils.isEmpty(accessToken)) {
+            generalCallBack.onSuccess(null);
+            return;
+        }
 
         cartItemAPI.addCartItem(productId, 1, "Bearer " + accessToken).enqueue(new Callback<ApiResponse>() {
             @Override

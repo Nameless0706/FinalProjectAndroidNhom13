@@ -20,4 +20,6 @@ public interface ProductAPI {
     @GET("products/sort/by/price")
     Call<ApiResponse> getSortedProductByPrice(@Query("sortOrder") String sortOrder);
 
+    @GET("products/category/name/{categoryName}")
+    Call<ApiResponse> getRelatedProducts(@Path("categoryName") String categoryName);
 }

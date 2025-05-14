@@ -1,6 +1,7 @@
 package com.nhom13.phonemart.service;
 
 import android.content.Context;
+import android.text.TextUtils;
 
 import androidx.annotation.NonNull;
 
@@ -11,6 +12,7 @@ import com.nhom13.phonemart.api.UserAPI;
 import com.nhom13.phonemart.dto.UserDto;
 import com.nhom13.phonemart.model.interfaces.GeneralCallBack;
 import com.nhom13.phonemart.model.interfaces.TokenCallback;
+import com.nhom13.phonemart.model.request.UserPasswordUpdateRequest;
 import com.nhom13.phonemart.model.request.UserUpdateRequest;
 import com.nhom13.phonemart.model.response.ApiResponse;
 import com.nhom13.phonemart.model.response.JwtResponse;
@@ -37,6 +39,11 @@ public class UserService {
 
     public void getUserDto(Long userId, GeneralCallBack<UserDto> callback) {
         String accessToken = TokenUtils.getAccessToken(context);
+
+        if (TextUtils.isEmpty(accessToken)) {
+            callback.onSuccess(null);
+            return;
+        }
 
         userAPI.getUserById(userId, "Bearer " + accessToken).enqueue(new Callback<ApiResponse>() {
             @Override
@@ -88,6 +95,11 @@ public class UserService {
     public void handleSaveFavoriteProduct(Long userId, Long productId, GeneralCallBack<UserDto> generalCallBack) {
         String accessToken = TokenUtils.getAccessToken(context);
 
+        if (TextUtils.isEmpty(accessToken)) {
+            generalCallBack.onSuccess(null);
+            return;
+        }
+
         userAPI.saveFavoriteProduct(userId, productId, "Bearer " + accessToken).enqueue(new Callback<ApiResponse>() {
             @Override
             public void onResponse(Call<ApiResponse> call, Response<ApiResponse> response) {
@@ -130,6 +142,11 @@ public class UserService {
 
     public void updateUserDetails(Long userId, UserUpdateRequest updateRequestBody, GeneralCallBack<UserDto> generalCallBack) {
         String accessToken = TokenUtils.getAccessToken(context);
+
+        if (TextUtils.isEmpty(accessToken)) {
+            generalCallBack.onSuccess(null);
+            return;
+        }
 
         userAPI.updateUserInfo(userId, updateRequestBody, "Bearer " + accessToken).enqueue(new Callback<ApiResponse>() {
             @Override
@@ -177,6 +194,49 @@ public class UserService {
                 generalCallBack.onError(throwable);
             }
         });
+    }
 
+    public void changePassword(Long userId, UserPasswordUpdateRequest userPasswordUpdateRequest, GeneralCallBack<String> generalCallBack) {
+        String accessToken = TokenUtils.getAccessToken(context);
+
+        if (TextUtils.isEmpty(accessToken)) {
+            generalCallBack.onSuccess(null);
+            return;
+        }
+
+        userAPI.updateUserPassword(userId, userPasswordUpdateRequest, "Bearer " + accessToken).enqueue(new Callback<ApiResponse>() {
+            @Override
+            public void onResponse(Call<ApiResponse> call, Response<ApiResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    generalCallBack.onSuccess("Password change successful!");
+                } else if (response.code() == 401) {
+                    // Token hết hạn → gọi refresh
+                    String refreshToken = TokenUtils.getRefreshToken(context);
+
+                    TokenUtils.createNewAccessToken(refreshToken, new TokenCallback() {
+                        @Override
+                        public void onSuccess(JwtResponse jwtResponse) {
+                            // lưu lại token mới
+                            TokenUtils.saveTokens(context, jwtResponse.getAccessToken(), jwtResponse.getRefreshToken());
+                            // gọi lại API với token mới
+                            changePassword(userId, userPasswordUpdateRequest, generalCallBack);
+                        }
+
+                        @Override
+                        public void onFailure(String errorMessage) {
+                            generalCallBack.onError(new Exception(errorMessage));
+                        }
+                    });
+                } else {
+                    String errorMessage = response.errorBody() != null ? "Mật khẩu cũ không chính xác" : "Unknown error";
+                    generalCallBack.onError(new Exception(errorMessage));
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ApiResponse> call, Throwable throwable) {
+                generalCallBack.onError(throwable);
+            }
+        });
     }
 }

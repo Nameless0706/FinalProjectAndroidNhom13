@@ -23,6 +23,7 @@ import com.nhom13.phonemart.enums.OrderStatus;
 import com.nhom13.phonemart.model.interfaces.GeneralCallBack;
 import com.nhom13.phonemart.model.interfaces.OnOrderActionListener;
 import com.nhom13.phonemart.service.UserService;
+import com.nhom13.phonemart.util.DialogUtils;
 import com.nhom13.phonemart.util.FragmentUtils;
 
 import java.util.ArrayList;
@@ -34,6 +35,7 @@ public class OrderFragment extends Fragment implements OnOrderActionListener {
 
     private Long userId;
     private String tabType;
+    private boolean isFirstLoad = true;
     private List<OrderDto> orderDtos;
     private List<OrderDto> ordersPending;
     private OrderAdapter adapter;
@@ -82,15 +84,18 @@ public class OrderFragment extends Fragment implements OnOrderActionListener {
         userService.getUserDto(userId, new GeneralCallBack<UserDto>() {
             @Override
             public void onSuccess(UserDto result) {
-                orderDtos = new ArrayList<>(result.getOrders());
+                if (result != null) {
+                    orderDtos = new ArrayList<>(result.getOrders());
 
-                if (tabType.equals("None")){
-                    setAdapter(getOrderDtos(OrderStatus.PENDING));
-                } else if (tabType.equals("Shipping")){
-                    Objects.requireNonNull(tabLayout.getTabAt(2)).select();
-                    setAdapter(getOrderDtos(OrderStatus.SHIPPED));
+                    if (tabType.equals("None")) {
+                        setAdapter(getOrderDtos(OrderStatus.PENDING));
+                    } else if (tabType.equals("Shipping")) {
+                        Objects.requireNonNull(tabLayout.getTabAt(2)).select();
+                        setAdapter(getOrderDtos(OrderStatus.SHIPPED));
+                    }
+                } else {
+                    DialogUtils.ShowDialog(getContext(), R.layout.error_dialog, "Load failure", "Please Login!");
                 }
-
             }
 
             @Override
@@ -110,24 +115,26 @@ public class OrderFragment extends Fragment implements OnOrderActionListener {
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
-                int position = tab.getPosition();
+                if (orderDtos != null) {
+                    int position = tab.getPosition();
 
-                switch (position) {
-                    case 0:
-                        setAdapter(getOrderDtos(OrderStatus.PENDING));
-                        break;
-                    case 1:
-                        setAdapter(getOrderDtos(OrderStatus.PROCESSING));
-                        break;
-                    case 2:
-                        setAdapter(getOrderDtos(OrderStatus.SHIPPED));
-                        break;
-                    case 3:
-                        setAdapter(getOrderDtos(OrderStatus.DELIVERED));
-                        break;
-                    case 4:
-                        setAdapter(getOrderDtos(OrderStatus.CANCELLED));
-                        break;
+                    switch (position) {
+                        case 0:
+                            setAdapter(getOrderDtos(OrderStatus.PENDING));
+                            break;
+                        case 1:
+                            setAdapter(getOrderDtos(OrderStatus.PROCESSING));
+                            break;
+                        case 2:
+                            setAdapter(getOrderDtos(OrderStatus.SHIPPED));
+                            break;
+                        case 3:
+                            setAdapter(getOrderDtos(OrderStatus.DELIVERED));
+                            break;
+                        case 4:
+                            setAdapter(getOrderDtos(OrderStatus.CANCELLED));
+                            break;
+                    }
                 }
             }
 
@@ -178,6 +185,12 @@ public class OrderFragment extends Fragment implements OnOrderActionListener {
     @Override
     public void onResume() {
         super.onResume();
-        getUserById();
+        if (isFirstLoad) {
+            // Đánh dấu đã load lần đầu
+            isFirstLoad = false;
+        } else {
+            // Gọi lại API khi quay lại fragment
+            getUserById();
+        }
     }
 }

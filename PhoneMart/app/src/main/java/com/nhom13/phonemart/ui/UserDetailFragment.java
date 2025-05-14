@@ -7,6 +7,7 @@ import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,12 +26,15 @@ import com.nhom13.phonemart.model.interfaces.GeneralCallBack;
 import com.nhom13.phonemart.model.request.UserUpdateRequest;
 import com.nhom13.phonemart.service.ImageService;
 import com.nhom13.phonemart.service.UserService;
+import com.nhom13.phonemart.util.DialogUtils;
 import com.nhom13.phonemart.util.FragmentUtils;
 import com.nhom13.phonemart.util.ImageUtils;
 import com.nhom13.phonemart.util.RealPathUtils;
+import com.nhom13.phonemart.util.TokenUtils;
 
 import java.io.File;
 import java.util.List;
+import java.util.Objects;
 
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
@@ -46,10 +50,9 @@ public class UserDetailFragment extends Fragment implements View.OnClickListener
     private static final String EDIT_USER = "edit_user";
     private UserDto edit_user;
     private Uri loaded_image_uri = null;
-    private UserDto updatedUser;
-    private boolean isImageChanged = false;
-    private final int UNAUTHORIZE_CODE = 401;
-    public UserDetailFragment() { }
+
+    public UserDetailFragment() {
+    }
 
     public static UserDetailFragment newInstance(UserDto edit_user) {
         UserDetailFragment fragment = new UserDetailFragment();
@@ -69,8 +72,6 @@ public class UserDetailFragment extends Fragment implements View.OnClickListener
         if (getArguments() != null) {
             edit_user = (UserDto) getArguments().getSerializable(EDIT_USER);
         }
-
-
     }
 
     @Override
@@ -82,9 +83,10 @@ public class UserDetailFragment extends Fragment implements View.OnClickListener
 
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
-
         super.onViewCreated(view, savedInstanceState);
+
         Mapping(view);
+
         requireActivity().getSupportFragmentManager().setFragmentResultListener("image_result", getViewLifecycleOwner(), (requestKey, result) -> {
             // Lấy kết quả trả về từ ChooseImageFragment
             String imageUriString = result.getString("selectedImageUri");
@@ -96,16 +98,12 @@ public class UserDetailFragment extends Fragment implements View.OnClickListener
             }
         });
 
-
         backImg.setOnClickListener(this);
         imgGroup.setOnClickListener(this);
         confirmBtn.setOnClickListener(this);
 
         firstNameEt.setEndIconOnClickListener(v -> setupEditText(firstNameEt));
         lastNameEt.setEndIconOnClickListener(v -> setupEditText(lastNameEt));
-
-        firstNameEt.getEditText().setText(edit_user.getFirstName());
-        lastNameEt.getEditText().setText(edit_user.getLastName());
 
         getUpdatedUser();
     }
@@ -122,7 +120,7 @@ public class UserDetailFragment extends Fragment implements View.OnClickListener
 
     @Override
     public void onClick(View view) {
-        if (view.getId() == R.id.userDetailBackImg){
+        if (view.getId() == R.id.userDetailBackImg) {
             requireActivity().getSupportFragmentManager().popBackStack();
         } else if (view.getId() == R.id.userDetailImgGroup) {
             FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.base_frag_container, new ChooseImageFragment());
@@ -134,9 +132,13 @@ public class UserDetailFragment extends Fragment implements View.OnClickListener
             userService.updateUserDetails(edit_user.getId(), updateRequestBody, new GeneralCallBack<UserDto>() {
                 @Override
                 public void onSuccess(UserDto result) {
-                    updateImage();
-                    // quay về fragment trước
-                    requireActivity().getSupportFragmentManager().popBackStack();
+                    if (result != null) {
+                        updateImage();
+                        // quay về fragment trước
+                        requireActivity().getSupportFragmentManager().popBackStack();
+                    } else {
+                        DialogUtils.ShowDialog(getContext(), R.layout.error_dialog, "Load failure", "Please Login!");
+                    }
                 }
 
                 @Override
@@ -214,10 +216,14 @@ public class UserDetailFragment extends Fragment implements View.OnClickListener
                     .load(loaded_image_uri)
                     .into(profileImg);
         } else {
-            if (edit_user.getImage() != null) {
-                ImageUtils.loadImageIntoImageView(getContext(), (long) edit_user.getImage().getId(), profileImg);
-            } else {
-                Log.d("Null image", "Null");
+            // khi logout rồi thì accessToken bị xóa --> check lại đã logout chưa (cách này không ổn)
+            String accessToken = TokenUtils.getAccessToken(requireContext());
+            if (!TextUtils.isEmpty(accessToken)) {
+                if (edit_user.getImage() != null) {
+                    ImageUtils.loadImageIntoImageView(getContext(), (long) edit_user.getImage().getId(), profileImg);
+                } else {
+                    Log.d("Null image", "Null");
+                }
             }
         }
     }
@@ -227,9 +233,11 @@ public class UserDetailFragment extends Fragment implements View.OnClickListener
         userService.getUserDto(edit_user.getId(), new GeneralCallBack<UserDto>() {
             @Override
             public void onSuccess(UserDto result) {
-                edit_user = result;
-                firstNameEt.getEditText().setText(edit_user.getFirstName());
-                lastNameEt.getEditText().setText(edit_user.getLastName());
+                if (result != null) {
+                    edit_user = result;
+                    firstNameEt.getEditText().setText(edit_user.getFirstName());
+                    lastNameEt.getEditText().setText(edit_user.getLastName());
+                }
             }
 
             @Override
