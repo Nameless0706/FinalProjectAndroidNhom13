@@ -16,6 +16,8 @@ public interface OrderAPI {
             @Query("userId") Long userId,
             @Query("branchId") Long branchId,
             @Query("address") String address,
+            @Query("paymentMethod") String paymentMethod,
+            @Query("cardType") String cardType,
             @Header("Authorization") String token);
 
     @PUT("orders/cancel")

@@ -5,6 +5,7 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,11 +14,14 @@ import android.widget.EditText;
 import android.widget.ImageView;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.slider.RangeSlider;
 import com.google.android.material.textfield.TextInputLayout;
 import com.nhom13.phonemart.R;
 import com.nhom13.phonemart.util.FragmentUtils;
 
 import java.math.BigDecimal;
+import java.text.NumberFormat;
+import java.util.Currency;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -27,6 +31,8 @@ import java.math.BigDecimal;
 public class ProductFilterFragment extends Fragment implements View.OnClickListener{
 
     private EditText minPriceEt, maxPriceEt;
+
+    private RangeSlider priceRange;
 
     private ImageView backImg;
 
@@ -83,6 +89,29 @@ public class ProductFilterFragment extends Fragment implements View.OnClickListe
         backImg.setOnClickListener(this);
         confirmBtn.setOnClickListener(this);
 
+        priceRange.setLabelFormatter(value -> {
+            NumberFormat format = NumberFormat.getCurrencyInstance();
+            format.setMaximumFractionDigits(0);
+            format.setCurrency(Currency.getInstance("USD"));
+            return format.format((double) value);
+        });
+
+        priceRange.addOnChangeListener((slider, value, fromUser) -> {
+            if (fromUser) {
+                // Get the current values from the slider (min and max)
+                float minValue = slider.getValues().get(0);
+                float maxValue = slider.getValues().get(1);
+
+                // Display or use the values
+                minPriceEt.setText(String.valueOf((int) minValue));
+                maxPriceEt.setText(String.valueOf((int) maxValue));
+
+                // Optional: Log to see the changes
+                Log.d("ProductFilterFragment", "Min Price: " + minValue + ", Max Price: " + maxValue);
+            }
+        });
+
+
     }
 
     private void applyFilter() {
@@ -96,10 +125,10 @@ public class ProductFilterFragment extends Fragment implements View.OnClickListe
         result.putString("minPrice", minPrice.toString());
         result.putString("maxPrice", maxPrice.toString());
 
-        getParentFragmentManager().setFragmentResult("priceFilter", result);
+        requireActivity().getSupportFragmentManager().setFragmentResult("priceFilter", result);
 
         //Dòng này còn đang bị lỗi
-        //FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.base_frag_container, AllProductFragment.newInstance(userId, searchStr));
+        requireActivity().getSupportFragmentManager().popBackStack();
     }
 
 
@@ -108,6 +137,7 @@ public class ProductFilterFragment extends Fragment implements View.OnClickListe
         minPriceEt = (EditText) view.findViewById(R.id.minPriceEt);
         maxPriceEt = (EditText) view.findViewById(R.id.maxPriceEt);
         confirmBtn = (Button) view.findViewById(R.id.productFilterConfirmBtn);
+        priceRange = (RangeSlider) view.findViewById(R.id.priceRangeSlider);
     }
 
     @Override

@@ -1,13 +1,8 @@
 package com.nhom13.phonemart.ui;
 
+import android.annotation.SuppressLint;
 import android.os.Build;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -19,82 +14,59 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.tabs.TabLayout;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import com.nhom13.phonemart.R;
 import com.nhom13.phonemart.adapter.ProductAdapter;
 import com.nhom13.phonemart.adapter.RecyclerViewInterface;
-import com.nhom13.phonemart.api.ProductAPI;
-import com.nhom13.phonemart.api.RetrofitClient;
-import com.nhom13.phonemart.dto.CategoryDto;
 import com.nhom13.phonemart.dto.ProductDto;
-import com.nhom13.phonemart.dto.UserDto;
 import com.nhom13.phonemart.model.interfaces.OnProductItemActionListener;
-import com.nhom13.phonemart.model.response.ApiResponse;
-import com.nhom13.phonemart.util.DialogUtils;
 import com.nhom13.phonemart.util.FragmentUtils;
+import com.nhom13.phonemart.viewmodel.ProductViewModel;
 
-import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link AllProductFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
 
 public class AllProductFragment extends Fragment implements View.OnClickListener, TabLayout.OnTabSelectedListener, OnProductItemActionListener, TextView.OnEditorActionListener {
 
     private EditText searchBar;
     private ImageView backImg, filterImg;
-
     private RecyclerView rvProduct;
-
     private ProductAdapter adapter;
     private TabLayout tabLayout;
-
-
-    private List<ProductDto> productList = new ArrayList<>();
-
-
-    private ProductAPI productApi;
-
+    private List<ProductDto> productList;
+    private List<ProductDto> originalProductList;
+    private ProductViewModel viewModel;
     private Long userId;
-
     private String searchString;
-
+    private String categoryName;
     private static final String USER_ID = "user_id";
-
     private static final String SEARCH_STRING = "search_string";
-
+    private static final String CATEGORY_NAME = "category_name";
     private boolean isPriceAscending = true;
-
     private boolean isDateDescending = true;
+    private boolean isSoldCountDescending = true;
 
-
-
-
+    private boolean isDataLoaded = false;
 
     public AllProductFragment() {
         // Required empty public constructor
     }
 
-
-    public static AllProductFragment newInstance(Long userId, String searchString) {
+    public static AllProductFragment newInstance(Long userId, String searchString, String categoryName) {
         AllProductFragment fragment = new AllProductFragment();
         Bundle args = new Bundle();
         args.putLong(USER_ID, userId);
         args.putString(SEARCH_STRING, searchString);
+        args.putString(CATEGORY_NAME, categoryName);
         fragment.setArguments(args);
         return fragment;
     }
@@ -105,66 +77,59 @@ public class AllProductFragment extends Fragment implements View.OnClickListener
         if (getArguments() != null) {
             userId = getArguments().getLong(USER_ID);
             searchString = getArguments().getString(SEARCH_STRING);
+            categoryName = getArguments().getString(CATEGORY_NAME);
         }
-        productApi = RetrofitClient.getClient().create(ProductAPI.class);
-
+        viewModel = new ViewModelProvider(this).get(ProductViewModel.class);
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_all_product, container, false);
     }
 
     @Override
-    public void onViewCreated(@NonNull View view, Bundle savedInstanceState){
+    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         Mapping(view);
 
-        if (searchString == null) {
-            getAllProducts();
-        }
-
-        else{
-            getProductsByName();
-        }
-
-        getParentFragmentManager().setFragmentResultListener("priceFilter", this, (requestKey, bundle) -> {
-
-            List<ProductDto> filteredList = new ArrayList<>();
-            String minPriceStr = bundle.getString("minPrice");
-            String maxPriceStr = bundle.getString("maxPrice");
-
-            BigDecimal minPrice = minPriceStr.isEmpty() ? BigDecimal.ZERO : new BigDecimal(minPriceStr);
-            BigDecimal maxPrice = maxPriceStr.isEmpty() ? new BigDecimal("999999999") : new BigDecimal(maxPriceStr);
-
-            Log.d("FilteredProductFragment", "Min Price: " + minPrice + ", Max Price: " + maxPrice);
-
-            // TODO: Use these values to fetch data or apply filters
-            for (ProductDto product : productList) {
-                BigDecimal price = product.getPrice();
-                if (price.compareTo(minPrice) >= 0 && price.compareTo(maxPrice) <= 0) {
-                    filteredList.add(product);
-                }
+        if (!viewModel.hasData()) {
+            if (categoryName != null) {
+                viewModel.getProductsByCategory(categoryName);
+            } else if (searchString != null) {
+                viewModel.getProductsByName(searchString);
+            } else {
+                viewModel.getAllProducts();
             }
-            adapter.notifyDataSetChanged();
+        }
+
+        viewModel.getProductList().observe(getViewLifecycleOwner(), products -> {
+            if (products != null) {
+
+                productList = products;
+
+                if (!isDataLoaded) {
+                    originalProductList = new ArrayList<>(products);
+                    productList = new ArrayList<>(originalProductList);
+                    isDataLoaded = true;
+
+                }
+                setAdapter();
+                getParentFragmentManager().setFragmentResultListener("priceFilter", this, (requestKey, bundle) -> {
+                    applyPriceFilter(bundle);
+                });
+            } else {
+                Log.d("AllProductFragment", "Product list is null");
+            }
         });
 
-
         tabLayout.addOnTabSelectedListener(this);
-
         searchBar.setOnEditorActionListener(this);
         backImg.setOnClickListener(this);
         filterImg.setOnClickListener(this);
         searchBar.setText(searchString);
-
-
-
-
     }
 
-    public void Mapping(View view){
+    public void Mapping(View view) {
         tabLayout = view.findViewById(R.id.tabLayout);
         rvProduct = view.findViewById(R.id.recycleView_product);
         backImg = view.findViewById(R.id.allProductBackImg);
@@ -172,80 +137,34 @@ public class AllProductFragment extends Fragment implements View.OnClickListener
         searchBar = view.findViewById(R.id.allProductSearchEt);
     }
 
-
-    private void setAdapter(){
+    private void setAdapter() {
         adapter = new ProductAdapter(getContext(), productList, AllProductFragment.this);
         rvProduct.setAdapter(adapter);
-        int spanCount = 2; // number of columns
+        int spanCount = 2;
         GridLayoutManager gridLayoutManager = new GridLayoutManager(getContext(), spanCount);
         rvProduct.setLayoutManager(gridLayoutManager);
     }
 
+    private void applyPriceFilter(Bundle bundle) {
+        if (originalProductList == null || originalProductList.isEmpty()) {
+            Log.d("Filter Error", "Original product list is empty or null");
+            return;
+        }
 
-    private void getAllProducts(){
-        productApi.getAllProducts().enqueue(new Callback<ApiResponse>() {
-            @Override
-            public void onResponse(@NonNull Call<ApiResponse> call, @NonNull Response<ApiResponse> response) {
-                if(response.isSuccessful()){
-                    Gson gson = new Gson();
-                    String json = gson.toJson(response.body().getData());
-                    Type listType = new TypeToken<List<ProductDto>>() {}.getType();
-                    productList = gson.fromJson(json, listType);
-
-                    sortProductsByDate(isDateDescending);
-                    setAdapter();
-
-                }
-
-                else{
-                    productList = null;
-                    DialogUtils.ShowDialog(requireContext(), R.layout.error_dialog, "Thất bại", "Không thể tải sản phẩm");
-                }
-
-            }
-
-            @Override
-            public void onFailure(@NonNull Call<ApiResponse> call, @NonNull Throwable throwable) {
-                Log.d("All Product", "onFailure: " + throwable.getMessage());
-
-            }
-        });
-
-    }
-
-    private void getProductsByName(){
         productList.clear();
-        productApi.getProductByName(searchString).enqueue(new Callback<ApiResponse>() {
-            @Override
-            public void onResponse(@NonNull Call<ApiResponse> call, @NonNull Response<ApiResponse> response) {
+        String minPriceStr = bundle.getString("minPrice");
+        String maxPriceStr = bundle.getString("maxPrice");
 
-                if (response.isSuccessful()){
-                    Gson gson = new Gson();
-                    String json = gson.toJson(response.body().getData());
-                    Type listType = new TypeToken<List<ProductDto>>() {}.getType();
-                    productList = gson.fromJson(json, listType);
-                    sortProductsByDate(isDateDescending);
-                    setAdapter();
+        BigDecimal minPrice = minPriceStr.isEmpty() ? BigDecimal.ZERO : new BigDecimal(minPriceStr);
+        BigDecimal maxPrice = maxPriceStr.isEmpty() ? new BigDecimal("999999999") : new BigDecimal(maxPriceStr);
 
-                }
-
-                else{
-                    productList = null;
-                    DialogUtils.ShowDialog(requireContext(), R.layout.error_dialog, "Th?t b?i", "Kh�ng t�m th?y s?n ph?m v?i t�n " + searchString);
-                }
-
-
+        for (ProductDto product : originalProductList) {
+            BigDecimal price = product.getPrice();
+            if (price.compareTo(minPrice) >= 0 && price.compareTo(maxPrice) <= 0) {
+                productList.add(product);
             }
-
-            @Override
-            public void onFailure(@NonNull Call<ApiResponse> call, @NonNull Throwable throwable) {
-                Log.d("All Product", "onFailure: " + throwable.getMessage());
-
-            }
-        });
-
-
-
+        }
+        adapter.notifyDataSetChanged();
     }
 
     private void sortProductsByDate(boolean descending) {
@@ -254,30 +173,19 @@ public class AllProductFragment extends Fragment implements View.OnClickListener
             return;
         }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             productList.sort((p1, p2) -> {
                 try {
                     LocalDateTime date1 = LocalDateTime.parse(p1.getDateAdded());
                     LocalDateTime date2 = LocalDateTime.parse(p2.getDateAdded());
-                    if(descending){
-                        return date2.compareTo(date1);
-                    }
-
-                    else{
-                        return date1.compareTo(date2);
-                    }
-
+                    return descending ? date2.compareTo(date1) : date1.compareTo(date2);
                 } catch (Exception e) {
                     Log.e("Sort Error", "Could not parse date: " + e.getMessage());
                     return 0;
                 }
             });
         }
-
-        //Set l?i flipper
         isDateDescending = !isDateDescending;
-
-
         if (adapter != null) {
             adapter.notifyDataSetChanged();
         }
@@ -292,22 +200,34 @@ public class AllProductFragment extends Fragment implements View.OnClickListener
             try {
                 BigDecimal price1 = p1.getPrice();
                 BigDecimal price2 = p2.getPrice();
-
-
-                if (ascending) {
-                    return price1.compareTo(price2); // Ascending order (lowest to highest)
-                } else {
-                    return price2.compareTo(price1); // Descending order (highest to lowest)
-                }
+                return ascending ? price1.compareTo(price2) : price2.compareTo(price1);
             } catch (Exception e) {
                 Log.e("Sort Error", "Could not compare prices: " + e.getMessage());
                 return 0;
             }
         });
-
-        //Set l?i flipper
         isPriceAscending = !isPriceAscending;
+        if (adapter != null) {
+            adapter.notifyDataSetChanged();
+        }
+    }
 
+    private void sortProductsBySoldCount(boolean ascending) {
+        if (productList == null || productList.isEmpty()) {
+            Log.d("Sort", "Product list is empty or null");
+            return;
+        }
+        productList.sort((p1, p2) -> {
+            try {
+                Integer soldCount1 = p1.getSoldCount();
+                Integer soldCount2 = p2.getSoldCount();
+                return ascending ? soldCount1.compareTo(soldCount2) : soldCount2.compareTo(soldCount1);
+            } catch (Exception e) {
+                Log.e("Sort Error", "Could not compare sold count: " + e.getMessage());
+                return 0;
+            }
+        });
+        isSoldCountDescending = !isSoldCountDescending;
         if (adapter != null) {
             adapter.notifyDataSetChanged();
         }
@@ -315,14 +235,12 @@ public class AllProductFragment extends Fragment implements View.OnClickListener
 
 
 
-
     @Override
     public void onClick(View view) {
-        if (view.getId() == R.id.allProductBackImg){
+        if (view.getId() == R.id.allProductBackImg) {
             requireActivity().getSupportFragmentManager().popBackStack();
-        }
-        else{
-            FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.base_frag_container, new ProductFilterFragment());
+        } else {
+            FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.base_frag_container, ProductFilterFragment.newInstance(userId, searchString));
         }
     }
 
@@ -330,49 +248,28 @@ public class AllProductFragment extends Fragment implements View.OnClickListener
     public void onTabSelected(TabLayout.Tab tab) {
         switch (tab.getPosition()) {
             case 0:
-                Toast.makeText(getContext(), "Hey", Toast.LENGTH_SHORT).show();
                 sortProductsByDate(isDateDescending);
                 break;
             case 1:
-                Toast.makeText(getContext(), "Hey2", Toast.LENGTH_SHORT).show();
+                sortProductsBySoldCount(isSoldCountDescending);
                 break;
             case 2:
-                Toast.makeText(getContext(), "Hey3", Toast.LENGTH_SHORT).show();
                 sortProductsByPrice(isPriceAscending);
                 break;
 
         }
     }
 
-
     @Override
-
     public void onTabReselected(TabLayout.Tab tab) {
-        switch (tab.getPosition()) {
-            case 0:
-                Toast.makeText(getContext(), "Hey", Toast.LENGTH_SHORT).show();
-                sortProductsByDate(isDateDescending);
-                break;
-            case 1:
-                Toast.makeText(getContext(), "Hey2-2", Toast.LENGTH_SHORT).show();
-                break;
-            case 2:
-                Toast.makeText(getContext(), "Hey3", Toast.LENGTH_SHORT).show();
-                sortProductsByPrice(isPriceAscending);
-                break;
-
-        }
+        onTabSelected(tab);
     }
 
     @Override
-
     public void onTabUnselected(TabLayout.Tab tab) {
-
     }
 
     @Override
-
-
     public void onClickProductItem(int position) {
         ProductDto productDto = productList.get(position);
         FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.base_frag_container, ProductDetailFragment.newInstance(productDto, userId));
@@ -391,8 +288,8 @@ public class AllProductFragment extends Fragment implements View.OnClickListener
             String query = searchBar.getText().toString().trim();
             if (!query.isEmpty()) {
                 searchString = query;
-                getProductsByName();
-                adapter.notifyDataSetChanged();
+                viewModel.getProductsByName(searchString);
+
             }
             return true;
         }

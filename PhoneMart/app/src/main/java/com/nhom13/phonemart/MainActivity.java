@@ -55,8 +55,6 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onError(Throwable t) {
                 FragmentUtils.loadFragment(getSupportFragmentManager(), R.id.main_frag_container, new LoginFragment());
-
-                DialogUtils.ShowDialog(MainActivity.this, R.layout.error_dialog, "Session expired", t.getMessage());
             }
         });
     }

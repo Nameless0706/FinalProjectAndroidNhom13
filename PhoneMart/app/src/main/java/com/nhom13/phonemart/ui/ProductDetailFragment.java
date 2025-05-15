@@ -5,6 +5,7 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.text.TextUtils;
@@ -278,9 +279,8 @@ public class ProductDetailFragment extends Fragment implements View.OnClickListe
     private void setAdapter(List<ProductDto> productDtos){
         ProductAdapter adapter = new ProductAdapter(requireContext(), productDtos, this);
         recyclerView_relatedProducts.setAdapter(adapter);
-        int spanCount = 2; // number of columns
-        GridLayoutManager gridLayoutManager = new GridLayoutManager(getContext(), spanCount);
-        recyclerView_relatedProducts.setLayoutManager(gridLayoutManager);
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
+        recyclerView_relatedProducts.setLayoutManager(linearLayoutManager);
     }
 
     @Override

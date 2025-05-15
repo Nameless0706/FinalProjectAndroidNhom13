@@ -18,18 +18,21 @@ public class ProductDto implements Serializable {
 	private String brand;
 	private BigDecimal price;
 	private int inventory;
+
+	private int soldCount;
 	private String description;
 
 	private String dateAdded;
 	private CategoryDto category;
 	private List<ImageDto> images;
 
-	public ProductDto(Long id, String name, String brand, BigDecimal price, int inventory, String description, CategoryDto category, List<ImageDto> images) {
+	public ProductDto(Long id, String name, String brand, BigDecimal price, int inventory, int soldCount, String description, CategoryDto category, List<ImageDto> images) {
 		this.id = id;
 		this.name = name;
 		this.brand = brand;
 		this.price = price;
 		this.inventory = inventory;
+		this.soldCount = soldCount;
 		this.description = description;
 		this.category = category;
 		this.images = images;
@@ -102,4 +105,8 @@ public class ProductDto implements Serializable {
 	public String getDateAdded() {return dateAdded;}
 
 	public void setDateAdded(String dateAdded) {this.dateAdded = dateAdded;}
+
+	public int getSoldCount() {return soldCount;}
+
+	public void setSoldCount(int soldCount) {this.soldCount = soldCount;}
 }

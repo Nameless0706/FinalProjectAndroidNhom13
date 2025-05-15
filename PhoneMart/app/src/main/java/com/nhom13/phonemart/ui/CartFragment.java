@@ -1,22 +1,32 @@
 package com.nhom13.phonemart.ui;
 
 import android.Manifest;
+import android.app.Dialog;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -31,6 +41,7 @@ import com.nhom13.phonemart.dto.CartDto;
 import com.nhom13.phonemart.dto.CartItemDto;
 import com.nhom13.phonemart.dto.OrderDto;
 import com.nhom13.phonemart.dto.ProductDto;
+import com.nhom13.phonemart.model.CartItem;
 import com.nhom13.phonemart.model.interfaces.BranchCallback;
 import com.nhom13.phonemart.model.interfaces.GeneralCallBack;
 import com.nhom13.phonemart.model.interfaces.LocationCallback;
@@ -40,6 +51,8 @@ import com.nhom13.phonemart.service.CartItemService;
 import com.nhom13.phonemart.service.CartService;
 import com.nhom13.phonemart.service.LocationService;
 import com.nhom13.phonemart.service.OrderService;
+import com.nhom13.phonemart.service.PaymentService;
+import com.nhom13.phonemart.service.ProductService;
 import com.nhom13.phonemart.util.DialogUtils;
 import com.nhom13.phonemart.util.FragmentUtils;
 
@@ -55,12 +68,24 @@ public class CartFragment extends Fragment implements View.OnClickListener, OnCa
     private CartItemAPI cartItemAPI;
     private Long userId, cartId;
     private CartService cartService;
+
+    private int paymentMethod = 1;
+
+    private WebView vnPayWebView;
+    private String cardType;
+
+
+    private PaymentService paymentService;
+
+    private ConstraintLayout paymentMethodGroup;
+
+    private ProductService productService;
     private CartItemService cartItemService;
     private CartDto cartDto;
     private List<CartItemDto> cartItemDtos;
     private BranchDto branchDto;
     private ImageView backBtn, imageView_location;
-    private TextView textView_totalProducts, textView_totalPrice, textView_branch;
+    private TextView textView_totalProducts, textView_totalPrice, textView_paymentMethod , textView_branch;
     private EditText editText_address;
     private Button button_order;
     private boolean isFirstLoad = true;
@@ -82,6 +107,8 @@ public class CartFragment extends Fragment implements View.OnClickListener, OnCa
         super.onCreate(savedInstanceState);
 
         cartService = new CartService(requireContext());
+        productService = new ProductService();
+        paymentService = new PaymentService();
         cartItemService = new CartItemService(requireContext());
 
         cartAPI = RetrofitClient.getClient().create(CartAPI.class);
@@ -109,7 +136,7 @@ public class CartFragment extends Fragment implements View.OnClickListener, OnCa
 
             @Override
             public void onError(Throwable t) {
-                Toast.makeText(getContext(), t.getMessage(), Toast.LENGTH_SHORT).show();
+                //Toast.makeText(getContext(), t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -144,6 +171,7 @@ public class CartFragment extends Fragment implements View.OnClickListener, OnCa
         Mapping(view);
         backBtn.setOnClickListener(this);
         imageView_location.setOnClickListener(this);
+        paymentMethodGroup.setOnClickListener(this);
         button_order.setOnClickListener(this);
     }
 
@@ -153,9 +181,14 @@ public class CartFragment extends Fragment implements View.OnClickListener, OnCa
 
         rvCartItems = view.findViewById(R.id.rvCart);
 
+        paymentMethodGroup = view.findViewById(R.id.paymentMethodGroup);
+
         textView_totalProducts = view.findViewById(R.id.textView_brand);
         textView_totalPrice = view.findViewById(R.id.textView_totalPrice);
+        textView_paymentMethod = view.findViewById(R.id.paymentMethodTv);
         textView_branch = view.findViewById(R.id.textView_branch);
+
+        vnPayWebView = view.findViewById(R.id.vnPayWebView);
 
         editText_address = view.findViewById(R.id.editText_address);
 
@@ -191,9 +224,47 @@ public class CartFragment extends Fragment implements View.OnClickListener, OnCa
                     new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                     1
             );
+        } else if (view.getId() == R.id.paymentMethodGroup){
+            showChoosePaymentMethodDialog();
         } else if (view.getId() == R.id.orderBtn) {
             placeOrder();
         }
+
+    }
+
+    private void showChoosePaymentMethodDialog(){
+        final Dialog dialog = new Dialog(requireContext());
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.bottom_sheet_layout);
+
+        LinearLayout onReceiveLayout = dialog.findViewById(R.id.layoutOnReceive);
+        LinearLayout vnPayLayout = dialog.findViewById(R.id.layoutVnPay);
+
+
+        onReceiveLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                textView_paymentMethod.setText("Thanh toán khi nhận hàng");
+                dialog.dismiss();
+                paymentMethod = 1;
+
+            }
+        });
+
+        vnPayLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                textView_paymentMethod.setText("Thanh toán qua VNPay");
+                dialog.dismiss();
+                paymentMethod = 2;
+            }
+        });
+
+        dialog.show();
+        dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT);
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        dialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
+        dialog.getWindow().setGravity(Gravity.BOTTOM);
     }
 
     @Override
@@ -321,23 +392,106 @@ public class CartFragment extends Fragment implements View.OnClickListener, OnCa
         });
     }
 
+    private void openVNPayWebView() {
+
+        BigDecimal total = cartDto.getTotalAmount();
+        paymentService.createPayment(total, new GeneralCallBack<String>() {
+            @Override
+            public void onSuccess(String result) {
+                loadVNPayWebView(result);
+            }
+
+            @Override
+            public void onError(Throwable t) {
+                DialogUtils.ShowDialog(getContext(), R.layout.error_dialog, "Load failure", "Không thể lấy url!");
+            }
+        });
+
+    }
+
+    private void loadVNPayWebView(String url) {
+        vnPayWebView.setVisibility(View.VISIBLE);
+        vnPayWebView.getSettings().setJavaScriptEnabled(true);
+        vnPayWebView.loadUrl(url);
+
+        vnPayWebView.setWebViewClient(new WebViewClient() {
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                if (url.contains("payment-info")) {
+                    handleVNPayReturn(url);
+                    return true;
+                }
+                return false;
+            }
+        });
+    }
+
+    private void handleVNPayReturn(String url) {
+        // Parse URL lấy thông tin kết quả
+        Uri uri = Uri.parse(url);
+        String responseCode = uri.getQueryParameter("vnp_ResponseCode");
+        cardType = uri.getQueryParameter("vnp_CardType");
+
+        if ("00".equals(responseCode)) {
+            DialogUtils.ShowDialog(requireContext(), R.layout.success_dialog, "Thành công", "Thanh toán thành công");
+        } else {
+            DialogUtils.ShowDialog(requireContext(), R.layout.error_dialog, "Thất bại", "Thanh toán thất bại");
+        }
+
+        // Ẩn WebView sau khi thanh toán xong
+        vnPayWebView.setVisibility(View.GONE);
+        createOrder("Thanh toán qua VNPay", cardType);
+
+    }
+
     private void placeOrder() {
         if (!TextUtils.isEmpty(editText_address.getText()) && branchDto != null && cartDto != null && cartItemDtos != null && !cartItemDtos.isEmpty()) {
-            OrderService orderService = new OrderService(requireContext());
+            if (paymentMethod == 2){
+               openVNPayWebView();
+            }
 
-            String address = String.valueOf(editText_address.getText());
+            else{
+                createOrder("Thanh toán khi nhận hàng", "");
+            }
+            updateSoldCount();
+        }
 
-            orderService.placeOrder(userId, branchDto.getId(), address, new GeneralCallBack<OrderDto>() {
+        else{
+            DialogUtils.ShowDialog(requireContext(), R.layout.error_dialog, "Thất bại", "Vui lòng điền đầy đủ thông tin");
+        }
+    }
+
+    private void createOrder(String paymentMethod, String cardType){
+        OrderService orderService = new OrderService(requireContext());
+
+        String address = String.valueOf(editText_address.getText());
+
+        orderService.placeOrder(userId, branchDto.getId(), address, paymentMethod, cardType, new GeneralCallBack<OrderDto>() {
+            @Override
+            public void onSuccess(OrderDto result) {
+                FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.base_frag_container, OrderDetailsFragment.newInstance(userId, result.getId()));
+                DialogUtils.ShowDialog(getContext(), R.layout.success_dialog, "Thanks!", "Order placed successfully");
+            }
+
+            @Override
+            public void onError(Throwable t) {
+                Toast.makeText(requireContext(), t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void updateSoldCount(){
+        for(CartItemDto cartItemDto : cartDto.getCartItems()){
+            productService.updateProductSoldCount(cartItemDto.getProduct().getId(), cartItemDto.getQuantity(), new GeneralCallBack<String>() {
                 @Override
-                public void onSuccess(OrderDto result) {
-                    FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.base_frag_container, OrderDetailsFragment.newInstance(userId, result.getId()));
-
-                    DialogUtils.ShowDialog(getContext(), R.layout.success_dialog, "Thanks!", "Order placed successfully");
+                public void onSuccess(String result) {
+                    // Không cần xử lý
                 }
 
                 @Override
                 public void onError(Throwable t) {
                     Toast.makeText(requireContext(), t.getMessage(), Toast.LENGTH_SHORT).show();
+
                 }
             });
         }
