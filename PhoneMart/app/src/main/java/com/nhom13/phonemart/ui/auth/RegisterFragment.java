@@ -97,7 +97,6 @@ public class RegisterFragment extends Fragment implements View.OnClickListener{
         String email = emailEt.getText().toString();
         String password = passwordEt.getText().toString();
 
-
         authAPI.register(new CreateUserRequest(firstName, lastName, email, password)).enqueue(new Callback<ApiResponse>() {
             @Override
             public void onResponse(@NonNull Call<ApiResponse> call, @NonNull Response<ApiResponse> response) {
@@ -108,12 +107,6 @@ public class RegisterFragment extends Fragment implements View.OnClickListener{
                 }
                 else{
                     try {
-
-                        //Chỉ lấy field message từ json
-                        //String errorBody = response.errorBody().string();
-                        //JsonObject jsonObject = JsonParser.parseString(errorBody).getAsJsonObject();
-                        //String errorMessage = jsonObject.get("message").getAsString();
-
                         Gson gson = new Gson();
                         ApiResponse apiResponse = gson.fromJson(response.errorBody().string(), ApiResponse.class);
 

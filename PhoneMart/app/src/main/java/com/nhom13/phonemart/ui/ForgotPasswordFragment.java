@@ -112,11 +112,6 @@ public class ForgotPasswordFragment extends Fragment implements View.OnClickList
                 }
                 else {
                     try {
-                        //Chỉ lấy field message từ json
-                        //String errorBody = response.errorBody().string();
-                        //JsonObject jsonObject = JsonParser.parseString(errorBody).getAsJsonObject();
-                        //String errorMessage = jsonObject.get("message").getAsString();
-
                         Gson gson = new Gson();
                         ApiResponse apiResponse = gson.fromJson(response.errorBody().string(), ApiResponse.class);
 
@@ -134,7 +129,6 @@ public class ForgotPasswordFragment extends Fragment implements View.OnClickList
                 Log.d("Error", Objects.requireNonNull(throwable.getMessage()));
             }
         });
-
     }
 
 

@@ -263,8 +263,6 @@ public class HomePageFragment extends Fragment implements RecyclerViewInterface,
         if (actionId == EditorInfo.IME_ACTION_SEARCH || actionId == EditorInfo.IME_ACTION_DONE) {
             String query = searchBar.getText().toString().trim();
             if (!query.isEmpty()) {
-                Toast.makeText(getContext(), "Searching for: " + query, Toast.LENGTH_SHORT).show();
-
                 FragmentUtils.loadFragment(requireActivity().getSupportFragmentManager(), R.id.base_frag_container, AllProductFragment.newInstance(loginUser.getId(), query, null));
             }
             return true;
