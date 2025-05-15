@@ -126,9 +126,12 @@ public class HomePageFragment extends Fragment implements RecyclerViewInterface,
     private void actionViewFlipperMain() {
 
         List<Integer> arrayListFlipper = new ArrayList<>();
-        arrayListFlipper.add(R.drawable.arrow);
-        arrayListFlipper.add(R.drawable.profile);
-        arrayListFlipper.add(R.drawable.baseline_home_24);
+        arrayListFlipper.add(R.drawable.banner_1);
+        arrayListFlipper.add(R.drawable.banner_2);
+        arrayListFlipper.add(R.drawable.banner_3);
+        arrayListFlipper.add(R.drawable.banner_4);
+        arrayListFlipper.add(R.drawable.banner_5);
+
 
         for (int i = 0; i < arrayListFlipper.size(); i++) {
             ImageView imageView = new ImageView(requireContext());

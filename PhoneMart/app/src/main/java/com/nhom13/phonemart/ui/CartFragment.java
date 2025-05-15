@@ -434,13 +434,13 @@ public class CartFragment extends Fragment implements View.OnClickListener, OnCa
 
         if ("00".equals(responseCode)) {
             DialogUtils.ShowDialog(requireContext(), R.layout.success_dialog, "Thành công", "Thanh toán thành công");
+            createOrder("Thanh toán qua VNPay", cardType);
         } else {
             DialogUtils.ShowDialog(requireContext(), R.layout.error_dialog, "Thất bại", "Thanh toán thất bại");
         }
 
         // Ẩn WebView sau khi thanh toán xong
         vnPayWebView.setVisibility(View.GONE);
-        createOrder("Thanh toán qua VNPay", cardType);
 
     }
 
