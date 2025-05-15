@@ -48,7 +48,7 @@ public class ImageUtils {
 
             @Override
             public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
-                Toast.makeText(context, "Network error", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(context, "Network error", Toast.LENGTH_SHORT).show();
             }
         });
     }
