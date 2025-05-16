@@ -35,8 +35,8 @@
 ## 🖥️ UI
 
 # Đăng ký/Đăng nhập
-![image](https://github.com/user-attachments/assets/ea602ba3-04db-46d4-944a-67d03d65f62a)
-![image](https://github.com/user-attachments/assets/512aa23f-e1df-4735-84b8-b6e0096274f6)
+![image](https://github.com/user-attachments/assets/e15e626f-8546-49f3-b909-7f523c49d3f2)
+![image](https://github.com/user-attachments/assets/64f0f25f-3115-4233-9a57-ee1d0ec3977e)
 
 # Lấy mật khẩu
 ![image](https://github.com/user-attachments/assets/401d94be-734a-4e64-a0d9-1fa9aff48dd2)
