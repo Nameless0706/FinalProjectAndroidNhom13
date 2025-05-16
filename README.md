@@ -2,10 +2,11 @@
 
 Ứng dụng giúp người dùng dễ dàng tìm kiếm, xem chi tiết và mua điện thoại từ nhiều thương hiệu nổi tiếng. Hệ thống hỗ trợ quản lý sản phẩm, giỏ hàng, đặt hàng và thanh toán.
 
-# 👥 Thành viên nhóm
+## 👥 Thành viên nhóm
+
 - Lê Văn Tú - 22110454
 - Huỳnh Quốc Thắng - 22110423
-
+  
 ## 🚀 Tính Năng
 
 - 👤 Đăng ký / Đăng nhập / Quản lý tài khoản
@@ -31,6 +32,8 @@
 - Java 17
 - MySQL 8
 
+## Link Api
+- https://github.com/vantu2004/shop-backend
 
 ## 🖥️ UI
 
