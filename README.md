@@ -4,9 +4,9 @@
 
 Ứng dụng giúp người dùng dễ dàng tìm kiếm, xem chi tiết và mua điện thoại từ nhiều thương hiệu nổi tiếng. Hệ thống hỗ trợ quản lý sản phẩm, giỏ hàng, đặt hàng và thanh toán.
 
-## 👥 Thành viên nhóm
-# Lê Văn Tú - 22110454
-# Huỳnh Quốc Thắng - 22110423
+# 👥 Thành viên nhóm
+  Lê Văn Tú - 22110454
+  Huỳnh Quốc Thắng - 22110423
 
 ## 🚀 Tính Năng
 
